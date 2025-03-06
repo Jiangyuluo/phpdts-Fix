@@ -97,7 +97,7 @@ $wthinfo = Array(
 	17 => '<span class="gold">极光</span>',
 	18 => '<span class="minirainbow">光玉雨</span>'
 );
-$sexinfo = Array(0=> '未定', 'm' => '男生', 'f' => '女生');
+$sexinfo = Array(0=> '未定', 'm' => '男生', 'f' => '女生', 'n' => '投影');
 $raceinfo = Array(0=> '人类', 1=> '兽人', 2=> '妖精', 3=> '龙', 4=> '鱼人', 5=> 'ＡＩ');
 $hpinfo = Array('<span class="clan">并无大碍</span>','<span class="yellow">伤痕累累</span>','<span class="red">生命危险</span>','<span class="red">已经死亡</span>');
 $spinfo = Array('精力充沛','略有疲惫','精疲力尽','已经死亡');
@@ -1077,6 +1077,7 @@ $iteminfo = Array(//注意顺序，AB必须在A的前面，以此类推
 	'🎆C' => '余烬', #种火盒子·报社篇
 	'P🎆' => '余烬', #霍霍完歌魂是不是还要霍霍种火数据（悲
 	'🎆' => '余烬', # Catch-All
+	'💝' => '投射平台', // NPC/Player platform - uses its $itmpara for logic
 );
 
 $itemspkinfo = Array(

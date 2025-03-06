@@ -131,6 +131,68 @@ table.infotable th {
 	50% { border-color: orange }
   }
 
+  /* Quest Panel */
+#quest-panel {
+    position: fixed;
+    right: -250px; /* Start hidden */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 2px solid rgba(225, 124, 226, 0.4);
+    border-radius: 10px 0 0 10px;
+    box-shadow: -3px 0 5px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    transition: right 0.3s ease-in-out;
+    z-index: 100;
+}
+
+#quest-panel.open {
+    right: 0; /* Slide in */
+}
+
+#quest-tab {
+    position: fixed; /* Make it relative to the viewport */
+    /* right: 0; Align to the edge of the viewport */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 100px;
+    background-color: rgba(225, 124, 226, 0.9);
+    border: 2px solid rgba(225, 124, 226, 0.4);
+    border-radius: 10px 0 0 10px;
+    color: #fff;
+    text-align: center;
+    line-height: 100px;
+    font: bold 12pt "FusionPixel10px";
+    cursor: pointer;
+    box-shadow: -3px 0 5px rgba(0, 0, 0, 0.5);
+    z-index: 101; /* Ensure it stays above other elements */
+}
+
+#quest-content {
+    padding: 50px;
+    color: #ddd;
+    font: 10pt "FusionPixel10px";
+}
+
+#quest-content h3 {
+    font: bold 12pt "FusionPixel12px";
+    color: #cceafa;
+    margin-bottom: 10px;
+}
+
+#quest-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+#quest-content ul li {
+    margin: 5px 0;
+    font: 10pt "FusionPixel10px";
+    color: #98fb98;
+}
+
 .typewritersong {@include typed("到哪都一样　一样乐观　耐操耐撞","永远都一样　一样天真　敢梦敢想","现在还一样　一样冲动　爱疯爱狂","不能停　不能闲　不能不忙","不管他　不怕你笑我","我生来就这样");}
 
 .clit {color: #feea23; font:18pt "FusionPixel10px" serif; }

@@ -618,12 +618,17 @@ namespace revcombat
 		if($pd['hp']<= 0)
 		{
 			# NPC二阶段处理：
-			if($pd['club'] == 99 && $pd['type'])
+			# Adding additional check for 百命猫 here to prevent she coming back if she's killed enough times.
+			if($pd['club'] == 99 && $pd['type'] && $pd['clbpara']['lifedestroyed'] < 111)
 			{
 				$log .= npc_chat_rev ($pd,$pa, 'death' );
 				include_once GAME_ROOT . './include/system.func.php';
 				$npcdata = evonpc ($pd['type'],$pd['name']);
 				$log .= '<span class="yellow">'.$pd['name'].'却没死去，反而爆发出真正的实力！</span><br>';
+				# add additional logic for 百命猫
+				if($pd['name']=='是TSEROF啦！'){
+					$pd['clbpara']['lifedestroyed'] += 1;
+				}
 				if($npcdata)
 				{
 					addnews($now , 'evonpc',$pd['name'], $npcdata['name'], $pa['name']);

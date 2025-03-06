@@ -919,6 +919,7 @@ function set_clbpara($para,$key,$value)
 //将itmpara转为数组
 function get_itmpara($para)
 {
+	//echo $para, "is a ", gettype($para);
 	if(empty($para)) $para = Array();
 	if(!is_array($para)) return json_decode($para,true);
 	else return $para;

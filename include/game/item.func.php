@@ -37,7 +37,8 @@ function itemuse($itmn,&$data=NULL) {
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	$itmpara = & ${'itmpara' . $itmn};
+	//$itmpara = & ${'itmpara' . $itmn};
+	$itmpara = & get_itmpara(${'itmpara' . $itmn});
 	$i=$itm;$ik=$itmk;$ie=$itme;$is=$itms;$isk=$itmsk;$ipara=$itmpara;
 	
 	if (($itms <= 0) && ($itms != $nosta)) {
@@ -2231,6 +2232,210 @@ function itemuse($itmn,&$data=NULL) {
 		$log .= "<span class=\"red\">$itm</span>的余烬向天上盘旋飞舞，消失了。<br>";
 		$itm = $itmk = $itmsk = '';
 		$itme = $itms = 0;
+	}elseif (strpos ( $itmk, '💝' ) === 0 ) {
+		// NPC Platform Logic starts here.- 2024-07-24
+		// Part 0: Extracting some special values from $itmpara.
+		$targetChargeBaseValue = (int)$itmpara['PlatformChargeBaseValue'] + $itme;
+		$playerOriginalName = $name;
+		$platformPlayerMode = $itmpara['PlatformPlayerMode'];
+		$platformPlayerPID = $itmpara['PlatformPlayerPID'];
+		$platformPlayerName = $itmpara['PlatformPlayerName'];
+		// 1st part: decides if the item is a pid type.
+		if($platformPlayerMode == 2 && isset($platformPlayerPID)){
+			//Extract the target player PID.
+			$targetPID = $platformPlayerPID;
+			//Extract all other data by going into Player Table.
+			$result = $db->query("SELECT * FROM {$tablepre}players WHERE pid='$targetPID' LIMIT 1");
+			$targetData = $db->fetch_array($result);
+			//Extract Process
+			//Name
+			$targetname = $targetData['name'];
+			$targeticon = $targetData['icon'];
+			$targettype = $targetData['type'];
+			//Stats
+			$targetlvl = $targetData['lvl'];$targetexp = $targetData['exp'];
+			$targetclub = $targetData['club'];$targetclubskill = $targetData['clubskill'];
+			$targetclubskillpara = $targetData['clubskillpara'];$targetskills = $targetData['skills'];
+			$targetskill = $targetData['skill'];
+			$targetwp = $targetData['wp'];$targetwk = $targetData['wk'];$targetwg = $targetData['wg'];
+			$targetwc = $targetData['wc'];$targetwd = $targetData['wd'];$targetwf = $targetData['wf'];
+			$targetinf = $targetData['inf'];
+			$targetgd = $targetData['gd'];
+			$targetmhp = $targetData['mhp'];$targetmsp = $targetData['msp'];$targetmss = $targetData['mss'];
+			$targetatt = $targetData['att'];$targetdef = $targetData['def'];
+			$targetrp = $targetData['rp'];$targetrage = $targetData['rage'];
+			//Weapon + Armor
+			$targetwep = $targetData['wep'];$targetwepk = $targetData['wepk'];$targetwepe = $targetData['wepe'];
+			$targetweps = $targetData['weps'];$targetwepsk = $targetData['wepsk'];$targetweppara = $targetData['weppara'];
+			$targetarb = $targetData['arb'];$targetarbk = $targetData['arbk'];$targetarbe = $targetData['arbe'];
+			$targetarbs = $targetData['arbs'];$targetarbsk = $targetData['arbsk'];$targetarbpara = $targetData['arbpara'];
+			$targetarh = $targetData['arh'];$targetarhk = $targetData['arhk'];$targetarhe = $targetData['arhe'];
+			$targetarhs = $targetData['arhs'];$targetarhsk = $targetData['arhsk'];$targetarhpara = $targetData['arhpara'];
+			$targetara = $targetData['ara'];$targetarak = $targetData['arak'];$targetarae = $targetData['arae'];
+			$targetaras = $targetData['aras'];$targetarask = $targetData['arask'];$targetarapara = $targetData['arapara'];
+			$targetarf = $targetData['arf'];$targetarfk = $targetData['arfk'];$targetarfe = $targetData['arfe'];
+			$targetarfs = $targetData['arfs'];$targetarfsk = $targetData['arfsk'];$targetarfpara = $targetData['arfpara'];
+			$targetart = $targetData['art'];$targetartk = $targetData['artk'];$targetarte = $targetData['arte'];
+			$targetarts = $targetData['arts'];$targetartsk = $targetData['artsk'];$targetartpara = $targetData['artpara'];
+			//Items
+			$targetitm1 = $targetData['itm1'];$targetitmk1 = $targetData['itmk1'];$targetitme1 = $targetData['itme1'];
+			$targetitms1 = $targetData['itms1'];$targetitmsk1 = $targetData['itmsk1'];$targetitmpara1 = $targetData['itmpara1'];
+			$targetitm2 = $targetData['itm2'];$targetitmk2 = $targetData['itmk2'];$targetitme2 = $targetData['itme2'];
+			$targetitms2 = $targetData['itms2'];$targetitmsk2 = $targetData['itmsk2'];$targetitmpara2 = $targetData['itmpara2'];
+			$targetitm3 = $targetData['itm3'];$targetitmk3 = $targetData['itmk3'];$targetitme3 = $targetData['itme3'];
+			$targetitms3 = $targetData['itms3'];$targetitmsk3 = $targetData['itmsk3'];$targetitmpara3 = $targetData['itmpara3'];
+			$targetitm4 = $targetData['itm4'];$targetitmk4 = $targetData['itmk4'];$targetitme4 = $targetData['itme4'];
+			$targetitms4 = $targetData['itms4'];$targetitmsk4 = $targetData['itmsk4'];$targetitmpara4 = $targetData['itmpara4'];
+			$targetitm5 = $targetData['itm5'];$targetitmk5 = $targetData['itmk5'];$targetitme5 = $targetData['itme5'];
+			$targetitms5 = $targetData['itms5'];$targetitmsk5 = $targetData['itmsk5'];$targetitmpara5 = $targetData['itmpara5'];
+			$targetitm6 = $targetData['itm6'];$targetitmk6 = $targetData['itmk6'];$targetitme6 = $targetData['itme6'];
+			$targetitms6 = $targetData['itms6'];$targetitmsk6 = $targetData['itmsk6'];$targetitmpara6 = $targetData['itmpara6'];
+			//Other values
+			$targetclbpara = $targetData['clbpara'];
+			$targetclbstatusa = $targetData['clbstatusa'];$targetclbstatusb = $targetData['clbstatusb'];$targetclbstatusc = $targetData['clbstatusc'];$targetclbstatusd = $targetData['clbstatusd'];$targetclbstatuse = $targetData['clbstatuse'];
+			$targetnikstatusa = $targetData['nikstatusa'];$targetnikstatusb = $targetData['nikstatusb'];$targetnikstatusc = $targetData['nikstatusc'];$targetnikstatusd = $targetData['nikstatusd'];$targetnikstatuse = $targetData['nikstatuse'];
+		}elseif($platformPlayerMode != 2 && isset($platformPlayerName)){
+			//Extract Following values from item
+			//Name
+			$targetname = $itmpara['PlatformPlayername'];
+			$targeticon = $itmpara['PlatformPlayericon'];
+			//Stats
+			$targetlvl = $itmpara['PlatformPlayerlvl'];$targetexp = $itmpara['PlatformPlayerexp'];
+			$targetclub = $itmpara['PlatformPlayerclub'];$targetclubskill = $itmpara['PlatformPlayerclubskill'];
+			$targetclubskillpara = $itmpara['PlatformPlayerclubskillpara'];$targetskills = $itmpara['PlatformPlayerskills'];
+			$targetskill = $itmpara['PlatformPlayerskill'];
+			$targetwp = $itmpara['PlatformPlayerwp'];$targetwk = $itmpara['PlatformPlayerwk'];$targetwg = $itmpara['PlatformPlayerwg'];
+			$targetwc = $itmpara['PlatformPlayerwc'];$targetwd = $itmpara['PlatformPlayerwd'];$targetwf = $itmpara['PlatformPlayerwf'];
+			$targetinf = $itmpara['PlatformPlayerinf'];
+			$targetgd = $itmpara['PlatformPlayergd'];
+			$targetmhp = $itmpara['PlatformPlayermhp'];$targetmsp = $itmpara['PlatformPlayermsp'];$targetmss = $itmpara['PlatformPlayermss'];
+			$targetatt = $itmpara['PlatformPlayeratt'];$targetdef = $itmpara['PlatformPlayerdef'];
+			$targetrp = $itmpara['PlatformPlayerrp'];$targetrage = $itmpara['PlatformPlayerrage'];
+			//Weapon + Armor
+			$targetwep = $itmpara['PlatformPlayerwep'];$targetwepk = $itmpara['PlatformPlayerwepk'];$targetwepe = $itmpara['PlatformPlayerwepe'];
+			$targetweps = $itmpara['PlatformPlayerweps'];$targetwepsk = $itmpara['PlatformPlayerwepsk'];$targetweppara = $itmpara['PlatformPlayerweppara'];
+			$targetarb = $itmpara['PlatformPlayerarb'];$targetarbk = $itmpara['PlatformPlayerarbk'];$targetarbe = $itmpara['PlatformPlayerarbe'];
+			$targetarbs = $itmpara['PlatformPlayerarbs'];$targetarbsk = $itmpara['PlatformPlayerarbsk'];$targetarbpara = $itmpara['PlatformPlayerarbpara'];
+			$targetarh = $itmpara['PlatformPlayerarh'];$targetarhk = $itmpara['PlatformPlayerarhk'];$targetarhe = $itmpara['PlatformPlayerarhe'];
+			$targetarhs = $itmpara['PlatformPlayerarhs'];$targetarhsk = $itmpara['PlatformPlayerarhsk'];$targetarhpara = $itmpara['PlatformPlayerarhpara'];
+			$targetara = $itmpara['PlatformPlayerara'];$targetarak = $itmpara['PlatformPlayerarak'];$targetarae = $itmpara['PlatformPlayerarae'];
+			$targetaras = $itmpara['PlatformPlayeraras'];$targetarask = $itmpara['PlatformPlayerarask'];$targetarapara = $itmpara['PlatformPlayerarapara'];
+			$targetarf = $itmpara['PlatformPlayerarf'];$targetarfk = $itmpara['PlatformPlayerarfk'];$targetarfe = $itmpara['PlatformPlayerarfe'];
+			$targetarfs = $itmpara['PlatformPlayerarfs'];$targetarfsk = $itmpara['PlatformPlayerarfsk'];$targetarfpara = $itmpara['PlatformPlayerarfpara'];
+			$targetart = $itmpara['PlatformPlayerart'];$targetartk = $itmpara['PlatformPlayerartk'];$targetarte = $itmpara['PlatformPlayerarte'];
+			$targetarts = $itmpara['PlatformPlayerarts'];$targetartsk = $itmpara['PlatformPlayerartsk'];$targetartpara = $itmpara['PlatformPlayerartpara'];
+			//Items
+			$targetitm1 = $itmpara['PlatformPlayeritm1'];$targetitmk1 = $itmpara['PlatformPlayeritmk1'];$targetitme1 = $itmpara['PlatformPlayeritme1'];
+			$targetitms1 = $itmpara['PlatformPlayeritms1'];$targetitmsk1 = $itmpara['PlatformPlayeritmsk1'];$targetitmpara1 = $itmpara['PlatformPlayeritmpara1'];
+			$targetitm2 = $itmpara['PlatformPlayeritm2'];$targetitmk2 = $itmpara['PlatformPlayeritmk2'];$targetitme2 = $itmpara['PlatformPlayeritme2'];
+			$targetitms2 = $itmpara['PlatformPlayeritms2'];$targetitmsk2 = $itmpara['PlatformPlayeritmsk2'];$targetitmpara2 = $itmpara['PlatformPlayeritmpara2'];
+			$targetitm3 = $itmpara['PlatformPlayeritm3'];$targetitmk3 = $itmpara['PlatformPlayeritmk3'];$targetitme3 = $itmpara['PlatformPlayeritme3'];
+			$targetitms3 = $itmpara['PlatformPlayeritms3'];$targetitmsk3 = $itmpara['PlatformPlayeritmsk3'];$targetitmpara3 = $itmpara['PlatformPlayeritmpara3'];
+			$targetitm4 = $itmpara['PlatformPlayeritm4'];$targetitmk4 = $itmpara['PlatformPlayeritmk4'];$targetitme4 = $itmpara['PlatformPlayeritme4'];
+			$targetitms4 = $itmpara['PlatformPlayeritms4'];$targetitmsk4 = $itmpara['PlatformPlayeritmsk4'];$targetitmpara4 = $itmpara['PlatformPlayeritmpara4'];
+			$targetitm5 = $itmpara['PlatformPlayeritm5'];$targetitmk5 = $itmpara['PlatformPlayeritmk5'];$targetitme5 = $itmpara['PlatformPlayeritme5'];
+			$targetitms5 = $itmpara['PlatformPlayeritms5'];$targetitmsk5 = $itmpara['PlatformPlayeritmsk5'];$targetitmpara5 = $itmpara['PlatformPlayeritmpara5'];
+			$targetitm6 = $itmpara['PlatformPlayeritm6'];$targetitmk6 = $itmpara['PlatformPlayeritmk6'];$targetitme6 = $itmpara['PlatformPlayeritme6'];
+			$targetitms6 = $itmpara['PlatformPlayeritms6'];$targetitmsk6 = $itmpara['PlatformPlayeritmsk6'];$targetitmpara6 = $itmpara['PlatformPlayeritmpara6'];
+			//Other values
+			$targetclbpara = $itmpara['PlatformPlayerclbpara'];
+			$targetclbstatusa = $itmpara['PlatformPlayerclbstatusa'];$targetclbstatusb = $itmpara['PlatformPlayerclbstatusb'];$targetclbstatusc = $itmpara['PlatformPlayerclbstatusc'];$targetclbstatusd = $itmpara['PlatformPlayerclbstatusd'];$targetclbstatuse = $itmpara['PlatformPlayerclbstatuse'];
+			$targetnikstatusa = $itmpara['PlatformPlayernikstatusa'];$targetnikstatusb = $itmpara['PlatformPlayernikstatusb'];$targetnikstatusc = $itmpara['PlatformPlayernikstatusc'];$targetnikstatusd = $itmpara['PlatformPlayernikstatusd'];$targetnikstatuse = $itmpara['PlatformPlayernikstatuse'];
+		}else{
+			$log .= '似乎这个NPC平台损坏了，不能使用……<br>';
+		}
+		// 2nd part: decides if the clone status is temporary, if so, store player's values in their $clbpara
+		if (isset($itmpara['PlatformIsTimed'])){
+			//Name
+			$clbpara['oriname'] = $name;
+			$clbpara['oriicon'] = $icon;
+			$clbpara['orinick'] = $nick;
+			//Stats
+			$clbpara['orilvl'] = $lvl;$clbpara['oriexp'] = $exp;
+			$clbpara['oriclub'] = $club;$clbpara['oriclubskill'] = $clubskill;
+			$clbpara['oriclubskillpara'] = $clubskillpara;
+			$clbpara['oriwp'] = $wp;$clbpara['oriwk'] = $wk;$clbpara['oriwg'] = $wg;
+			$clbpara['oriwc'] = $wc;$clbpara['oriwd'] = $wd;$clbpara['oriwf'] = $wf;
+			$clbpara['oriinf'] = $inf;
+			$clbpara['origd'] = $gd;
+			$clbpara['orimhp'] = $mhp;$clbpara['orimsp'] = $msp;$clbpara['orimss'] = $mss;
+			$clbpara['oriatt'] = $att;$clbpara['oridef'] = $def;
+			$clbpara['orirp'] = $rp;$clbpara['orirage'] = $rage;
+			//Weapon + Armor
+			$clbpara['oriwep'] = $wep;$clbpara['oriwepk'] = $wepk;$clbpara['oriwepe'] = $wepe;
+			$clbpara['oriweps'] = $weps;$clbpara['oriwepsk'] = $wepsk;$clbpara['oriweppara'] = $weppara;
+			$clbpara['oriarb'] = $arb;$clbpara['oriarbk'] = $arbk;$clbpara['oriarbe'] = $arbe;
+			$clbpara['oriarbs'] = $arbs;$clbpara['oriarbsk'] = $arbsk;$clbpara['oriarbpara'] = $arbpara;
+			$clbpara['oriarh'] = $arh;$clbpara['oriarhk'] = $arhk;$clbpara['oriarhe'] = $arhe;
+			$clbpara['oriarhs'] = $arhs;$clbpara['oriarhsk'] = $arhsk;$clbpara['oriarhpara'] = $arhpara;
+			$clbpara['oriara'] = $ara;$clbpara['oriarak'] = $arak;$clbpara['oriarae'] = $arae;
+			$clbpara['oriaras'] = $aras;$clbpara['oriarask'] = $arask;$clbpara['oriarapara'] = $arapara;
+			$clbpara['oriarf'] = $arf;$clbpara['oriarfk'] = $arfk;$clbpara['oriarfe'] = $arfe;
+			$clbpara['oriarfs'] = $arfs;$clbpara['oriarfsk'] = $arfsk;$clbpara['oriarfpara'] = $arfpara;
+			$clbpara['oriart'] = $art;$clbpara['oriartk'] = $artk;$clbpara['oriarte'] = $arte;
+			$clbpara['oriarts'] = $arts;$clbpara['oriartsk'] = $artsk;$clbpara['oriartpara'] = $artpara;
+			//Items
+			$clbpara['oriitm1'] = $itm1;$clbpara['oriitmk1'] = $itmk1;$clbpara['oriitme1'] = $itme1;
+			$clbpara['oriitms1'] = $itms1;$clbpara['oriitmsk1'] = $itmsk1;$clbpara['oriitmpara1'] = $itmpara1;
+			$clbpara['oriitm2'] = $itm2;$clbpara['oriitmk2'] = $itmk2;$clbpara['oriitme2'] = $itme2;
+			$clbpara['oriitms2'] = $itms2;$clbpara['oriitmsk2'] = $itmsk2;$clbpara['oriitmpara2'] = $itmpara2;
+			$clbpara['oriitm3'] = $itm3;$clbpara['oriitmk3'] = $itmk3;$clbpara['oriitme3'] = $itme3;
+			$clbpara['oriitms3'] = $itms3;$clbpara['oriitmsk3'] = $itmsk3;$clbpara['oriitmpara3'] = $itmpara3;
+			$clbpara['oriitm4'] = $itm4;$clbpara['oriitmk4'] = $itmk4;$clbpara['oriitme4'] = $itme4;
+			$clbpara['oriitms4'] = $itms4;$clbpara['oriitmsk4'] = $itmsk4;$clbpara['oriitmpara4'] = $itmpara4;
+			$clbpara['oriitm5'] = $itm5;$clbpara['oriitmk5'] = $itmk5;$clbpara['oriitme5'] = $itme5;
+			$clbpara['oriitms5'] = $itms5;$clbpara['oriitmsk5'] = $itmsk5;$clbpara['oriitmpara5'] = $itmpara5;
+			$clbpara['oriitm6'] = $itm6;$clbpara['oriitmk6'] = $itmk6;$clbpara['oriitme6'] = $itme6;
+			$clbpara['oriitms6'] = $itms6;$clbpara['oriitmsk6'] = $itmsk6;$clbpara['oriitmpara6'] = $itmpara6;
+			//Other values
+			$clbpara['oriclbpara'] = $clbpara;
+			$clbpara['oriclbstatusa'] = $clbstatusa;$clbpara['oriclbstatusb'] = $clbstatusb;$clbpara['oriclbstatusc'] = $clbstatusc;$clbpara['oriclbstatusd'] = $clbstatusd;$clbpara['oriclbstatuse'] = $clbstatuse;
+			$clbpara['orinikstatusa'] = $nikstatusa;$clbpara['orinikstatusb'] = $nikstatusb;$clbpara['orinikstatusc'] = $nikstatusc;$clbpara['orinikstatusd'] = $nikstatusd;$clbpara['orinikstatuse'] = $nikstatuse;
+		}
+		//3rd Part: Write in all the cloned values.
+		//DEBUG
+		//echo "clbpara is ",gettype($clbpara),"itmpara is $itmpara ",gettype($itmpara),"platformPlayerMode is $platformPlayerMode ",gettype($platformPlayerMode), "targetPID is $targetPID ", gettype($targetPID),"targetData is $targetData ",gettype($targetData);
+		//Name
+		//$name = $targetname; # can't do this.
+		$clbpara['PlatformName'] = $targetname;
+		$icon = $targeticon;
+		//Stats
+		$lvl = $targetlvl;$exp = $targetexp;
+		changeclub($targetclub,$data);
+		$clubskill = $targetclubskill;
+		$clubskillpara = $targetclubskillpara;
+		$wp = $targetwp + $targetskill;$wk = $targetwk + $targetskill;$wc = $targetwc + $targetskill;$wg = $targetwg + $targetskill;$wd = $targetwd + $targetskill;$wf = $targetwf + $targetskill;
+		$inf = $targetinf; $gd = $targetgd;
+		if ($targettype > 0) {$gd = 'n';}
+		$hp = $mhp = $targetmhp; $sp = $msp = $targetmsp; $ss = $mss = $targetmss;
+		$rp = $targetrp;$att = $targetatt;$def = $targetdef;$rage = $targetrage;
+
+		//Weapon + Armor
+		$wep = $targetwep;$wepk = $targetwepk;$wepe = $targetwepe;$weps = $targetweps;$wepsk = $targetwepsk;$weppara = $targetweppara;
+		$arb = $targetarb;$arbk = $targetarbk;$arbe = $targetarbe;$arbs = $targetarbs;$arbsk = $targetarbsk;$arbpara = $targetarbpara;
+		$arh = $targetarh;$arhk = $targetarhk;$arhe = $targetarhe;$arhs = $targetarhs;$arhsk = $targetarhsk;$arhpara = $targetarhpara;
+		$ara = $targetara;$arak = $targetarak;$arae = $targetarae;$aras = $targetaras;$arask = $targetarask;$arapara = $targetarapara;
+		$arf = $targetarf;$arfk = $targetarfk;$arfe = $targetarfe;$arfs = $targetarfs;$arfsk = $targetarfsk;$arfpara = $targetarfpara;
+		$art = $targetart;$artk = $targetartk;$arte = $targetarte;$arts = $targetarts;$artsk = $targetartsk;$artpara = $targetartpara;
+		//Items
+		$itm1 = $targetitm1;$itmk1 = $targetitmk1;$itme1 = $targetitme1;$itms1 = $targetitms1;$itmsk1 = $targetitmsk1;$itmpara1 = $targetitmpara1;
+		$itm2 = $targetitm2;$itmk2 = $targetitmk2;$itme2 = $targetitme2;$itms2 = $targetitms2;$itmsk2 = $targetitmsk2;$itmpara2 = $targetitmpara2;
+		$itm3 = $targetitm3;$itmk3 = $targetitmk3;$itme3 = $targetitme3;$itms3 = $targetitms3;$itmsk3 = $targetitmsk3;$itmpara3 = $targetitmpara3;
+		$itm4 = $targetitm4;$itmk4 = $targetitmk4;$itme4 = $targetitme4;$itms4 = $targetitms4;$itmsk4 = $targetitmsk4;$itmpara4 = $targetitmpara4;
+		$itm5 = $targetitm5;$itmk5 = $targetitmk5;$itme5 = $targetitme5;$itms5 = $targetitms5;$itmsk5 = $targetitmsk5;$itmpara5 = $targetitmpara5;
+		$itm6 = $targetitm6;$itmk6 = $targetitmk6;$itme6 = $targetitme6;$itms6 = $targetitms6;$itmsk6 = $targetitmsk6;$itmpara6 = $targetitmpara6;
+		//Other Values
+		//$clbpara = $targetclbpara; Let's not do this for now.
+		$clbstatusa = $targetclbstatusa;$clbstatusb = $targetclbstatusb; $clbstatusc = $targetclbstatusc; $clbstatusd = $targetclbstatusd; $clbstatuse = $targetclbstatuse;
+		$nikstatusa = $targetnikstatusa;$nikstatusb = $targetnikstatusb; $nikstatusc = $targetnikstatusc; $nikstatusd = $targetnikstatusd; $nikstatuse = $targetnikstatuse;
+		//Write in the temporary charge value. Won't matter if the clone is permanent anyways.
+		$clbpara['NPCPlatformCharge'] = $clbpara['NPCPlatformMAXCharge'] = $targetChargeBaseValue;
+		//4th Part: Produce some dialogue.
+		$clbpara['dialogue'] = 'npcplatform';
+		//$clbpara['noskip_dialogue'] = 1;
+		//5th Part: Output a log and news.
+		$log .= '这个平台完成了使命，消失了……<br>';
+		addnews ( $now, 'npcplatformusage',$playerOriginalName,$nick);
 	}elseif (strpos ( $itmk, 'Y' ) === 0 || strpos ( $itmk, 'Z' ) === 0) {
 		if ($itm == '电池') {
 			//功能需要修改，改为选择道具使用YE类型道具可充电

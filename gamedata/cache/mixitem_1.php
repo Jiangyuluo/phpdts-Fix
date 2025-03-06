@@ -249,7 +249,7 @@ $mixinfo = array
 	array('class' => 'fseed', 'stuff' => array('◆焰火','✦ЦВЙΨХЩΗЖФ✦'),'result' => array('✦ЦΨЙЩЦΑПΨЁВЦЩΨ✦','🎆C',1,1),),
 	
 	array('class' => 'fseed', 'stuff' => array('◆◆◆愈合数据','✦烈焰火'),'result' => array('✦愈合数据','🎆H',120,'∞',),),
-	array('class' => 'fseed', 'stuff' => array('◆◆◆熟练数据','✦烈焰火'),'result' => array('✦熟练数据','🎆V',75,1,),),
+	array('class' => 'fseed', 'stuff' => array('◆◆◆熟练数据','✦烈焰火'),'result' => array('✦熟练数据','🎆V',175,1,),),
 	array('class' => 'fseed', 'stuff' => array('◆◆◆生命数据','✦烈焰火'),'result' => array('✦生命数据','🎆O',500,1,),),
 	array('class' => 'fseed', 'stuff' => array('◆◆◆意念数据','✦烈焰火'),'result' => array('✦意念数据','🎆D',500,1,),),
 	

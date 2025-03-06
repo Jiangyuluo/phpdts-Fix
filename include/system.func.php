@@ -382,7 +382,8 @@ function add_once_area($atime) {
 					}
 				//躲避禁区判定
 				//} elseif($sub['type'] != 1 && $sub['type'] != 7 && $sub['type'] != 9 && $sub['type'] != 13 && $sub['type'] != 20 && $sub['type'] != 21 && $sub['type'] != 88 && $sub['type'] != 22 && $sub['type'] != 92) {
-				}elseif(!in_array($sub['type'],$sentinel_typelist)){
+				// Let's try giving NPCs less human rights to migrate the leak problem
+				}elseif(!in_array($sub['type'],$sentinel_typelist) && $gamestate <= 40){
 					if($npc_away_from_deepzones)
 					{	//开启了NPC不会因躲避禁区移动到危险地图的功能
 						do{

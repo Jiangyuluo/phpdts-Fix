@@ -359,6 +359,8 @@ function  nparse_news($start = 0, $range = 0  ){//$type = '') {
 			$newsinfo .= "<li>{$hour}时{$min}分{$sec}秒，$nword<br>\n";
 		} elseif($news == 'notworthit') {
 			$newsinfo .= "<li>{$hour}时{$min}分{$sec}秒，<span class=\"lime\">{$a}做出了一个他自己可能会后悔很长一段时间的决定。</span><br>\n";
+		} elseif($news == 'npcplatformusage') {
+			$newsinfo .= "<li>{$hour}时{$min}分{$sec}秒，<span class=\"lime\">{$a}决定化身成为全新的自我。</span><br>\n";
 		} elseif($news == 'present') {
 			$newsinfo .= "<li>{$hour}时{$min}分{$sec}秒，<span class=\"yellow\">{$a}打开了{$b}，获得了{$c}！</span><br>\n";
 		} elseif($news == 'emix_success') {

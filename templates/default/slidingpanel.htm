@@ -1,0 +1,37 @@
+<div id="quest-panel">
+    <div id="quest-tab" onmouseover="showPanel()" onmouseout="hidePanel()">无授权魔改造</div>
+    <div id="quest-content" onmouseover="keepPanelOpen()" onmouseout="hidePanel()">
+        <h3>任务窗体</h3>
+        <ul id="quest-list">
+            <!-- Dynamically populate quests -->
+            <li>这里是任务窗体。</li>
+            <li>该窗体的内容通过读取clbpara中的键值生成。</li>
+            <li>目前这只是一个范例。</li>
+        </ul>
+        <h3>其他信息</h3>
+        <ul id="misc-list">
+            <!-- Dynamically populate quests -->
+            <li>理论上这里也能放点别的。</li>
+            <li>GPT4o：会赢的。</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    let panelTimeout;
+
+function showPanel() {
+    clearTimeout(panelTimeout);
+    document.getElementById('quest-panel').classList.add('open');
+}
+
+    function hidePanel() {
+        panelTimeout = setTimeout(() => {
+            document.getElementById('quest-panel').classList.remove('open');
+        }, 500); // Delay hiding to allow smooth interaction
+    }
+
+    function keepPanelOpen() {
+        clearTimeout(panelTimeout);
+    }
+</script>
