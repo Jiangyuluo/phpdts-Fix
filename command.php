@@ -8,7 +8,7 @@ require './include/common.inc.php';
 require GAME_ROOT.'./include/game.func.php';
 
 //判断是否进入游戏
-if(!$cuser||!$cpass) { gexit($_ERROR['no_login'],__file__,__line__); } 
+if(!$cuser||!$cpass) { gexit($_ERROR['no_login'],__file__,__line__); }
 
 //$result = $db->query("SELECT * FROM {$tablepre}players WHERE name = '$cuser' AND type = 0");
 $pdata = fetch_playerdata_by_name($cuser);
@@ -69,7 +69,7 @@ if($hp > 0){
 			$log .= "<span class=\"yellow\">{$noisemin}分钟前，{$plsinfo[$noisepls]}传来了{$noiseinfo[$noisemode]}。</span><br>";
 		}
 	}
-	
+
 	if ($club==0 && !isset($clubavl))
 	{
 		include_once GAME_ROOT.'./include/game/clubslct.func.php';
@@ -85,7 +85,7 @@ if($hp > 0){
 		include_once GAME_ROOT.'./include/game/itembag.func.php';
 		overnumlimit();
 	}
-	
+
 	//判断冷却时间是否过去
 	if($coldtimeon){
 		$cdover = $cdsec*1000 + $cdmsec + $cdtime;
@@ -165,11 +165,19 @@ if($hp > 0){
 					$state = substr($command,4,1);
 					$mode = 'rest';
 				}
+			} elseif($command == 'fishing') {
+				include_once GAME_ROOT.'./include/game/fishing.func.php';
+				start_fishing($pdata);
+				if($mode == 'fishing') {
+					// 如果成功开始钓鱼，同时应用休息效果
+					include_once GAME_ROOT.'./include/state.func.php';
+					rest('rest', $pdata);
+				}
 			} elseif($command == 'itemmain') {
 				if(($club == 20 && $itemcmd == 'itemmix') || ($club != 20 && ($itemcmd == 'elementmix' || $itemcmd == 'elementbag'))){
 					$log .= "你的手突然掐住了你的头左右摇摆！<br><span class='yellow'>“你还想要干什么，啊？你还想要干什么！！”</span><br>看来你的手和脑子之间起了一点小摩擦。<br><br>";
 					$mode = 'command';
-				} else {	
+				} else {
 					if($itemcmd == 'itemmix' || $itemcmd == 'elementmix'){
 						$main = 'itemmix_tips';
 					}
@@ -201,13 +209,13 @@ if($hp > 0){
 				}elseif($sp_cmd == 'sp_trapadtsk'){
 					$position = 0;
 					if ($club==7)
-					{	
+					{
 						foreach(Array(1,2,3,4,5,6) as $imn)
 							if(strpos(${'itmk'.$imn},'B')===0 && ${'itme'.$imn} > 0 ){
 								$position = $imn;
 								break;
 							}
-						if (!$position) 
+						if (!$position)
 						{
 							$log .= '<span class="red">你没有电池，无法改造陷阱！</span><br />';
 							$mode = 'command';
@@ -220,13 +228,13 @@ if($hp > 0){
 								$position = $imn;
 								break;
 							}
-						if (!$position) 
+						if (!$position)
 						{
 							$log .= '<span class="red">你没有毒药，无法改造陷阱！</span><br />';
 							$mode = 'command';
 						}
 					}
-					else  
+					else
 					{
 						$log .= '<span class="red">你不懂得如何改造陷阱！</span><br />';
 						$mode = 'command';
@@ -375,7 +383,7 @@ if($hp > 0){
 					$p12[1]=1; $p12[2]=2;
 					$mode='sp_skpts';
 				//妙手技能
-				}elseif($sp_cmd == 'sp_pickpocket_selected'){		
+				}elseif($sp_cmd == 'sp_pickpocket_selected'){
 					if (!isset($choice)) {
 						$mode = 'command';
 					} else {
@@ -383,13 +391,13 @@ if($hp > 0){
 						include_once GAME_ROOT . './include/game/revclubskills_extra.func.php';
 						skill_tl_pickpocket_act($choice);
  					}
-					$mode = 'command';				
+					$mode = 'command';
 				}else{
 					$mode = $sp_cmd;
-				}				
+				}
 			} elseif($command == 'team') {
 				include_once GAME_ROOT.'./include/game/team.func.php';
-				if($teamcmd == 'teamquit') {				
+				if($teamcmd == 'teamquit') {
 					teamquit();
 				} else{
 					teamcheck();
@@ -419,10 +427,19 @@ if($hp > 0){
 				//$log.="【DEBUG】关闭了对话框。";
 				if(!empty($dialogue_log[$clbpara['dialogue']])) $log.= $dialogue_log[$clbpara['dialogue']];
 				unset($clbpara['dialogue']); unset($clbpara['noskip_dialogue']);
+			} elseif ($command == 'choose_fish') {
+				// 处理鱼篓子物品选择
+				if (isset($clbpara['fish_basket'])) {
+					include_once GAME_ROOT.'./include/game/item.nouveau_booster1.php';
+					item_nouveau_booster1($clbpara['fish_basket']['position'], $pdata);
+				} else {
+					$log .= '出现了错误，请重新使用鱼篓子。<br>';
+					$mode = 'command';
+				}
 			} elseif (strpos($command,'memory')===0) {
 				$smn = substr($command,6);
 				if(!empty($clbpara['smeo'] && isset($clbpara['smeo'][$smn]))){
-					$iid = $clbpara['smeo'][$smn][0]; $itp = $clbpara['smeo'][$smn][1]; 
+					$iid = $clbpara['smeo'][$smn][0]; $itp = $clbpara['smeo'][$smn][1];
 					lost_searchmemory($smn,$pdata);
 					if($itp == 'itm'){
 						include_once GAME_ROOT.'./include/game/search.func.php';
@@ -550,9 +567,9 @@ if($hp > 0){
 					$horizon = $chor;
 					$log .= "视界切换为<span class=\"yellow\">$horizoninfo[$chor]</span>。<br> ";
 					# 切换视界后，丢失所有视野
-					lost_searchmemory('all',$pdata); 
+					lost_searchmemory('all',$pdata);
 					# 向页面发送刷新标记
-					$log .= "<span id='HsUipfcGhU'></span>"; 
+					$log .= "<span id='HsUipfcGhU'></span>";
 				}else{
 					$log .= "<span class=\"yellow\">这种想法太奇怪了！</span><br> ";
 				}
@@ -593,7 +610,23 @@ if($hp > 0){
 			\revbattle\revbattle_prepare($command,$message);
 		} elseif($mode == 'rest') {
 			include_once GAME_ROOT.'./include/state.func.php';
-			rest($command);
+			// 如果在休息状态下点击钓鱼按钮，则进入钓鱼状态
+			if($command == 'fishing') {
+				include_once GAME_ROOT.'./include/game/fishing.func.php';
+				start_fishing($pdata);
+				// 如果成功进入钓鱼状态，保持原有的休息状态
+				if($mode == 'fishing') {
+					// 不需要调用rest函数，因为钓鱼状态下会自动应用休息效果
+				}
+			} else {
+				rest($command);
+			}
+		} elseif($mode == 'fishing') {
+			include_once GAME_ROOT.'./include/game/fishing.func.php';
+			fishing_command($command, $pdata);
+			// 在钓鱼的同时也应用休息效果
+			include_once GAME_ROOT.'./include/state.func.php';
+			rest($command, $pdata);
 //		} elseif($mode == 'chgpassword') {
 //			include_once GAME_ROOT.'./include/game/special.func.php';
 //			chgpassword($oldpswd,$newpswd,$newpswd2);
@@ -698,8 +731,8 @@ if($hp > 0){
 							skill_merc_chase($sk,${$sk.'mkey'});
 						} elseif(isset(${$sk.'mkey'}) && isset(${$sk.${$sk.'mkey'}.'moveto'})){
 							skill_merc_move($sk,${$sk.'mkey'},${$sk.${$sk.'mkey'}.'moveto'});
-						} 
-					} 
+						}
+					}
 				}
 			}
 			$mode = 'command';
@@ -711,7 +744,7 @@ if($hp > 0){
 			command_end_flag:
 			$mode = 'command';
 		}
-		
+
 		if($action == 'pacorpse' && $gamestate < 40){
 //			if($state == 1 || $state == 2 || $state ==3){
 //				$state = 0;
@@ -722,11 +755,11 @@ if($hp > 0){
 				if($db->num_rows($result)>0){
 					$edata = $db->fetch_array($result);
 					include_once GAME_ROOT.'./include/game/battle.func.php';
-					findcorpse($edata);					
-				}	
-			}	
+					findcorpse($edata);
+				}
+			}
 		}
-				
+
 		//指令执行完毕，更新冷却时间
 		if($coldtimeon && isset($cmdcdtime)){
 			$nowmtime = floor(getmicrotime()*1000);
@@ -779,7 +812,7 @@ if($hp <= 0) {
 	include template('death');
 	$gamedata['innerHTML']['cmd'] = ob_get_contents();
 	$mode = 'death';
-} elseif($cmd){	
+} elseif($cmd){
 	$gamedata['innerHTML']['cmd'] = $cmd;
 } elseif($itms0){
 	ob_clean();
@@ -787,7 +820,13 @@ if($hp <= 0) {
 	$gamedata['innerHTML']['cmd'] = ob_get_contents();
 } elseif($state == 1 || $state == 2 || $state ==3) {
 	ob_clean();
-	include template('rest');
+	if($mode == 'fishing') {
+		// 在钓鱼模式下显示钓鱼界面
+		$fishing_count = count($clbpara['fishing']['caught_items']);
+		include template('fishing');
+	} else {
+		include template('rest');
+	}
 	$gamedata['innerHTML']['cmd'] = ob_get_contents();
 } elseif(!$cmd) {
 	ob_clean();

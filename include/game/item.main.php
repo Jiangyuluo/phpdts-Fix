@@ -80,8 +80,14 @@ function itemuse($itmn,&$data=NULL) {
 	include_once GAME_ROOT.'./include/game/item.synthesis.php';
 	include_once GAME_ROOT.'./include/game/item.club_card.php';
 	include_once GAME_ROOT.'./include/game/item.nachster_booster.php';
+	include_once GAME_ROOT.'./include/game/item.nouveau_booster1.php';
 	include_once GAME_ROOT.'./include/game/item.test.php';
 	include_once GAME_ROOT.'./include/game/item.other.php';
+
+	// Try to handle with nouveau booster1 items first
+	if(item_nouveau_booster1($itmn, $data)) {
+		return;
+	}
 
 	// Delegate to specific item type handlers based on item type code
 	if(strpos($itmk, 'W') === 0 || strpos($itmk, 'D') === 0 || strpos($itmk, 'A') === 0 || strpos($itmk, 'ss') === 0) {
@@ -196,11 +202,11 @@ function itemuse($itmn,&$data=NULL) {
 		$itm = $itmk = $itmsk = '';
 		$itme = $itms = 0;
 	}
-	
+
 	// 检查成就
 	include_once GAME_ROOT.'./include/game/achievement.func.php';
 	check_item_achievement_rev($name,$i,$ie,$is,$ik,$isk);
-		
+
 	$mode = 'command';
 	return;
 }
