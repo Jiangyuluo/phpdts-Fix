@@ -13,9 +13,9 @@ function rs_game($mode = 0) {
 		//重设玩家互动信息、聊天记录、地图道具、地图陷阱、进行状况
 		$sql = file_get_contents("{$sqldir}reset.sql");
 		$sql = str_replace("\r", "\n", str_replace(' bra_', ' '.$tablepre, $sql));
-		
+
 		$db->queries($sql);
-		
+
 		//重设游戏进行状况的时间
 		/*if($fp = fopen("{$dir}newsinfo.php", 'wb')) {
 			global $checkstr;
@@ -24,7 +24,7 @@ function rs_game($mode = 0) {
 		} else {
 			gexit('Can not write to cache files, please check directory ./gamedata/ and ./gamedata/cache/ .', __file__, __line__);
 		}*/
-		
+
 		//清空战斗信息
 		global $hdamage,$hplayer,$noisetime,$noisepls,$noiseid,$noiseid2,$noisemode,$starttime,$gamevars;
 		$hdamage = 0;
@@ -35,7 +35,7 @@ function rs_game($mode = 0) {
 		$noiseid2 = 0;
 		$noisemode = '';
 		save_combatinfo();
-		
+
 		//修改反挂机间隔
 		$afktime = $starttime;
 		//重设连斗判断死亡数
@@ -43,7 +43,7 @@ function rs_game($mode = 0) {
 		//重设游戏剧情开关
 		$gamevars = Array();
 		save_gameinfo();
-		
+
 	}
 	if ($mode & 2) {
 		//echo " - 禁区初始化 - ";
@@ -76,7 +76,7 @@ function rs_game($mode = 0) {
 		//$typenum = sizeof($typeinfo);
 		$plsnum = sizeof($plsinfo);
 		$npcqry = '';
-		
+
 		//for($i = 1; $i < $typenum; $i++) {
 		foreach ($npcinfo as $i => $npcs){
 			if(!empty($npcs)) {
@@ -87,7 +87,7 @@ function rs_game($mode = 0) {
 					$npc['type'] = $i;
 					$npc['endtime'] = $now;
 					$npc['sNo'] = $j;
-					
+
 					//if(($npc['mode'] == 1)&&($npc['num'] <= $npc['sub'])){
 					//	$npc = array_merge($npc,$npc[$j]);
 					//} elseif($npc['mode'] == 2) {
@@ -96,8 +96,8 @@ function rs_game($mode = 0) {
 					//} else {
 					//	$npc = array_merge($npc,$npc[1]);
 					//}
-					
-					
+
+
 					$subnum = sizeof($npc['sub']);
 					$sub = $j % $subnum;
 					$npc = array_merge($npc,$npc['sub'][$sub]);
@@ -116,7 +116,7 @@ function rs_game($mode = 0) {
 					if(!empty($npc['club'])) changeclub($npc['club'],$npc);
 					# NPC自定义技能初始化
 					if(!empty($npc['clubskill']) || !empty($npc['clubskillpara'])) customtclubskill($npc);
-					
+
 					# 初始化NPC所在位置
 					global $hidding_typelist,$deepzones;
 
@@ -130,13 +130,13 @@ function rs_game($mode = 0) {
 							$rpls=rand(1,$plsnum-1);
 						}while (in_array($rpls,$deepzones));
 					}
-					else 
+					else
 					{
 						do{$rpls=rand(1,$plsnum-1);}while ($rpls==34);
 					}
 					if($npc['pls'] == 99)
 					{
-						$npc['pls'] = $rpls; 
+						$npc['pls'] = $rpls;
 					}
 
 					$npc['state'] = 0;
@@ -156,7 +156,7 @@ function rs_game($mode = 0) {
 	}
 	if ($mode & 16) {
 		//echo " - 地图道具/陷阱初始化 - ";
-		//2024-07-19 No itmpara is intended to initially spawn in the map, thus this is unchanged for now - will change if a need arises.
+		//2024-07-19 Added itmpara support for map items
 		//感谢 Martin1994 提供地图道具数据库化的源代码
 		$plsnum = sizeof($plsinfo);
 		$iqry = $tqry = '';
@@ -175,52 +175,80 @@ function rs_game($mode = 0) {
 		//$mapitem = array();
 		//$ifqry = $iqry = 'INSERT INTO '.$tablepre.'mapitem (itm,itmk,itme,itms,itmsk,map) VALUES ';
 		for($i = 1; $i < $in; $i++) {
-			if(!empty($itemlist[$i]) && strpos($itemlist[$i],',')!==false){
-				list($iarea,$imap,$inum,$iname,$ikind,$ieff,$ista,$iskind) = explode(',',$itemlist[$i]);
+			if(!empty($itemlist[$i])){
+				// 特殊处理JSON对象中的逗号
+				$line = $itemlist[$i];
+				$json_start = strpos($line, '{');
+				$json_end = strrpos($line, '}');
+				$json_content = '';
+
+				// 如果存在JSON对象
+				if($json_start !== false && $json_end !== false && $json_end > $json_start) {
+					// 提取JSON内容
+					$json_content = substr($line, $json_start, $json_end - $json_start + 1);
+					// 替换JSON内容为占位符
+					$line = substr($line, 0, $json_start) . 'JSON_PLACEHOLDER';
+				}
+
+				// 分割字符串
+				$item_parts = explode(',', $line);
+
+				// 检查是否有itmpara字段
+				$itmpara = '';
+				if(count($item_parts) >= 9) {
+					$itmpara = $item_parts[8];
+					// 如果itmpara是JSON占位符，则替换回实际的JSON内容
+					if($itmpara === 'JSON_PLACEHOLDER') {
+						$itmpara = $json_content;
+					}
+				}
+
+				list($iarea,$imap,$inum,$iname,$ikind,$ieff,$ista,$iskind) = array_slice($item_parts, 0, 8);
+
 				if(($iarea == $an)||($iarea == 99)) {
 					for($j = $inum; $j>0; $j--) {
 						if($imap == 99) {
 							$rmap = rand(1,$plsnum-1);
 							while ($rmap==34){$rmap = rand(1,$plsnum-1);}
 							if(strpos($ikind ,'TO')===0){
-								$tqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$rmap'),";
+								$tqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$rmap','$itmpara'),";
 							}else{
-								$iqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$rmap'),";
+								$iqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$rmap','$itmpara'),";
 							}
 							//$iqry[$rmap] .= "('$iname', '$ikind','$ieff','$ista','$iskind'),";
 							//$db->query("INSERT INTO {$tablepre}{$rmap}mapitem (itm,itmk,itme,itms,itmsk) VALUES ('$iname', '$ikind','$ieff','$ista','$iskind')");
 						}else{
 							if(strpos($ikind ,'TO')===0){
-								$tqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$imap'),";
+								$tqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$imap','$itmpara'),";
 							}else{
-								$iqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$imap'),";
+								$iqry .= "('$iname', '$ikind','$ieff','$ista','$iskind','$imap','$itmpara'),";
 							}
 							//$db->query("INSERT INTO {$tablepre}{$imap}mapitem (itm,itmk,itme,itms,itmsk) VALUES ('$iname', '$ikind','$ieff','$ista','$iskind')");
 						}
-						
+
 						//if($imap == 99) {
 						//	$imap = rand(1,$plsnum-1);
 							//$mapitem[$rmap] .= "$iname,$ikind,$ieff,$ista,$iskind,\n";
 						//} else {
-							//$mapitem[$imap] .= "$iname,$ikind,$ieff,$ista,$iskind,\n"; 
+							//$mapitem[$imap] .= "$iname,$ikind,$ieff,$ista,$iskind,\n";
 						//}
 					}
 				}
 			}
 		}
 		if(!empty($iqry)){
-			$iqry = "INSERT INTO {$tablepre}mapitem (itm,itmk,itme,itms,itmsk,pls) VALUES ".substr($iqry, 0, -1);
+			$iqry = "INSERT INTO {$tablepre}mapitem (itm,itmk,itme,itms,itmsk,pls,itmpara) VALUES ".substr($iqry, 0, -1);
 			$db->query($iqry);
 		}
 		if(!empty($tqry)){
-			$tqry = "INSERT INTO {$tablepre}maptrap (itm,itmk,itme,itms,itmsk,pls) VALUES ".substr($tqry, 0, -1);
+			$tqry = "INSERT INTO {$tablepre}maptrap (itm,itmk,itme,itms,itmsk,pls,itmpara) VALUES ".substr($tqry, 0, -1);
 			$db->query($tqry);
 		}
 //		for($imap = 0;$imap<$plsnum;$imap++){
 //			if(!empty($iqry[$imap])){
 //				$iqry[$imap] = "INSERT INTO {$tablepre}{$imap}mapitem (itm,itmk,itme,itms,itmsk) VALUES ".substr($iqry[$imap], 0, -1);
 //				$db->query($iqry[$imap]);
-//			}	
+//			}
 //		}
 //		if($ifqry != $iqry){//判定是否有数据写入
 //			$iqry = substr($iqry, 0, -1);//去除尾部多余的逗号
@@ -230,7 +258,7 @@ function rs_game($mode = 0) {
 //			$mapfile = GAME_ROOT."./gamedata/mapitem/{$map}mapitem.php";
 //			writeover($mapfile,$itemdata,'ab');
 //		}
-		
+
 		unset($itemlist);unset($iqry);
 		//unset($mapitem);
 		//挤一挤 仓库道具初始化
@@ -251,30 +279,55 @@ function rs_game($mode = 0) {
 	}
 	if ($mode & 32) {
 		//echo " - 商店初始化 - ";
-		//2024-07-19 No itmpara is intended to initially spawn in the shop, thus this is unchanged for now - will change if a need arises.
+		//2024-07-19 Added itmpara support for shop items
 		$sql = file_get_contents("{$sqldir}shopitem.sql");
 		$sql = str_replace("\r", "\n", str_replace(' bra_', ' '.$tablepre, $sql));
 		$db->queries($sql);
 		//runquery($sql);
-		
+
 		$file = config('shopitem',$gamecfg);
 		$shoplist = openfile($file);
 		$qry = '';
 		foreach($shoplist as $lst){
-			if(!empty($lst) && strpos($lst,',')!==false){
-				$lst = explode(',',$lst);
+			if(!empty($lst)){
+				// 特殊处理JSON对象中的逗号
+				$line = $lst;
+				$json_start = strpos($line, '{');
+				$json_end = strrpos($line, '}');
+				$json_content = '';
+
+				// 如果存在JSON对象
+				if($json_start !== false && $json_end !== false && $json_end > $json_start) {
+					// 提取JSON内容
+					$json_content = substr($line, $json_start, $json_end - $json_start + 1);
+					// 替换JSON内容为占位符
+					$line = substr($line, 0, $json_start) . 'JSON_PLACEHOLDER';
+				}
+
+				// 分割字符串
+				$lst = explode(',', $line);
+
+				// 检查是否有itmpara字段
+				$itmpara = '';
+				if(count($lst) >= 10) {
+					$itmpara = $lst[9];
+					// 如果itmpara是JSON占位符，则替换回实际的JSON内容
+					if($itmpara === 'JSON_PLACEHOLDER') {
+						$itmpara = $json_content;
+					}
+				}
 				if(empty($lst[8])) $lst[8] = '';
 				list($kind,$num,$price,$area,$item,$itmk,$itme,$itms,$itmsk)=$lst;
 				if($kind != 0){
-					$qry .= "('$kind','$num','$price','$area','$item','$itmk','$itme','$itms','$itmsk'),";
+					$qry .= "('$kind','$num','$price','$area','$item','$itmk','$itme','$itms','$itmsk','$itmpara'),";
 				}
-			}			
+			}
 		}
 		if(!empty($qry)){
-			$qry = "INSERT INTO {$tablepre}shopitem (kind,num,price,area,item,itmk,itme,itms,itmsk) VALUES ".substr($qry, 0, -1);
+			$qry = "INSERT INTO {$tablepre}shopitem (kind,num,price,area,item,itmk,itme,itms,itmsk,itmpara) VALUES ".substr($qry, 0, -1);
 		}
 		$db->query($qry);
-		
+
 	}
 }
 
@@ -285,7 +338,7 @@ function rs_sttime() {
 	list($sec,$min,$hour,$day,$month,$year,$wday,$yday,$isdst) = localtime($now);
 	$month++;
 	$year += 1900;
-	
+
 	if($startmode == 1) {
 		if($hour >= $starthour){ $nextday = $day+1;}
 		else{$nextday = $day;}
@@ -310,7 +363,7 @@ function rs_sttime() {
 	} else {
 		$starttime = 0;
 	}
-	
+
 	return;
 }
 
@@ -319,7 +372,7 @@ function add_once_area($atime) {
 	//实际上GAMEOVER的判断是在common.inc.php里
 	global $db,$gtablepre,$tablepre,$now,$gamestate,$areaesc,$arealist,$areanum,$arealimit,$areaadd,$plsinfo,$weather,$hack,$validnum,$alivenum,$deathnum;
 	global $gamevars,$deepzones,$sentinel_typelist,$npc_away_from_deepzones;
-	
+
 	if (($gamestate > 10)&&($now > $atime)) {
 		$plsnum = sizeof($plsinfo) - 1;
 		if(($areanum >= $arealimit*$areaadd)&&($validnum<=0)) {//无人参加GAMEOVER不是因为这里，这里只是保险。
@@ -390,7 +443,7 @@ function add_once_area($atime) {
 							$pls = $arealist[rand($areanum+1,$plsnum)];
 						}while (in_array($pls,$deepzones));
 					}
-					else 
+					else
 					{
 						do{
 							$pls = $arealist[rand($areanum+1,$plsnum)];
@@ -400,7 +453,7 @@ function add_once_area($atime) {
 				}
 			}
 			$alivenum = $db->result($db->query("SELECT COUNT(*) FROM {$tablepre}players WHERE hp>0 AND type=0"), 0);
-			if(($alivenum == 1)&&($gamestate >= 30)) { 
+			if(($alivenum == 1)&&($gamestate >= 30)) {
 				gameover($atime);
 				return;
 			} elseif(($alivenum <= 0)&&($gamestate >= 30)) {
@@ -437,13 +490,13 @@ function duel($time = 0,$keyitm = ''){
 		$time = $time == 0 ? $now : $time;
 		$gamestate = 50;
 		save_gameinfo();
-		
+
 		addnews($time,'duelkey',$name,$keyitm,$nick);
 		addnews($time,'duel');
 		systemputchat($time,'duel');
 		return 50;
 	}
-	
+
 }
 //------游戏结束------
 //模式：0保留：程序故障；1：全部死亡；2：最后幸存；3：禁区解除；4：无人参加；5：核爆全灭；6：GM中止
@@ -469,7 +522,7 @@ function gameover($time = 0, $mode = '', $winname = '') {
 			$alivenum = 0;
 			$winmode = 4;
 			$winner = '';
-			
+
 		} else {//判断谁是最后幸存者
 			$result = $db->query("SELECT * FROM {$tablepre}players WHERE hp>0 AND type=0");
 			$alivenum = $db->num_rows($result);
@@ -517,7 +570,7 @@ function gameover($time = 0, $mode = '', $winname = '') {
 			$tresult = $db->query("SELECT name,ip FROM {$tablepre}players WHERE teamID='$team' AND type=0");
 			if($db->num_rows($tresult) > 1)
 			{
-				while($tpdata = $db->fetch_array($tresult)) 
+				while($tpdata = $db->fetch_array($tresult))
 				{
 					if(!in_array($tpdata['name'],$team_mates) && !in_array($tpdata['ip'],$team_ips))
 					{
@@ -547,14 +600,14 @@ function gameover($time = 0, $mode = '', $winname = '') {
 		//$pdata['teamIcon'] = !empty($team_mates) ? 1 : 0;
 		$db->query("INSERT INTO {$gtablepre}winners (gid,nick,name,pass,type,endtime,gd,sNo,icon,club,hp,mhp,sp,msp,ss,mss,att,def,pls,lvl,`exp`,money,bid,inf,rage,pose,tactic,killnum,killnum2,state,wp,wk,wg,wc,wd,wf,teamID,teamPass,teamMate,teamIcon,wep,wepk,wepe,weps,arb,arbk,arbe,arbs,arh,arhk,arhe,arhs,ara,arak,arae,aras,arf,arfk,arfe,arfs,art,artk,arte,arts,itm0,itmk0,itme0,itms0,itm1,itmk1,itme1,itms1,itm2,itmk2,itme2,itms2,itm3,itmk3,itme3,itms3,itm4,itmk4,itme4,itms4,itm5,itmk5,itme5,itms5,itm6,itmk6,itme6,itms6,motto,wmode,vnum,gtime,gstime,getime,hdmg,hdp,hkill,hkp,wepsk,arbsk,arhsk,arask,arfsk,artsk,itmsk0,itmsk1,itmsk2,itmsk3,itmsk4,itmsk5,itmsk6) VALUES ('".$gamenum."','".$pdata['nick']."','".$pdata['name']."','".$pdata['pass']."','".$pdata['type']."','".$pdata['endtime']."','".$pdata['gd']."','".$pdata['sNo']."','".$pdata['icon']."','".$pdata['club']."','".$pdata['hp']."','".$pdata['mhp']."','".$pdata['sp']."','".$pdata['msp']."','".$pdata['ss']."','".$pdata['mss']."','".$pdata['att']."','".$pdata['def']."','".$pdata['pls']."','".$pdata['lvl']."','".$pdata['exp']."','".$pdata['money']."','".$pdata['bid']."','".$pdata['inf']."','".$pdata['rage']."','".$pdata['pose']."','".$pdata['tactic']."','".$pdata['killnum']."','".$pdata['killnum2']."','".$pdata['state']."','".$pdata['wp']."','".$pdata['wk']."','".$pdata['wg']."','".$pdata['wc']."','".$pdata['wd']."','".$pdata['wf']."','".$pdata['teamID']."','".$pdata['teamPass']."','".$pdata['teamMate']."','".$pdata['teamIcon']."','".$pdata['wep']."','".$pdata['wepk']."','".$pdata['wepe']."','".$pdata['weps']."','".$pdata['arb']."','".$pdata['arbk']."','".$pdata['arbe']."','".$pdata['arbs']."','".$pdata['arh']."','".$pdata['arhk']."','".$pdata['arhe']."','".$pdata['arhs']."','".$pdata['ara']."','".$pdata['arak']."','".$pdata['arae']."','".$pdata['aras']."','".$pdata['arf']."','".$pdata['arfk']."','".$pdata['arfe']."','".$pdata['arfs']."','".$pdata['art']."','".$pdata['artk']."','".$pdata['arte']."','".$pdata['arts']."','".$pdata['itm0']."','".$pdata['itmk0']."','".$pdata['itme0']."','".$pdata['itms0']."','".$pdata['itm1']."','".$pdata['itmk1']."','".$pdata['itme1']."','".$pdata['itms1']."','".$pdata['itm2']."','".$pdata['itmk2']."','".$pdata['itme2']."','".$pdata['itms2']."','".$pdata['itm3']."','".$pdata['itmk3']."','".$pdata['itme3']."','".$pdata['itms3']."','".$pdata['itm4']."','".$pdata['itmk4']."','".$pdata['itme4']."','".$pdata['itms4']."','".$pdata['itm5']."','".$pdata['itmk5']."','".$pdata['itme5']."','".$pdata['itms5']."','".$pdata['itm6']."','".$pdata['itmk6']."','".$pdata['itme6']."','".$pdata['itms6']."','".$pdata['motto']."','".$pdata['wmode']."','".$pdata['vnum']."','".$pdata['gtime']."','".$pdata['gstime']."','".$pdata['getime']."','".$pdata['hdmg']."','".$pdata['hdp']."','".$pdata['hkill']."','".$pdata['hkp']."','".$pdata['wepsk']."','".$pdata['arbsk']."','".$pdata['arhsk']."','".$pdata['arask']."','".$pdata['arfsk']."','".$pdata['artsk']."','".$pdata['itmsk0']."','".$pdata['itmsk1']."','".$pdata['itmsk2']."','".$pdata['itmsk3']."','".$pdata['itmsk4']."','".$pdata['itmsk5']."','".$pdata['itmsk6']."')");
 	}
-	
+
 	//存在获胜者数据时 检查获胜者结局成就
 	if(!empty($pdata))
 	{
 		include_once GAME_ROOT.'./include/game/achievement.func.php';
 		check_end_achievement_rev($winner,$winmode,$pdata);
 	}
-	
+
 	rs_sttime();//重置游戏开始时间和当前游戏状态
 	$gamestate = 0;
 	save_gameinfo();//先保存一次免得后面的处理过程太长，尽可能避免脏数据
@@ -567,10 +620,10 @@ function gameover($time = 0, $mode = '', $winname = '') {
 	{
 		addnews($time, 'roomgameover' ,$gamenum, $groomid);
 	}
-	else 
+	else
 	{
 		addnews($time, 'gameover' ,$gamenum);
-	}	
+	}
 	systemputchat($time,'gameover');
 	include_once './include/news.func.php';
 	$newsinfo = nparse_news(0,65535);
@@ -593,16 +646,16 @@ function movehtm($atime = 0) {
 		if(array_search($key,$arealist) > $areanum || $hack){
 		$movedata .= "<option value=\"$key\"><!--{if \$pls == $key}--><--现在位置--><!--{else}-->$value($xyinfo[$key])<!--{/if}--><br />";
 		}
-	} 
+	}
 	writeover($movehtm,$movedata);*/
-	
+
 	/*$areahtm = GAME_ROOT.TPLDIR.'/areainfo.htm';
 	$areadata = '<span class="evergreen"><b>现在的禁区是：</b></span>';
 	for($i=0;$i<=$areanum;$i++){
 		$areadata .= '&nbsp;'.$plsinfo[$arealist[$i]];
 	}
 	$areadata .= '<br><span class="evergreen"><b>下回的禁区是：</b></span>';*/
-	
+
 	$areadata = '';
 	if(!$atime){
 		global $areatime;
@@ -663,7 +716,7 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 	$anpcinfo = get_addnpcinfo();
 	$anpc_namelist = Array();
 	$anpc = array_merge($npcinit,$anpcinfo[$type]);
-	$anpc = array_merge($anpc,$anpc['sub'][$sub]);	
+	$anpc = array_merge($anpc,$anpc['sub'][$sub]);
 	if(!$anpc){
 		//echo 'no npc.';
 		return;
@@ -685,7 +738,7 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 			}
 			//$npc['wp'] = $npc['wk'] = $npc['wg'] = $npc['wc'] = $npc['wd'] = $npc['wf'] = $npc['skill'];
 			if($npc['gd'] == 'r'){$npc['gd'] = rand(0,1) ? 'm':'f';}
-			
+
 			# 位置信息为数组时，在两地中择一随机刷新
 			if(is_array($npc['pls']))
 			{
@@ -710,7 +763,7 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 					}
 				}
 				//$npc['pls'] = rand(1,$plsnum-1);
-			}	
+			}
 
 			# NPC称号技能初始化
 			if(!empty($npc['club'])) changeclub($npc['club'],$npc);
@@ -739,7 +792,7 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 					$npc['clbpara'] = is_array($npc['clbpara']) ? array_merge($npc['clbpara'],$anpcdata['clbpara']) : $anpcdata['clbpara'];
 				}
 			}
-			
+
 			# 对将要插入数据库的npc数组格式化，现在可以直接在npc配置文件里预设那些后添加的字段了。
 			$npc=player_format_with_db_structure($npc);
 			$db->array_insert("{$tablepre}players", $npc);
@@ -765,7 +818,7 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 		}
 		unset($anpc_namelist);
 	}
-	else 
+	else
 	{
 		return $summon_ids;
 	}
@@ -781,7 +834,7 @@ function evonpc($type,$name){
 	if(!isset($enpcinfo[$type])){return false;}
 	$result = $db->query("SELECT * FROM {$tablepre}players WHERE type = '$type' AND name = '$name'");
 	$num = $db->num_rows($result);
-	if(!$num){return false;}	
+	if(!$num){return false;}
 	if(!isset($enpcinfo[$type][$name])){return false;}
 	$npc=$enpcinfo[$type][$name];
 	$npc['hp'] = $npc['mhp'];
@@ -825,7 +878,7 @@ function evonpc($type,$name){
 		$qry = substr($qry,0,-1);
 		$db->query( "UPDATE {$tablepre}players SET $qry WHERE type = '$type' AND name = '$name'" );
 	}
-		
+
 	return $npc;
 }
 
@@ -847,7 +900,7 @@ function antiAFK($timelimit = 0){
 		if($db->affected_rows()){
 			addnews($now,'death32',$kcontent['name'],'',$kcontent['pls']);
 			$alivenum--;
-			$deathnum++;			
+			$deathnum++;
 
 
 		}
@@ -884,15 +937,15 @@ function set_credits(){
 		}
 	}
 	//var_dump($updatelist);
-	
-	
+
+
 	//$db->multi_update("{$gtablepre}users", $updatelist2, 'username');
 	//$db->multi_update("{$gtablepre}users", $updatelist2, 'username');
 //	$result = $db->query("SELECT * FROM {$tablepre}players WHERE type='0'");
 //	$list = $creditlist = $updatelist = Array();
 //	while($data = $db->fetch_array($result)){
 //		$list[$data['name']]['players'] = $data;
-//	}	
+//	}
 //	$result = $db->query("SELECT * FROM {$gtablepre}users WHERE lastgame='$gamenum'");
 //	while($data = $db->fetch_array($result)){
 //		$list[$data['username']]['users'] = $data;
@@ -910,7 +963,7 @@ function set_credits(){
 //				}else{
 //					$udghlist[] = Array('name' => $key, 'gainhonour' => $obtain);
 //				}
-//			}			
+//			}
 //		}
 //	}
 //	$db->multi_update("{$gtablepre}users", $updatelist, 'username');
@@ -920,14 +973,14 @@ function set_credits(){
 //	}
 	//更新成就
 	//$result = $db->query("SELECT * FROM {$tablepre}players WHERE {$tablepre}players.type='0'");
-	//while($data = $db->fetch_array($result)) 
+	//while($data = $db->fetch_array($result))
 	//{
 	//	$dlist[$data['name']] = $data['achievement'];
 	//}
 	//include_once GAME_ROOT.'./include/game/achievement.func.php';
 	//foreach($dlist as $key => $val)
 	//{
-		//$v=$val; 
+		//$v=$val;
 		//normalize_achievement($v,$c1,$c2);
 		//$res = $db->query("SELECT * FROM {$gtablepre}users WHERE username='".$key."'" );
 		//$data=$db->fetch_array($res);
@@ -990,10 +1043,10 @@ function get_gambling_result($clist, $winner='',$winmode=''){
 					$bwlist[$bdata['uname']] = $bdata;//此处只记录赌赢者的资料
 					$bwsum += $bdata['wager'];//赌赢者本金数目
 					$bwsum2 += $bdata['wager'] * $bdata['odds'];//赌赢者总系数
-				}				
+				}
 				$bpool += $bdata['wager'];//奖池记录所有玩家的赌注总额
 			}
-			
+
 			//(所有入场玩家战斗力总和÷1000）×（每名玩家APM达到则1.0—1.1之间的随机数）×（连斗时间从10—0.1递减）=每局基础奖金——飞雪大魔王
 
 			$creditsum = $apmnum = 0;
@@ -1002,16 +1055,16 @@ function get_gambling_result($clist, $winner='',$winmode=''){
 				$apm = $cdata['deathtime'] > $cdata['validtime'] ? $cdata['cmdnum'] / ($cdata['deathtime'] - $cdata['validtime']) : $cdata['cmdnum'] / ($now - $cdata['validtime']);
 				if($apm >= 1){$apmnum ++;}
 			}
-			
+
 			$avrcredit = $creditsum / ($validnum > 0 ? $validnum : 1);//平均战斗力
 			if($avrcredit > 10000){$creditodds = 1.25;}//平均战斗力超过10000则系数为1.25，否则系数减少，平均战斗力为4000时为1.1；
 			else{$creditodds = round((1 + $avrcredit / 40000)*1000)/1000;}
 			$apmodds = round(pow(1.02,$apmnum)*1000)/1000;//每有一名玩家达到60APM则乘以1.02
 			$timeodds = 1.2 - $areanum/$areaadd * 0.1;//游戏结束时为0禁则系数为1.2，否则每禁系数减少0.1，不会低于0.8
 			if($timeodds < 0.8){$timeodds = 0.8;}
-			
-			
-			
+
+
+
 //			$result3 = $db->query("SELECT cmdnum FROM {$tablepre}players WHERE type=0 ORDER BY cmdnum DESC LIMIT 10");
 //			while($cdata = $db->fetch_array($result3)){
 //				$cmdsum += $cdata['cmdnum'];
@@ -1019,7 +1072,7 @@ function get_gambling_result($clist, $winner='',$winmode=''){
 //			if($cmdsum <= 10000){$cmdodds = 1;}
 //			elseif($cmdsum >= 30000){$cmdodds = 1.25;}
 //			else{$cmdodds = 1+($cmdsum-10000)*0.0000125;}
-			
+
 			//$dmgprizeodds = 100 + round(pow($hdamage,0.5)) * 2;
 			$obpool = $bpool;
 			$bpool = round($bpool * $creditodds * $apmodds * $timeodds);
@@ -1062,9 +1115,9 @@ function get_gambling_result($clist, $winner='',$winmode=''){
 //					$crup = $val['wager'] + round($bpool * 0.9 * $val['wager'] * $val['odds'] / $bwsum2);
 //					$bwlist[$val['uname']]['crup'] = $crup;
 //					$credits2 = $val['credits2'] + $crup;
-//					$updatelist[$key] = Array('username' => $key, 'credits2' => $credits2);				
+//					$updatelist[$key] = Array('username' => $key, 'credits2' => $credits2);
 //				}
-				
+
 			}else{
 				$gblog .= '无判断正确者，奖池的20%归获胜者。';
 				$wcrup = ceil($bpool * 0.2);
