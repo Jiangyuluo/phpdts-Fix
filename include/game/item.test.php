@@ -7,20 +7,20 @@ if (! defined('IN_GAME')) {
 /**
  * 处理测试物品
  * 这些物品主要用于测试游戏功能
- * 
+ *
  * @param int $itmn 物品在物品栏中的位置
  * @param array &$data 玩家数据
  */
 function item_test($itmn, &$data) {
     global $log, $db, $tablepre, $now, $pid, $event_bgm, $cmd;
     extract($data, EXTR_REFS);
-    
+
     $itm = & ${'itm' . $itmn};
     $itmk = & ${'itmk' . $itmn};
     $itme = & ${'itme' . $itmn};
     $itms = & ${'itms' . $itmn};
     $itmsk = & ${'itmsk' . $itmn};
-    
+
     if ($itm == 'NPC战斗测试仪') {
         include_once GAME_ROOT.'./include/game/revcombat.func.php';
         $pa = fetch_playerdata_by_pid(1);
@@ -42,6 +42,10 @@ function item_test($itmn, &$data) {
         //???
         $clbpara['dialogue'] = 'testingDialog';
         //$clbpara['noskip_dialogue'] = 1;
+    } elseif ($itm == '对话选择测试器') {
+        // 带选择的对话测试
+        $clbpara['dialogue'] = 'choiceTestingDialog';
+        $clbpara['noskip_dialogue'] = 1; // 设置为不可跳过的对话
     } elseif ($itm == '事件BGM替换器') {
         // 这是一个触发事件BGM的案例，只要输入$clbpara['event_bgmbook'] = Array('事件曲集名'); 即可将当前曲集替换为特殊事件BGM
         // 特殊事件曲集'event_bgmbook'的优先级高于地图曲集'pls_bgmbook'，前者存在时后者不会生效
@@ -219,7 +223,7 @@ function item_test($itmn, &$data) {
             }
             $itms--;
         }
-        else 
+        else
         {
             $log .= '这件长得很像猫的东西该怎么用呢？<br>';
         }

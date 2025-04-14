@@ -5,7 +5,7 @@ require './include/common.inc.php';
 require GAME_ROOT.'./include/game.func.php';
 
 
-if(!$cuser||!$cpass) { gexit($_ERROR['no_login'],__file__,__line__); } 
+if(!$cuser||!$cpass) { gexit($_ERROR['no_login'],__file__,__line__); }
 if(isset($mode) && $mode == 'quit') {
 
 	gsetcookie('user','');
@@ -128,7 +128,7 @@ if($action == 'corpse' || $action == 'pacorpse' && $gamestate<40){
 			init_battle_rev($pdata,$edata,1);
 			$main = 'battle_rev';
 		}
-	}	
+	}
 }
 elseif($action == 'chase' || $action == 'pchase' || $action == 'dfight'){
 	$enemyid = $bid;
@@ -152,7 +152,7 @@ elseif($action == 'neut'){
 			init_battle_rev($pdata,$edata,1);
 			$main = 'battle_rev';
 		}
-	}	
+	}
 }
 if($hp > 0 && $coldtimeon && $showcoldtimer && $rmcdtime){$log .= "行动冷却时间：<span id=\"timer\" class=\"yellow\">0.0</span>秒<script type=\"text/javascript\">demiSecTimerStarter($rmcdtime);</script><br>";}
 //如果身上存在时效性技能，检查技能是否超时
@@ -180,7 +180,11 @@ if ($club==0)
 	getclub($name,$c1,$c2,$c3);
 	$clubavl[0]=0; $clubavl[1]=$c1; $clubavl[2]=$c2; $clubavl[3]=$c3;
 }
-if(!empty($clbpara['dialogue']) || !empty($clbpara['noskip_dialogue']))
+// 检查是否有对话需要显示，但如果刚刚处理了对话选择，则不显示
+// 通过检查 $_POST['command'] 是否包含 'dialogue_choice' 来判断
+$just_made_choice = isset($_POST['command']) && strpos($_POST['command'], 'dialogue_choice') === 0;
+
+if(!$just_made_choice && (!empty($clbpara['dialogue']) || !empty($clbpara['noskip_dialogue'])))
 {
 	$opendialog = $clbpara['noskip_dialogue'];
 	if(!empty($clbpara['dialogue'])) $dialogue_id = $clbpara['dialogue'];
@@ -188,10 +192,13 @@ if(!empty($clbpara['dialogue']) || !empty($clbpara['noskip_dialogue']))
 if(isset($opendialog))
 {
 	$log.="<script>
-	$('{$opendialog}').showModal();
+	var dialogElement = document.getElementById('{$opendialog}');
+	if(dialogElement && dialogElement.showModal) {
+		dialogElement.showModal();
+	}
 	</script>";
 }
-	
+
 //if (!strstr($_SERVER['HTTP_REFERER'], 'php') && $_SERVER['HTTP_REFERER'] != '') {
 if (isset($_GET['is_new'])) {
 	include './api.php';

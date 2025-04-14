@@ -423,6 +423,108 @@ if($hp > 0){
 				else{
 					$mode='command';
 				}
+			} elseif(strpos($command,'dialogue_choice') === 0) {
+				// 处理对话选择
+				$choice_parts = explode(' ', $command);
+				if(count($choice_parts) >= 3) {
+					$dialogue_id = $choice_parts[1];
+					$choice_index = $choice_parts[2];
+
+					// 检查对话 ID 和选择索引是否有效
+					if(isset($dialogue_branch[$dialogue_id]) && isset($dialogue_branch[$dialogue_id][$choice_index])) {
+						// 记录玩家的选择
+						$clbpara['dialogue_choice'] = array(
+							'dialogue_id' => $dialogue_id,
+							'choice_index' => $choice_index,
+							'choice_text' => $dialogue_branch[$dialogue_id][$choice_index]
+						);
+
+						// 输出选择的结果
+						$log .= "你选择了：<span class=\"yellow\">{$dialogue_branch[$dialogue_id][$choice_index]}</span><br>";
+
+						// 添加非常明显的错误信息
+						$log .= "<div style='background-color: red; color: white; padding: 10px; margin: 10px; border: 2px solid black;'>对话选择调试信息: 对话 ID = {$dialogue_id}, 选择索引 = {$choice_index}</div>";
+
+						// 如果有对应的选择结果日志，显示它
+						$choice_log_key = $dialogue_id.'_choice_'.$choice_index;
+
+						// 调试信息，显示对话日志的键值
+						$log .= "<!-- DEBUG: 对话 ID: {$dialogue_id}, 选择索引: {$choice_index}, 选择日志键: {$choice_log_key} -->";
+
+						// 显示所有可用的对话日志键
+						$log .= "<!-- DEBUG: 可用的对话日志键: ";
+						foreach($dialogue_log as $key => $value) {
+							$log .= "{$key}, ";
+						}
+						$log .= " -->";
+
+						if(isset($dialogue_log[$choice_log_key]) && !empty($dialogue_log[$choice_log_key])) {
+							$log .= "<!-- DEBUG: 使用选择特定日志 -->";
+							$log .= $dialogue_log[$choice_log_key];
+						} elseif(isset($dialogue_log[$dialogue_id]) && !empty($dialogue_log[$dialogue_id])) {
+							// 如果没有特定选择的日志，显示通用日志
+							$log .= "<!-- DEBUG: 使用通用日志 -->";
+							$log .= $dialogue_log[$dialogue_id];
+						} else {
+							$log .= "<!-- DEBUG: 没有找到对应的对话日志 -->";
+						}
+
+						// 清除对话状态
+						unset($clbpara['dialogue']);
+						unset($clbpara['noskip_dialogue']);
+
+						// 确保对话框不会重新打开
+						$dialogue_id = null;
+						$opendialog = null;
+
+						// 保存玩家数据，确保选择被记录
+						$serialized_clbpara = serialize($clbpara);
+						$encoded_clbpara = base64_encode($serialized_clbpara);
+						$log .= "<!-- DEBUG: 序列化后的 clbpara 长度: " . strlen($serialized_clbpara) . " -->";
+						$log .= "<!-- DEBUG: 编码后的 clbpara 长度: " . strlen($encoded_clbpara) . " -->";
+
+						$update_query = "UPDATE {$tablepre}players SET clbpara='" . $encoded_clbpara . "' WHERE pid='$pid'";
+						$update_result = $db->query($update_query);
+
+						if($update_result) {
+							$log .= "<!-- DEBUG: 数据库更新成功 -->";
+
+							// 验证数据库中的值是否正确
+							$verify_query = "SELECT clbpara FROM {$tablepre}players WHERE pid='$pid'";
+							$verify_result = $db->query($verify_query);
+							if($verify_result && $db->num_rows($verify_result) > 0) {
+								$verify_data = $db->fetch_array($verify_result);
+								$db_clbpara = $verify_data['clbpara'];
+								$log .= "<!-- DEBUG: 数据库中的 clbpara 长度: " . strlen($db_clbpara) . " -->";
+
+								// 尝试解码和反序列化
+								try {
+									$decoded_clbpara = base64_decode($db_clbpara);
+									$unserialized_clbpara = unserialize($decoded_clbpara);
+
+									if(is_array($unserialized_clbpara) && isset($unserialized_clbpara['dialogue_choice'])) {
+										$log .= "<!-- DEBUG: 数据库中的 dialogue_choice 存在 -->";
+									} else {
+										$log .= "<!-- DEBUG: 数据库中的 dialogue_choice 不存在 -->";
+									}
+								} catch(Exception $e) {
+									$log .= "<!-- DEBUG: 反序列化失败: " . $e->getMessage() . " -->";
+								}
+							} else {
+								$log .= "<!-- DEBUG: 无法验证数据库中的值 -->";
+							}
+						} else {
+							$log .= "<!-- DEBUG: 数据库更新失败: " . $db->error() . " -->";
+						}
+
+						// 设置命令模式为命令模式，确保页面能够正确显示选择结果
+						$mode = 'command';
+					} else {
+						$log .= "<span class=\"red\">无效的对话选择！</span><br>";
+					}
+				} else {
+					$log .= "<span class=\"red\">对话选择格式错误！</span><br>";
+				}
 			} elseif(strpos($command,'end_dialogue') === 0) {
 				//$log.="【DEBUG】关闭了对话框。";
 				if(!empty($dialogue_log[$clbpara['dialogue']])) $log.= $dialogue_log[$clbpara['dialogue']];
@@ -785,7 +887,10 @@ if($hp > 0){
 		$gamedata['innerHTML']['ingamebgm'] = $bgm_player;
 	}
 	//检查执行动作后是否有对话框产生
-	if(!empty($clbpara['dialogue']))
+	//如果刚刚处理了对话选择，则不显示对话框
+	$just_made_choice = strpos($command, 'dialogue_choice') === 0;
+
+	if(!$just_made_choice && !empty($clbpara['dialogue']))
 	{
 		$opendialog = 'dialogue';
 		$dialogue_id = $clbpara['dialogue'];
@@ -853,6 +958,9 @@ $gamedata['innerHTML']['anum'] = $alivenum;
 ob_clean();
 $main ? include template($main) : include template('profile');
 $gamedata['innerHTML']['main'] = ob_get_contents();
+// 添加调试信息，显示最终的 log 变量状态
+$log .= "<!-- DEBUG: 最终的 log 变量长度: " . strlen($log) . " -->";
+
 $gamedata['innerHTML']['log'] = $log;
 if(isset($error)){$gamedata['innerHTML']['error'] = $error;}
 $gamedata['value']['teamID'] = $teamID;
