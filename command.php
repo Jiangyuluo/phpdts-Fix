@@ -443,27 +443,27 @@ if($hp > 0){
 						$log .= "你选择了：<span class=\"yellow\">{$dialogue_branch[$dialogue_id][$choice_index]}</span><br>";
 
 						// 添加非常明显的错误信息
-						$log .= "<div style='background-color: red; color: white; padding: 10px; margin: 10px; border: 2px solid black;'>对话选择调试信息: 对话 ID = {$dialogue_id}, 选择索引 = {$choice_index}</div>";
+						//$log .= "<div style='background-color: red; color: white; padding: 10px; margin: 10px; border: 2px solid black;'>对话选择调试信息: 对话 ID = {$dialogue_id}, 选择索引 = {$choice_index}</div>";
 
 						// 如果有对应的选择结果日志，显示它
 						$choice_log_key = $dialogue_id.'_choice_'.$choice_index;
 
 						// 调试信息，显示对话日志的键值
-						$log .= "<!-- DEBUG: 对话 ID: {$dialogue_id}, 选择索引: {$choice_index}, 选择日志键: {$choice_log_key} -->";
+						//$log .= "<!-- DEBUG: 对话 ID: {$dialogue_id}, 选择索引: {$choice_index}, 选择日志键: {$choice_log_key} -->";
 
 						// 显示所有可用的对话日志键
-						$log .= "<!-- DEBUG: 可用的对话日志键: ";
-						foreach($dialogue_log as $key => $value) {
-							$log .= "{$key}, ";
-						}
-						$log .= " -->";
+						//$log .= "<!-- DEBUG: 可用的对话日志键: ";
+						//foreach($dialogue_log as $key => $value) {
+						//	$log .= "{$key}, ";
+						//}
+						//$log .= " -->";
 
 						if(isset($dialogue_log[$choice_log_key]) && !empty($dialogue_log[$choice_log_key])) {
-							$log .= "<!-- DEBUG: 使用选择特定日志 -->";
+							//$log .= "<!-- DEBUG: 使用选择特定日志 -->";
 							$log .= $dialogue_log[$choice_log_key];
 						} elseif(isset($dialogue_log[$dialogue_id]) && !empty($dialogue_log[$dialogue_id])) {
 							// 如果没有特定选择的日志，显示通用日志
-							$log .= "<!-- DEBUG: 使用通用日志 -->";
+							//$log .= "<!-- DEBUG: 使用通用日志 -->";
 							$log .= $dialogue_log[$dialogue_id];
 						} else {
 							$log .= "<!-- DEBUG: 没有找到对应的对话日志 -->";
@@ -480,8 +480,8 @@ if($hp > 0){
 						// 保存玩家数据，确保选择被记录
 						$serialized_clbpara = serialize($clbpara);
 						$encoded_clbpara = base64_encode($serialized_clbpara);
-						$log .= "<!-- DEBUG: 序列化后的 clbpara 长度: " . strlen($serialized_clbpara) . " -->";
-						$log .= "<!-- DEBUG: 编码后的 clbpara 长度: " . strlen($encoded_clbpara) . " -->";
+						//$log .= "<!-- DEBUG: 序列化后的 clbpara 长度: " . strlen($serialized_clbpara) . " -->";
+						//$log .= "<!-- DEBUG: 编码后的 clbpara 长度: " . strlen($encoded_clbpara) . " -->";
 
 						$update_query = "UPDATE {$tablepre}players SET clbpara='" . $encoded_clbpara . "' WHERE pid='$pid'";
 						$update_result = $db->query($update_query);
