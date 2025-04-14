@@ -1,0 +1,51 @@
+2024年7月19日 修复 $itmpara0 字段清零问题
+
+在2024年7月19日，游戏中的物品添加了新的字段$itmpara，该字段为一数组，可让物品有着数组中定义的键值的属性。
+在实现过程中，发现获得具有itmpara字段的物品时，itmpara0没有被正确清除，导致后续获得的物品可能会继承之前物品的itmpara属性。
+
+以下是对应此问题的修复记录：
+
+1. 修复 `itemget` 函数中的物品合并逻辑
+   - 在物品合并后，确保清零 `itmpara0` 字段
+   - 修改前：
+     ```php
+     $itm0 = $itmk0 = $itmsk0 = '';
+     $itme0 = $itms0 = 0;
+     $itmpara0 = '';
+     $mode = 'command';
+     return;
+     ```
+   - 修改后：
+     ```php
+     $itm0 = $itmk0 = $itmsk0 = $itmpara0 = '';
+     $itme0 = $itms0 = 0;
+     $mode = 'command';
+     return;
+     ```
+
+2. 修复 `itemadd` 函数中的物品添加逻辑
+   - 在物品添加到背包后，确保清零 `itmpara0` 字段
+   - 修改前：
+     ```php
+     ${'itm'.$i} = $itm0;
+     ${'itmk'.$i} = $itmk0;
+     ${'itme'.$i} = $itme0;
+     ${'itms'.$i} = $itms0;
+     ${'itmsk'.$i} = $itmsk0;
+     ${'itmpara'.$i} = $itmpara0;
+     $itm0 = $itmk0 = $itmsk = $itmpara = '';
+     $itme0 = $itms0 = 0;
+     ```
+   - 修改后：
+     ```php
+     ${'itm'.$i} = $itm0;
+     ${'itmk'.$i} = $itmk0;
+     ${'itme'.$i} = $itme0;
+     ${'itms'.$i} = $itms0;
+     ${'itmsk'.$i} = $itmsk0;
+     ${'itmpara'.$i} = $itmpara0;
+     $itm0 = $itmk0 = $itmsk0 = $itmpara0 = '';
+     $itme0 = $itms0 = 0;
+     ```
+
+这些修改确保了当获得物品时，`itmpara0` 字段会被正确清零，避免后续获得的物品继承之前物品的 `itmpara` 属性。

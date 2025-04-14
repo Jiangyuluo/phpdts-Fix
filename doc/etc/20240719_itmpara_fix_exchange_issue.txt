@@ -1,0 +1,66 @@
+2024年7月19日 修复 $itmpara 字段在装备交换时的问题
+
+在2024年7月19日，我们修复了将具有itmpara字段的武器装备时，背包里面的itmpara（如itmpara6）没有被正确剔除的问题。
+但在修复后，出现了一个新问题：已有itmpara字段的武器在和没有itmpara字段的武器交换时，前者的itmpara字段会被错误地清空，而它应该被保留。
+
+以下是对应此问题的修复记录：
+
+1. 修复 `item.weapon.php` 文件中的装备逻辑
+   - 在装备武器或防具时，确保清零背包中的 `itmpara` 字段，但保留 `itmpara` 变量中的值
+   - 修改前：
+     ```php
+     ${$eqp} = $itm;
+     ${$eqp.'k'} = $itmk;
+     ${$eqp.'e'} = $itme;
+     ${$eqp.'s'} = $itms;
+     ${$eqp.'sk'} = $itmsk;
+     ${$eqp.'para'} = $itmpara;
+     $log .= "装备了<span class=\"yellow\">$itm</span>。<br>";
+     $itm = $itmk = $itmsk = '';
+     $itme = $itms = 0;
+     // 清除背包中的itmpara字段
+     ${'itmpara' . $itmn} = '';
+     ```
+   - 修改后：
+     ```php
+     ${$eqp} = $itm;
+     ${$eqp.'k'} = $itmk;
+     ${$eqp.'e'} = $itme;
+     ${$eqp.'s'} = $itms;
+     ${$eqp.'sk'} = $itmsk;
+     ${$eqp.'para'} = $itmpara;
+     $log .= "装备了<span class=\"yellow\">$itm</span>。<br>";
+     $itm = $itmk = $itmsk = '';
+     $itme = $itms = 0;
+     // 清除背包中的itmpara字段，但保留itmpara变量中的值
+     ${'itmpara' . $itmn} = '';
+     ```
+
+2. 修复 `item.weapon.php` 文件中的替换装备逻辑
+   - 在替换武器或防具时，确保将卸下装备的 `itmpara` 值正确地设置到背包中的 `itmpara` 字段
+   - 修改前：
+     ```php
+     $itm = $itmt;
+     $itmk = $itmkt;
+     $itme = $itmet;
+     $itms = $itmst;
+     $itmsk = $itmskt;
+     $itmpara = $itmparat;
+     // 清除背包中的itmpara字段
+     ${'itmpara' . $itmn} = '';
+     $log .= "卸下了<span class=\"red\">$itm</span>，装备了<span class=\"yellow\">{${$eqp}}</span>。<br>";
+     ```
+   - 修改后：
+     ```php
+     $itm = $itmt;
+     $itmk = $itmkt;
+     $itme = $itmet;
+     $itms = $itmst;
+     $itmsk = $itmskt;
+     $itmpara = $itmparat;
+     // 将背包中的itmpara字段设置为卸下装备的itmpara值
+     ${'itmpara' . $itmn} = $itmparat;
+     $log .= "卸下了<span class=\"red\">$itm</span>，装备了<span class=\"yellow\">{${$eqp}}</span>。<br>";
+     ```
+
+这些修改确保了当武器或防具被装备时，背包中的 `itmpara` 字段会被正确处理，同时在交换装备时，已有 `itmpara` 字段的武器的 `itmpara` 值会被正确保留。

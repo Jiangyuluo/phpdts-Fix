@@ -5,7 +5,7 @@
 ///include/game/itemmain.func.php
 //	Issue：
 //	preg_replace
-//	
+//
 //*/
 
 if(!defined('IN_GAME')) {
@@ -105,7 +105,7 @@ function calc_trap_damage(&$pa,$pd=NULL,$playerflag=0,$selflag=0)
 	}
 	// 随机数大神的陷阱
 	if($pa['itmk0'] == 'TO8')
-	{ 
+	{
 		$damage = $pa['hp'] / 8;
 		return $damage;
 	}
@@ -122,7 +122,7 @@ function calc_trap_damage(&$pa,$pd=NULL,$playerflag=0,$selflag=0)
 	if($pa['itmk0'] == 'TOr')
 	{
 		$log .= "<br>可能是因为制作陷阱的人正在反叛随机数大神，<br>
-		<span class=\"yellow\">你看到天上突然有一颗骰子掉了下来，爆炸在你的头上！</span><br>";		
+		<span class=\"yellow\">你看到天上突然有一颗骰子掉了下来，爆炸在你的头上！</span><br>";
 		$damage = diceroll($pa['mhp']);
 		return $damage;
 	}
@@ -140,7 +140,7 @@ function calc_trap_damage(&$pa,$pd=NULL,$playerflag=0,$selflag=0)
 		$pa['skilllog'] .= "已经跳到你腿上的<span class='yellow'>{$pa['itm0']}</span>显然被你非凡的气魄震慑到了！你仅";
 		$damage = round($damage * (1 - ($damage_p/100)));
 	}
-	
+
 	return $damage;
 }
 
@@ -153,7 +153,7 @@ function check_trap_def_event(&$pa,$damage,$playerflag=0,$selflag=0)
 	include_once GAME_ROOT.'./include/game/revattr.func.php';
 	if(empty($pa['ex_keys'])) $pa['ex_keys'] = array_merge(\revattr\get_equip_ex_array($pa),\revattr\get_wep_ex_array($pa));
 	# 计算迎击概率（锡安迎击率+20）
-	if(!empty($pa['ex_keys']) && in_array('m',$pa['ex_keys'])) 
+	if(!empty($pa['ex_keys']) && in_array('m',$pa['ex_keys']))
 	{
 		$pa['minedetect'] = 1;
 		$def_obbs = $pa['club'] == 7 ? 60 : 40;
@@ -208,7 +208,7 @@ function trap(&$data=NULL){
 		$data = &$pdata;
 	}
 	extract($data,EXTR_REFS);
-	
+
 	$playerflag = $itmsk0 ? true : false;
 	$selflag = $itmsk0 == $pid ? true : false;
 	$dice=diceroll(99);
@@ -221,7 +221,7 @@ function trap(&$data=NULL){
 		{
 			$trname = $wdata['name'];$trtype = $wdata['type'];$trperfix = '<span class="yellow">'.$trname.'</span>设置的';
 		}
-		else 
+		else
 		{
 			$trname = $trtype = $trperfix = '';
 		}
@@ -251,7 +251,7 @@ function trap(&$data=NULL){
 		if($damage)
 		{
 			$tmp_club=$club;
-			$hp -= $damage; 
+			$hp -= $damage;
 			$trapkill = false;
 
 			if($playerflag)
@@ -263,12 +263,12 @@ function trap(&$data=NULL){
 			$log .= "受到<span class=\"dmg\">$damage</span>点伤害！<br>";
 
 			# 踩雷rp结算
-			$rp_up = -1 * $rp / 2; 
+			$rp_up = -1 * $rp / 2;
 			include_once GAME_ROOT.'./include/state.func.php';
 			if($rp_up) rpup_rev($data,$rp_up);
 
 			# 陷阱击杀
-			if($hp <= 0) 
+			if($hp <= 0)
 			{
 				if(!empty($wdata))
 				{
@@ -288,7 +288,7 @@ function trap(&$data=NULL){
 					$log .= "你被{$trperfix}陷阱杀死了！";
 					if($killmsg && !$selflag){
 						$log .= "<span class=\"yellow\">{$trname}对你说：“{$killmsg}”</span><br>";
-					}				
+					}
 					if ($tmp_club==99) $log.="<span class=\"lime\">但由于你及时按下了BOMB键，你原地满血复活了！</span><br>";
 				}
 				$trapkill = true;
@@ -338,7 +338,7 @@ function trap(&$data=NULL){
 				{
 					$w_log = "<span class=\"yellow\">{$name}触发了你设置的陷阱{$itm0}，但是没有受到任何伤害！</span><br>";
 					logsave ( $itmsk0, $now, $w_log ,'b');
-				}				
+				}
 			}
 			$log .= "糟糕，你触发了{$trperfix}陷阱<span class=\"yellow\">$itm0</span>！";
 			if(!empty($data['minedetect']))
@@ -359,12 +359,12 @@ function trap(&$data=NULL){
 		return;
 	}
 	# 陷阱回避
-	else 
+	else
 	{
 		# 检查成就
 		// include_once GAME_ROOT.'./include/game/achievement.func.php';
 		// check_trap_miss_achievement($achievement,$selflag,$itm0,$itme0);
-		
+
 		# logsave
 		if($playerflag && !$selflag)
 		{
@@ -386,7 +386,7 @@ function trap(&$data=NULL){
 			else
 			{
 				$log .= "你发现了{$trperfix}陷阱<span class=\"yellow\">$itm0</span>，不过你并没有触发它。陷阱看上去还可以重复使用。<br>";
-			}				
+			}
 			$itmsk0 = '';$itmk0 = str_replace('TO','TN',$itmk0);
 			$mode = 'itemfind';
 			return;
@@ -401,7 +401,7 @@ function trap(&$data=NULL){
 			else
 			{
 				$log .= "你触发了{$trperfix}陷阱<span class=\"yellow\">$itm0</span>，不过你成功地回避了陷阱。<br>";
-			}		
+			}
 			$itm0 = $itmk0 = $itmsk0 = '';
 			$itme0 = $itms0 = 0;
 			$mode = 'command';
@@ -442,7 +442,7 @@ function itemfind(&$data=NULL) {
 	}
 }
 
-function itemget(&$data=NULL) 
+function itemget(&$data=NULL)
 {
 	global $log,$nosta,$mode,$cmd;
 	if(!isset($data))
@@ -471,21 +471,22 @@ function itemget(&$data=NULL)
 	}
 	if(preg_match('/^(WC|WD|WF|Y|B|C|TN|GA|GB|M|V)/',$itmk0) && $itms0 !== $nosta){
 		//global $wep,$wepk,$wepe,$weps,$wepsk;
-		if($wep == $itm0 && $wepk == $itmk0 && $wepe == $itme0 && $wepsk == $itmsk0){
+		if($wep == $itm0 && $wepk == $itmk0 && $wepe == $itme0 && $wepsk == $itmsk0 && $weppara == $itmpara0){
 			$weps += $itms0;
 			$log .= "与装备着的武器<span class=\"yellow\">$wep</span>合并了。";
-			$itm0 = $itmk0 = $itmsk0 = '';
+			$itm0 = $itmk0 = $itmsk0 = $itmpara0 = '';
 			$itme0 = $itms0 = 0;
 			$mode = 'command';
 			return;
 		}else{
 			for($i = 1;$i <= 6;$i++){
 				//global ${'itm'.$i},${'itmk'.$i},${'itme'.$i},${'itms'.$i},${'itmsk'.$i};
-				if((${'itms'.$i})&&($itm0 == ${'itm'.$i})&&($itmk0 == ${'itmk'.$i})&&($itme0 == ${'itme'.$i})&&($itmsk0 == ${'itmsk'.$i})){
+				if((${'itms'.$i})&&($itm0 == ${'itm'.$i})&&($itmk0 == ${'itmk'.$i})&&($itme0 == ${'itme'.$i})&&($itmsk0 == ${'itmsk'.$i})&&($itmpara0 == ${'itmpara'.$i})){
 					${'itms'.$i} += $itms0;
 					$log .= "与包裹里的<span class=\"yellow\">$itm0</span>合并了。";
 					$itm0 = $itmk0 = $itmsk0 = '';
 					$itme0 = $itms0 = 0;
+					$itmpara0 = '';
 					$mode = 'command';
 					return;
 				}
@@ -506,7 +507,7 @@ function itemget(&$data=NULL)
 				if(bot_check_getitem($data)) itemadd($data);
 				else itemdrop($data);
 			}
-			else  
+			else
 			{
 				include template('itemmerge0');
 				$cmd = ob_get_contents();
@@ -554,7 +555,7 @@ function itemdrop($item,&$data=NULL) {
 		$itmsk = & ${'ar'.$itmn.'sk'};
 
 	} else*/
-	
+
 	if(strpos($item,'itm') === 0) {
 		$itmn = substr($item,3,1);
 		//global ${'itm'.$itmn},${'itmk'.$itmn},${'itme'.$itmn},${'itms'.$itmn},${'itmsk'.$itmn};
@@ -601,7 +602,7 @@ function itemdrop($item,&$data=NULL) {
 		$mode = 'command';
 		return;
 	}
-	
+
 	if ((strpos ( $itmk, 'Y' ) === 0 || strpos ( $itmk, 'Z' ) === 0) && ($itm == '棱镜八面体'))
 	{
 		$theitem = array('itm' => &$itm, 'itmk' => &$itmk, 'itme' => &$itme,'itms' => &$itms,'itmsk' => &$itmsk);
@@ -609,7 +610,7 @@ function itemdrop($item,&$data=NULL) {
 		include_once GAME_ROOT . './include/game/item.func.php';
 		octitem_rotate($theitem, 7);
 	}
-	
+
 	if(strpos($itmsk,'v')!==false)
 	{
 		$log .= "{$itm}在地上化作点点碎片，随风消逝了。<br>";
@@ -617,7 +618,7 @@ function itemdrop($item,&$data=NULL) {
 	}
 	else
 	{
-		$db->query("INSERT INTO {$tablepre}mapitem (itm, itmk, itme, itms, itmsk ,pls) VALUES ('$itm', '$itmk', '$itme', '$itms', '$itmsk', '$pls')");
+		$db->query("INSERT INTO {$tablepre}mapitem (itm, itmk, itme, itms, itmsk ,itmpara, pls) VALUES ('$itm', '$itmk', '$itme', '$itms', '$itmsk', '$itmpara', '$pls')");
 		$drop_iid = $db->insert_id();
 		$log .= "你丢弃了<span class=\"red\">$itm</span>。<br>";
 		check_add_searchmemory($drop_iid,'itm',$itm,$data);
@@ -687,7 +688,7 @@ function itemoff($item){
 	$itms0 = $itms;
 	$itmsk0 = $itmsk;
 	$itmpara0 = $itmpara;
-	
+
 	if($item == 'wep'){
 	$itm = '拳头';
 	$itmsk = '';
@@ -729,7 +730,7 @@ function itemadd(&$data=NULL)
 			${'itms'.$i} = $itms0;
 			${'itmsk'.$i} = $itmsk0;
 			${'itmpara'.$i} = $itmpara0;
-			$itm0 = $itmk0 = $itmsk = $itmpara = '';
+			$itm0 = $itmk0 = $itmsk0 = $itmpara0 = '';
 			$itme0 = $itms0 = 0;
 			$mode = 'command';
 			return;
@@ -753,15 +754,15 @@ function itemadd(&$data=NULL)
 
 function itemmerge($itn1,$itn2){
 	global $log,$mode;
-	
+
 	if($itn1 == $itn2) {
 		$log .= '需要选择两个物品才能进行合并！';
 		$mode = 'itemmerge';
 		return;
 	}
-	
+
 	global $nosta,${'itm'.$itn1},${'itmk'.$itn1},${'itme'.$itn1},${'itms'.$itn1},${'itmsk'.$itn1},${'itm'.$itn2},${'itmk'.$itn2},${'itme'.$itn2},${'itms'.$itn2},${'itmsk'.$itn2}, ${'itmpara'.$itn1}, ${'itmpara'.$itn2};
-	
+
 	$it1 = & ${'itm'.$itn1};
 	$itk1 = & ${'itmk'.$itn1};
 	$ite1 = & ${'itme'.$itn1};
@@ -774,13 +775,13 @@ function itemmerge($itn1,$itn2){
 	$its2 = & ${'itms'.$itn2};
 	$itsk2 = & ${'itmsk'.$itn2};
 	$itpara2 = & ${'itmpara'.$itn2};
-	
+
 	if(!$its1 || !$its2) {
 		$log .= '请选择正确的物品进行合并！';
 		$mode = 'itemmerge';
 		return;
 	}
-	
+
 	if($its1==$nosta || $its2==$nosta) {
 		$log .= '耐久是无限的物品不能合并！';
 		$mode = 'itemmerge';
@@ -809,7 +810,7 @@ function itemmerge($itn1,$itn2){
 			$its2 += $its1;
 			$it1 = $itk1 = $itsk1 = $itpara1 = '';
 			$ite1 = $its1 = 0;
-			
+
 			$log .= "你合并了 <span class=\"yellow\">$it2</span>。";
 			$mode = 'command';
 			return;
@@ -839,7 +840,7 @@ function itemmix($mlist, $itemselect=-1) {
 	global $itmk1,$itmk2,$itmk3,$itmk4,$itmk5,$itmk6,$itmsk1,$itmsk2,$itmsk3,$itmsk4,$itmsk5,$itmsk6;
 	global $syncn,$synck,$synce,$syncs,$syncsk,$sync,$reqname,$star;
 	global $cmd;
-	$mlist2 = array_unique($mlist);	
+	$mlist2 = array_unique($mlist);
 	if(count($mlist) != count($mlist2)) {
 		$log .= '相同道具不能进行合成！<br>';
 		$mode = 'itemmix';
@@ -1002,7 +1003,7 @@ function itemmix($mlist, $itemselect=-1) {
 			foreach($mlist as $k)
 				if (1<=$k && $k<=6)
 					$mask|=(1<<((int)$k-1));
-					
+
 			$cmd.='<input type="hidden" id="mode" name="mode" value="itemmain">';
 			$cmd.='<input type="hidden" id="command" name="command" value="itemmix">';
 			$cmd.='<input type="hidden" id="mixmask" name="mixmask" value="'.$mask.'">';
@@ -1020,7 +1021,7 @@ function itemmix($mlist, $itemselect=-1) {
 			$i=(int)$itemselect;
 			if ($i<0 || $i>$sync)
 			{
-				$mode='command'; return; 
+				$mode='command'; return;
 			}
 			foreach($mlist as $val)
 			{
@@ -1070,7 +1071,7 @@ function itemmix($mlist, $itemselect=-1) {
 			foreach($mlist as $k)
 				if (1<=$k && $k<=6)
 					$mask|=(1<<((int)$k-1));
-			
+
 			$cmd.='<input type="hidden" id="mode" name="mode" value="itemmain">';
 			$cmd.='<input type="hidden" id="command" name="command" value="itemmix">';
 			$cmd.='<input type="hidden" id="mixmask" name="mixmask" value="'.$mask.'">';
@@ -1088,7 +1089,7 @@ function itemmix($mlist, $itemselect=-1) {
 			$i=(int)$itemselect;
 			if ($i<0 || $i>$sync)
 			{
-				$mode='command'; return; 
+				$mode='command'; return;
 			}
 			foreach($mlist as $val)
 			{
@@ -1109,9 +1110,9 @@ function itemmix($mlist, $itemselect=-1) {
 	$mixinfo = get_mixinfo();
 	//if(!empty($vn_mixinfo)) $mixinfo = array_merge($mixinfo,$vn_mixinfo);
 	foreach($mixinfo as $minfo) {
-		if(!array_diff($mixitem,$minfo['stuff']) && !array_diff($minfo['stuff'],$mixitem) && count($mixitem) == count($minfo['stuff'])){ 
+		if(!array_diff($mixitem,$minfo['stuff']) && !array_diff($minfo['stuff'],$mixitem) && count($mixitem) == count($minfo['stuff'])){
 			$mixflag = true;
-			break;			
+			break;
 		}
 	}
 
@@ -1120,7 +1121,7 @@ function itemmix($mlist, $itemselect=-1) {
 		$itmstr .= $val.' ';
 	}
 	$itmstr = substr($itmstr,0,-1);
-		
+
 	if(!$mixflag || $club == 20) {
 		//Added an additional check here so even Club20 somehow entered itemmix, nothing can be made.
 		$log .= "<span class=\"yellow\">$itmstr</span>不能合成！<br>";
@@ -1143,11 +1144,11 @@ function itemmix($mlist, $itemselect=-1) {
 		elseif((strpos($itmk0,'H') === 0)&&($club == 16)&&($itms0 !== $nosta)){ $itms0 = ceil($itms0*2); }
 		elseif(($itmk0 == 'EE' || $itmk0 == 'ER') && ($club == 7)){ $itme0 *= 5; }
 		//elseif(($itm0 == '移动PC' || $itm0 == '广域生命探测器') && ($club == 7)){ $itme0 *= 3; }
-		
+
 		//检查成就
 		include_once GAME_ROOT.'./include/game/achievement.func.php';
 		check_mixitem_achievement_rev($name,$itm0);
-		
+
 		itemget();
 	}
 	return;
@@ -1231,7 +1232,7 @@ function itemmove($from,$to){
 		$tpara = $fpara;
 		$f = $fk = $fsk = $fpara = '';
 		$fe = $fs = 0;
-		
+
 	}else {
 		$log .= "将<span class=\"yellow\">{$f}</span>与<span class=\"yellow\">{$t}</span>互换了位置。<br>";
 		$temp = $t;
@@ -1252,13 +1253,13 @@ function itemmove($from,$to){
 		$fs = $temps;
 		$fsk = $tempsk;
 		$fpara = $temppara;
-		
+
 	}
 	return;
 }
 
 
-function itembuy($item,$shop,$bnum=1,&$data=NULL) 
+function itembuy($item,$shop,$bnum=1,&$data=NULL)
 {
 	global $log,$mode,$now,$areanum,$areaadd,$shops;
 	global $db,$tablepre;
@@ -1338,7 +1339,7 @@ function itembuy($item,$shop,$bnum=1,&$data=NULL)
 	$itmsk0 = $iteminfo['itmsk'];
 	$itmpara0 = $iteminfo['itmpara'];
 
-	itemget($data);	
+	itemget($data);
 	return;
 }
 
@@ -1380,7 +1381,7 @@ function getcorpse($item,&$data=NULL)
 	}
 
 	//$edata = $db->fetch_array($result);
-	
+
 	if($edata['hp']>0) {
 		$log .= '对方尚未死亡！<br>';
 		$action = ''; $bid = 0;
@@ -1454,7 +1455,7 @@ function getcorpse($item,&$data=NULL)
 		$mode = 'command';
 		return;
 	}
-	
+
 	if($item == 'pickpocket')
 	{
 		//用视野保存一下，可以吗？
@@ -1473,7 +1474,7 @@ function getcorpse($item,&$data=NULL)
 		$mode = 'command';
 		return;
 	}
-	
+
 	if($item == 'wep' || $item == 'wep2') {
 		$itm0 = $edata[$item];
 		$itmk0 = $edata[$item.'k'];
@@ -1482,7 +1483,7 @@ function getcorpse($item,&$data=NULL)
 		$itmsk0 = $edata[$item.'sk'];
 		$itmpara0 = $edata[$item.'para'];
 		$edata[$item] = $edata[$item.'k'] = $edata[$item.'sk'] = $edata[$item.'para'] = '';
-		$edata[$item.'e'] = $edata[$item.'s'] = 0;  
+		$edata[$item.'e'] = $edata[$item.'s'] = 0;
 	} elseif(strpos($item,'ar') === 0) {
 		$itm0 = $edata[$item];
 		$itmk0 = $edata[$item.'k'];
@@ -1491,7 +1492,7 @@ function getcorpse($item,&$data=NULL)
 		$itmsk0 = $edata[$item.'sk'];
 		$itmpara0 = $edata[$item.'para'];
 		$edata[$item] = $edata[$item.'k'] = $edata[$item.'sk'] = $edata[$item.'para'] = '';
-		$edata[$item.'e'] = $edata[$item.'s'] = 0;  
+		$edata[$item.'e'] = $edata[$item.'s'] = 0;
 	} elseif(strpos($item,'itm') === 0) {
 		$itmn = substr($item,3,1);
 		$itm0 = $edata['itm'.$itmn];
@@ -1501,7 +1502,7 @@ function getcorpse($item,&$data=NULL)
 		$itmsk0 = $edata['itmsk'.$itmn];
 		$itmpara0 = $edata['itmpara'.$itmn];
 		$edata['itm'.$itmn] = $edata['itmk'.$itmn] = $edata['itmsk'.$itmn] = $edata['itmpara'.$itmn] = '';
-		$edata['itme'.$itmn] = $edata['itms'.$itmn] = 0;  
+		$edata['itme'.$itmn] = $edata['itms'.$itmn] = 0;
 	} elseif($item == 'money') {
 		$money += $edata['money'];
 		$log .= '获得了金钱 <span class="yellow">'.$edata['money'].'</span>。<br>';
@@ -1568,16 +1569,16 @@ function change_subwep($s=2,&$data=NULL)
         $no_swepflag = 1;
     }
 
-    ${$seqp} = ${$eqp}; ${$eqp} = $swep; 
+    ${$seqp} = ${$eqp}; ${$eqp} = $swep;
     ${$seqpk} = ${$eqp.'k'}; ${$eqp.'k'} = $swepk;
-    ${$seqpe} = ${$eqp.'e'}; ${$eqp.'e'} = $swepe; 
-    ${$seqps} = ${$eqp.'s'}; ${$eqp.'s'} = $sweps; 
-    ${$seqpsk} = ${$eqp.'sk'}; ${$eqp.'sk'} = $swepsk; 
+    ${$seqpe} = ${$eqp.'e'}; ${$eqp.'e'} = $swepe;
+    ${$seqps} = ${$eqp.'s'}; ${$eqp.'s'} = $sweps;
+    ${$seqpsk} = ${$eqp.'sk'}; ${$eqp.'sk'} = $swepsk;
 	${$seqpara} = ${$eqp.'para'}; ${$eqp.'para'} = $sweppara;
 
     $sweplog = '';
     if(!$no_wepflag) $sweplog.="收起了<span class='yellow'>{$wep2}</span>";
-    if(!$no_swepflag) 
+    if(!$no_swepflag)
     {
         if(!empty($sweplog)) $sweplog .= '，';
         $sweplog .="拿出了<span class='yellow'>{$wep}</span>";
@@ -1593,7 +1594,7 @@ function change_subwep($s=2,&$data=NULL)
 function destory_single_equip(&$pa,$equip)
 {
 	global $log;
-	
+
 	$equip_list = get_equip_list();
 
 	if(in_array($equip,$equip_list))
@@ -1602,7 +1603,7 @@ function destory_single_equip(&$pa,$equip)
 		$pa[$equip.'e'] = $pa[$equip.'s'] = 0;
 		reload_equip_items($pa);
 	}
-	else 
+	else
 	{
 		$log .= "传入了非法的道具位名。";
 		return;
@@ -1626,7 +1627,7 @@ function destory_single_item(&$pa,$i,$costlog=0)
 		$pa['itm'.$i] = $pa['itmk'.$i] = $pa['itmsk'.$i] = $pa['itmpara'.$i] = '';
 		$pa['itme'.$i] = $pa['itms'.$i] = 0;
 	}
-	else 
+	else
 	{
 		$log .= "传入了非法的道具位名。";
 		return;
@@ -1692,7 +1693,7 @@ function reload_set_items(&$pa)
 	{
 		if(check_skill_unlock('inf_cursed',$pa)) getclubskill('inf_cursed',$pa['clbpara']);
 	}
-	else 
+	else
 	{
 		if(!check_skill_unlock('inf_cursed',$pa)) lostclubskill('inf_cursed',$pa['clbpara']);
 	}
@@ -1742,7 +1743,7 @@ function check_item_edit_event($pa,&$pd,$event)
 	$flag = 0;
 	# 「渗透」效果判定
 	if($event == 'c8_infilt')
-	{	
+	{
 		for($i=0;$i<=6;$i++)
 		{
 			if(!empty($pd['itms'.$i]))
@@ -1762,13 +1763,13 @@ function check_item_edit_event($pa,&$pd,$event)
 		//偷懒，尝试12次添加诅咒属性
 		for($i=1;$i<=12;$i++)
 		{
-			
+
 			$curse_id = rand(1,12);
 			//1-6表示背包道具
 			if($curse_id <= 6)
 			{
 				if(!empty($pd['itms'.$i]) && strpos($pd['itmsk'.$i],'V')===False)
-				{					
+				{
 					$pd['itmsk'.$i] .= 'V';
 					$flag = 1;
 				}
@@ -1778,10 +1779,10 @@ function check_item_edit_event($pa,&$pd,$event)
 			{
 				$curse_equipment = (Array('wep','arb','arh','ara','arf','art'))[$curse_id - 7];
 				if(!empty($pd[$curse_equipment]) && strpos($pd[$curse_equipment.'sk'],'V')===False)
-				{					
+				{
 					$pd[$curse_equipment.'sk'] .= 'V';
 					$flag = 1;
-				}				
+				}
 			}
 			if($flag == 1) break;
 		}
@@ -1814,7 +1815,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 					else $log.= "<span class='grey'>{$pa['nm']}的{$pa['wep']}的攻击力上升了".abs($hurtvalue)."！……为什么啊？</span><br>";
 				}
 			}
-			else 
+			else
 			{
 				$pa['weps'] = max(0,$pa['weps']-$hurtvalue);
 				if(!$pa['type'])
@@ -1830,7 +1831,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 			}
 		}
 		//消耗型武器
-		else 
+		else
 		{
 			if($pa['weps'] != $nosta)
 			{
@@ -1847,8 +1848,8 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 						$log .= "{$pa['nm']}的<span class=\"red\">{$pa['wep']}</span>用光了！<br>";
 						$wep_loss_flag = 1;
 					}
-				} 
-				elseif($pa['wep_kind'] == 'G' || $pa['wep_kind'] == 'J') 
+				}
+				elseif($pa['wep_kind'] == 'G' || $pa['wep_kind'] == 'J')
 				{
 					if(!$pa['type'])
 					{
@@ -1887,7 +1888,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 			if($check_sk && !empty($pa['wepsk'])) unset_ex_from_array($pa,get_itmsk_array($pa['wepsk']));
 
 			$pa['wep'] = '拳头'; $pa['wep_kind'] = 'N'; $pa['wepk'] = 'WN';
-			$pa['wepe'] = 0; $pa['weps'] = $nosta; $pa['wepsk'] = '';
+			$pa['wepe'] = 0; $pa['weps'] = $nosta; $pa['wepsk'] = ''; $pa['weppara'] = '';
 			return -1;
 		}
 	}
@@ -1927,10 +1928,10 @@ function armor_hurt(&$pa,$which,$hurtvalue,$check_sk=0)
 				$pa[$which] = '内衣'; $pa[$which.'k'] = 'DN';
 				$pa[$which.'e'] = 0; $pa[$which.'s'] = $nosta; $pa[$which.'sk'] = ''; $pa[$which.'para'] = '';
 			}
-			else 
+			else
 			{
 				$pa[$which] = $pa[$which.'k'] = $pa[$which.'sk'] = ''; $pa[$which.'para'] = '';
-				$pa[$which.'e'] = $pa[$which.'s'] = 0; 
+				$pa[$which.'e'] = $pa[$which.'s'] = 0;
 			}
 			return -1;
 		}

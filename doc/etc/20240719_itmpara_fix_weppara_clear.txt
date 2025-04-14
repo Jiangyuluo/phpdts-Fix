@@ -1,0 +1,19 @@
+2024年7月19日 修复 $itmpara 字段清零问题
+
+在2024年7月19日，游戏中的物品添加了新的字段$itmpara，该字段为一数组，可让物品有着数组中定义的键值的属性。
+在实现过程中，发现当卸下有weppara属性的武器时，其itmpara数据（也即该weppara）并没有被更新·清零，导致如果有没有itmpara数据的武器被换上，该武器也会具有之前的weppara属性。
+
+以下是对应此问题的修复记录：
+
+1. 修复 `weapon_loss` 函数
+   - 在武器损坏时，确保清零 `weppara` 字段
+   - 修改前：`$pa['wep'] = '拳头'; $pa['wep_kind'] = 'N'; $pa['wepk'] = 'WN'; $pa['wepe'] = 0; $pa['weps'] = $nosta; $pa['wepsk'] = '';`
+   - 修改后：`$pa['wep'] = '拳头'; $pa['wep_kind'] = 'N'; $pa['wepk'] = 'WN'; $pa['wepe'] = 0; $pa['weps'] = $nosta; $pa['wepsk'] = ''; $pa['weppara'] = '';`
+
+2. 检查其他相关函数
+   - `itemoff` 函数：已经正确处理了 `weppara` 字段的清零
+   - `change_subwep` 函数：已经正确处理了 `weppara` 和 `wep2para` 字段的交换
+   - `destory_single_equip` 函数：已经正确处理了装备 `para` 字段的清零
+   - `armor_hurt` 函数：已经正确处理了防具 `para` 字段的清零
+
+这些修改确保了当武器或装备被卸下或损坏时，相应的 `para` 字段会被正确清零，避免新装备的武器或装备继承之前的属性。

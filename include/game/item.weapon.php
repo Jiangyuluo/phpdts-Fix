@@ -8,14 +8,14 @@ if (! defined ( 'IN_GAME' )) {
 function item_weapon($itmn, &$data) {
 	global $log, $mode, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
 	$itmpara = & get_itmpara(${'itmpara' . $itmn});
-	
+
 	if(strpos($itmk, 'W') === 0) {
 		$eqp = 'wep';
 		$noeqp = 'WN';
@@ -44,7 +44,7 @@ function item_weapon($itmn, &$data) {
 		$eqp = 'art';
 		$noeqp = '';
 	}
-	
+
 	//global ${$eqp}, ${$eqp.'k'}, ${$eqp.'e'}, ${$eqp.'s'}, ${$eqp.'sk'};
 	//global $artk;
 	if((($artk=='XX')||($artk=='XY'))&&($eqp == 'art')){
@@ -72,7 +72,7 @@ function item_weapon($itmn, &$data) {
 		$itmnumlimit = $itme>=$itms ? $itms : $itme;
 	}
 	if (($noeqp && strpos(${$eqp.'k'}, $noeqp) === 0) || !${$eqp.'s'}) {
-		
+
 		// 装备道具时，进行单次套装检测
 		include_once GAME_ROOT.'./include/game/itemmain.func.php';
 		reload_single_set_item($data,$eqp,$itm,1);
@@ -84,8 +84,10 @@ function item_weapon($itmn, &$data) {
 		${$eqp.'sk'} = $itmsk;
 		${$eqp.'para'} = $itmpara;
 		$log .= "装备了<span class=\"yellow\">$itm</span>。<br>";
-		$itm = $itmk = $itmsk = $itmpara = '';
+		$itm = $itmk = $itmsk = '';
 		$itme = $itms = 0;
+		// 清除背包中的itmpara字段，但保留itmpara变量中的值
+		${'itmpara' . $itmn} = '';
 	} else {
 
 		// 替换装备时，进行单次套装检测
@@ -113,6 +115,8 @@ function item_weapon($itmn, &$data) {
 		$itms = $itmst;
 		$itmsk = $itmskt;
 		$itmpara = $itmparat;
+		// 将背包中的itmpara字段设置为卸下装备的itmpara值
+		${'itmpara' . $itmn} = $itmparat;
 		$log .= "卸下了<span class=\"red\">$itm</span>，装备了<span class=\"yellow\">{${$eqp}}</span>。<br>";
 	}
 }

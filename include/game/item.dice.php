@@ -474,7 +474,7 @@ function item_dice($itmn, &$data) {
 				$itme1 = $itme2 = $itme3 = $itme4 = $itme5 = $itme6 = 1;
 				$itms1 = $itms2 = $itms3 = $itms4 = $itms5 = $itms6 = 1;
 				$itmsk1 = $itmsk2 = $itmsk3 = $itmsk4 = $itmsk5 = $itmsk6 = '';
-				$itmpara1 = $itmpara2 = $itmpara3 = $itmpara4 = $itmpara5 = $itmpara6 = 0;
+				$itmpara1 = $itmpara2 = $itmpara3 = $itmpara4 = $itmpara5 = $itmpara6 = '';
 			}else{
 				//Otherwise, we swap every item in player's bag with random items at player's location.
 				$log .= '一道白光闪过，你背包中的物品都消失了，但是……<br>';
