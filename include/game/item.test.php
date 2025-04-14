@@ -39,13 +39,12 @@ function item_test($itmn, &$data) {
         $pd = fetch_playerdata_by_pid($pid);
         \revcombat\rev_combat_prepare($pa, $pd, 1);
     } elseif ($itm == '对话测试器') {
-        //???
+        // 简单对话测试
+        // Regarding making dialogues with choices:
+        // The user's choice will be stored in $clbpara['choice_index'] and $clbpara['choice_text'].
+        // {"dialogue_id":"testingDialog","choice_index":"1","choice_text":"选项B"}
         $clbpara['dialogue'] = 'testingDialog';
-        //$clbpara['noskip_dialogue'] = 1;
-    } elseif ($itm == '对话选择测试器') {
-        // 带选择的对话测试
-        $clbpara['dialogue'] = 'choiceTestingDialog';
-        $clbpara['noskip_dialogue'] = 1; // 设置为不可跳过的对话
+        $clbpara['noskip_dialogue'] = 0;
     } elseif ($itm == '事件BGM替换器') {
         // 这是一个触发事件BGM的案例，只要输入$clbpara['event_bgmbook'] = Array('事件曲集名'); 即可将当前曲集替换为特殊事件BGM
         // 特殊事件曲集'event_bgmbook'的优先级高于地图曲集'pls_bgmbook'，前者存在时后者不会生效
@@ -207,6 +206,10 @@ function item_test($itmn, &$data) {
         //global $rp;
         $rp = 0;
         $log .= "你使用了<span class=\"yellow\">$itm</span>。你的RP归零了。<br>";
+    } elseif ($itm == '对话选择测试器') {
+        // 带选择的对话测试
+        $clbpara['dialogue'] = 'choiceTestingDialog';
+        $clbpara['noskip_dialogue'] = 1; // 设置为不可跳过的对话
     }elseif ($itm == '调制解调器'){
         if(!empty($gamevars['apis']))
         {
