@@ -1,0 +1,156 @@
+2024年7月19日 $itmpara 字段 tooltip 配置问题修复记录（第九次）
+
+在2024年7月19日，我们实现了 $itmpara 字段在 tooltip 中的显示功能，但在实际使用中发现了一个新问题：
+
+1. 之前的修复似乎没有生效，tooltip 内容中仍然显示 "No tooltip config found for key: AddDamageRaw" 和 "No tooltip config found for key: AddDamagePercentage"
+2. 这表明系统仍然无法找到 AddDamageRaw 和 AddDamagePercentage 这两个键的配置信息
+
+修复内容：
+
+1. 添加更详细的调试信息，以便更好地理解问题
+   - 输出每个键的类型和值
+   - 修改前：
+     ```php
+     // 安全地处理 JSON 输出
+     if(is_array($itmpara)) {
+         // 使用 JSON_UNESCAPED_UNICODE 确保中文显示正常
+         $json_str = json_encode($itmpara, JSON_UNESCAPED_UNICODE);
+         $debug_info .= "\r\nInput value: " . $json_str;
+     } else {
+         $debug_info .= "\r\nInput value: " . $itmpara;
+     }
+     ```
+   - 修改后：
+     ```php
+     // 安全地处理 JSON 输出
+     if(is_array($itmpara)) {
+         // 使用 JSON_UNESCAPED_UNICODE 确保中文显示正常
+         $json_str = json_encode($itmpara, JSON_UNESCAPED_UNICODE);
+         $debug_info .= "\r\nInput value: " . $json_str;
+         
+         // 输出每个键的类型和值
+         $debug_info .= "\r\nDetailed key info:";
+         foreach($itmpara as $k => $v) {
+             $debug_info .= "\r\n - Key: '{$k}' (" . gettype($k) . ")";
+             $debug_info .= "\r\n   Value: '" . (is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v) . "' (" . gettype($v) . ")";
+         }
+     } else {
+         $debug_info .= "\r\nInput value: " . $itmpara;
+     }
+     ```
+
+2. 改进键名匹配逻辑，添加更多调试信息
+   - 输出所有可用的配置键
+   - 输出每种匹配方式的结果
+   - 添加大小写不敏感的匹配（使用 strcasecmp）
+   - 修改前：
+     ```php
+     // 检查是否有对应的 tooltip 配置
+     // 先尝试直接匹配
+     if(isset($itmpara_tooltip[$key])) {
+         $debug_info .= "\r\n - Found tooltip config for key: {$key}";
+         $config = $itmpara_tooltip[$key];
+     } 
+     // 如果没有找到，尝试将键名转换为首字母大写的形式
+     elseif(isset($itmpara_tooltip[ucfirst($key)])) {
+         $debug_info .= "\r\n - Found tooltip config for key (case-insensitive): {$key} -> " . ucfirst($key);
+         $config = $itmpara_tooltip[ucfirst($key)];
+     }
+     // 如果还是没有找到，尝试将键名转换为全大写的形式
+     elseif(isset($itmpara_tooltip[strtoupper($key)])) {
+         $debug_info .= "\r\n - Found tooltip config for key (uppercase): {$key} -> " . strtoupper($key);
+         $config = $itmpara_tooltip[strtoupper($key)];
+     }
+     // 如果还是没有找到，尝试将键名转换为全小写的形式
+     elseif(isset($itmpara_tooltip[strtolower($key)])) {
+         $debug_info .= "\r\n - Found tooltip config for key (lowercase): {$key} -> " . strtolower($key);
+         $config = $itmpara_tooltip[strtolower($key)];
+     }
+     // 如果还是没有找到，尝试将键名转换为驼峰式的形式
+     else {
+         // 尝试将键名转换为驼峰式
+         $camelKey = preg_replace_callback('/(^|_)([a-z])/', function($matches) {
+             return strtoupper($matches[2]);
+         }, $key);
+         
+         if(isset($itmpara_tooltip[$camelKey])) {
+             $debug_info .= "\r\n - Found tooltip config for key (camelCase): {$key} -> {$camelKey}";
+             $config = $itmpara_tooltip[$camelKey];
+         } else {
+             $debug_info .= "\r\n - No tooltip config found for key: {$key}";
+             continue;
+         }
+     }
+     ```
+   - 修改后：
+     ```php
+     // 检查是否有对应的 tooltip 配置
+     // 输出所有可用的配置键
+     $debug_info .= "\r\n - Available tooltip config keys: " . implode(', ', array_keys($itmpara_tooltip));
+     
+     // 先尝试直接匹配
+     $debug_info .= "\r\n - Direct match check: isset(\$itmpara_tooltip['{$key}']) = " . (isset($itmpara_tooltip[$key]) ? 'true' : 'false');
+     if(isset($itmpara_tooltip[$key])) {
+         $debug_info .= "\r\n - Found tooltip config for key: {$key}";
+         $config = $itmpara_tooltip[$key];
+     }
+     // 如果没有找到，尝试将键名转换为首字母大写的形式
+     else {
+         $ucfirstKey = ucfirst($key);
+         $debug_info .= "\r\n - Ucfirst match check: isset(\$itmpara_tooltip['{$ucfirstKey}']) = " . (isset($itmpara_tooltip[$ucfirstKey]) ? 'true' : 'false');
+         if(isset($itmpara_tooltip[$ucfirstKey])) {
+             $debug_info .= "\r\n - Found tooltip config for key (ucfirst): {$key} -> {$ucfirstKey}";
+             $config = $itmpara_tooltip[$ucfirstKey];
+         }
+         // 如果还是没有找到，尝试将键名转换为全大写的形式
+         else {
+             $upperKey = strtoupper($key);
+             $debug_info .= "\r\n - Uppercase match check: isset(\$itmpara_tooltip['{$upperKey}']) = " . (isset($itmpara_tooltip[$upperKey]) ? 'true' : 'false');
+             if(isset($itmpara_tooltip[$upperKey])) {
+                 $debug_info .= "\r\n - Found tooltip config for key (uppercase): {$key} -> {$upperKey}";
+                 $config = $itmpara_tooltip[$upperKey];
+             }
+             // 如果还是没有找到，尝试将键名转换为全小写的形式
+             else {
+                 $lowerKey = strtolower($key);
+                 $debug_info .= "\r\n - Lowercase match check: isset(\$itmpara_tooltip['{$lowerKey}']) = " . (isset($itmpara_tooltip[$lowerKey]) ? 'true' : 'false');
+                 if(isset($itmpara_tooltip[$lowerKey])) {
+                     $debug_info .= "\r\n - Found tooltip config for key (lowercase): {$key} -> {$lowerKey}";
+                     $config = $itmpara_tooltip[$lowerKey];
+                 }
+                 // 如果还是没有找到，尝试将键名转换为驼峰式的形式
+                 else {
+                     // 尝试将键名转换为驼峰式
+                     $camelKey = preg_replace_callback('/(^|_)([a-z])/', function($matches) {
+                         return strtoupper($matches[2]);
+                     }, $key);
+                     
+                     $debug_info .= "\r\n - CamelCase match check: isset(\$itmpara_tooltip['{$camelKey}']) = " . (isset($itmpara_tooltip[$camelKey]) ? 'true' : 'false');
+                     if(isset($itmpara_tooltip[$camelKey])) {
+                         $debug_info .= "\r\n - Found tooltip config for key (camelCase): {$key} -> {$camelKey}";
+                         $config = $itmpara_tooltip[$camelKey];
+                     }
+                     // 如果还是没有找到，尝试在所有键中进行大小写不敏感的匹配
+                     else {
+                         $found = false;
+                         foreach(array_keys($itmpara_tooltip) as $configKey) {
+                             if(strcasecmp($configKey, $key) === 0) {
+                                 $debug_info .= "\r\n - Found tooltip config for key (strcasecmp): {$key} -> {$configKey}";
+                                 $config = $itmpara_tooltip[$configKey];
+                                 $found = true;
+                                 break;
+                             }
+                         }
+                         
+                         if(!$found) {
+                             $debug_info .= "\r\n - No tooltip config found for key: {$key}";
+                             continue;
+                         }
+                     }
+                 }
+             }
+         }
+     }
+     ```
+
+这些修改添加了更详细的调试信息，以便更好地理解问题。通过输出每个键的类型和值，以及每种匹配方式的结果，我们可以更清楚地看到问题所在。此外，我们还添加了大小写不敏感的匹配（使用 strcasecmp），以便更灵活地匹配键名。

@@ -1,0 +1,303 @@
+2024年7月19日 $itmpara 字段 tooltip 显示问题修复记录（第六次）
+
+在2024年7月19日，我们实现了 $itmpara 字段在 tooltip 中的显示功能，但在实际使用中发现了几个问题：
+
+1. 调试信息没有显示，只显示了 lore 内容
+2. 移除 lore 键值后，tooltip 完全不显示
+3. 出现错误：`Invalid argument supplied for foreach() in itmpara_tooltip.func.php on line 47`
+
+这个错误表明在 `foreach($itmpara as $key => $value)` 语句中，`$itmpara` 不是一个数组或可迭代对象，这可能是问题的根源。
+
+修复内容：
+
+1. 修复 `parse_itmpara_tooltip` 函数中的错误
+   - 添加更详细的调试信息
+   - 确保 `$itmpara` 始终是一个数组
+   - 修改前：
+     ```php
+     function parse_itmpara_tooltip($itmpara, $item_type = '')
+     {
+         global $itmpara_tooltip;
+     
+         // 如果 itmpara 为空，直接返回空字符串
+         if(empty($itmpara)) {
+             return '';
+         }
+     
+         // 如果 itmpara 不是数组，尝试将其转换为数组
+         if(!is_array($itmpara)) {
+             // 添加调试输出，查看原始的 itmpara 值
+             $debug_info = "\r\nOriginal itmpara: {$itmpara}";
+             
+             $itmpara = get_itmpara($itmpara);
+             
+             // 添加调试输出，查看解析后的 itmpara 值
+             $debug_info .= "\r\nParsed itmpara: ".(is_array($itmpara) ? json_encode($itmpara) : $itmpara);
+             
+             if(empty($itmpara)) {
+                 return $debug_info; // 返回调试信息而不是空字符串
+             }
+         }
+     ```
+   - 修改后：
+     ```php
+     function parse_itmpara_tooltip($itmpara, $item_type = '')
+     {
+         global $itmpara_tooltip;
+         
+         // 初始化调试信息
+         $debug_info = "\r\n---------- DEBUG INFO ----------";
+         $debug_info .= "\r\nFunction: parse_itmpara_tooltip";
+         $debug_info .= "\r\nInput type: " . gettype($itmpara);
+         $debug_info .= "\r\nInput value: " . (is_array($itmpara) ? json_encode($itmpara) : $itmpara);
+         $debug_info .= "\r\nItem type: {$item_type}";
+     
+         // 如果 itmpara 为空，直接返回调试信息
+         if(empty($itmpara)) {
+             $debug_info .= "\r\nEmpty itmpara detected";
+             return $debug_info;
+         }
+     
+         // 如果 itmpara 不是数组，尝试将其转换为数组
+         if(!is_array($itmpara)) {
+             $debug_info .= "\r\nConverting itmpara to array using get_itmpara()";
+             
+             $itmpara = get_itmpara($itmpara);
+             
+             $debug_info .= "\r\nAfter conversion:";
+             $debug_info .= "\r\n - Type: " . gettype($itmpara);
+             $debug_info .= "\r\n - Value: " . (is_array($itmpara) ? json_encode($itmpara) : $itmpara);
+             $debug_info .= "\r\n - Empty: " . (empty($itmpara) ? 'true' : 'false');
+             
+             if(empty($itmpara)) {
+                 $debug_info .= "\r\nEmpty result after conversion";
+                 return $debug_info;
+             }
+             
+             // 确保 $itmpara 是数组
+             if(!is_array($itmpara)) {
+                 $debug_info .= "\r\nWarning: itmpara is still not an array after conversion";
+                 $debug_info .= "\r\nForcing conversion to empty array";
+                 $itmpara = array();
+             }
+         }
+     ```
+
+2. 修复 `foreach` 循环中的错误
+   - 添加检查确保 `$itmpara` 是数组并且不为空
+   - 修改前：
+     ```php
+     // 处理其他键值
+     foreach($itmpara as $key => $value) {
+         // 跳过 lore，单独处理
+         if($key === 'lore') {
+             continue;
+         }
+     ```
+   - 修改后：
+     ```php
+     // 处理其他键值
+     $debug_info .= "\r\nProcessing itmpara keys:";
+     $debug_info .= "\r\n - itmpara type: " . gettype($itmpara);
+     $debug_info .= "\r\n - itmpara empty: " . (empty($itmpara) ? 'true' : 'false');
+     
+     // 确保 $itmpara 是数组并且不为空
+     if(is_array($itmpara) && !empty($itmpara)) {
+         $debug_info .= "\r\n - Keys: " . implode(', ', array_keys($itmpara));
+         
+         foreach($itmpara as $key => $value) {
+             $debug_info .= "\r\nProcessing key: {$key} = " . (is_array($value) ? json_encode($value) : $value);
+     ```
+
+3. 修复 `get_itmpara` 函数中的 JSON 解析问题
+   - 添加更详细的调试信息
+   - 添加更多的 JSON 解析错误处理
+   - 添加手动解析 JSON 的功能
+   - 修改前：
+     ```php
+     function get_itmpara($para)
+     {
+         if(empty($para)) $para = Array();
+         if(!is_array($para)) {
+             // 尝试修复 JSON 解析问题
+             // 如果字符串中包含逗号，可能会导致 JSON 解析失败
+             // 确保字符串是有效的 JSON
+             $para = trim($para);
+             
+             // 检查是否是有效的 JSON 格式
+             if (substr($para, 0, 1) == '{' && substr($para, -1) == '}') {
+                 $result = json_decode($para, true);
+                 
+                 // 如果解析失败，尝试修复 JSON 字符串
+                 if ($result === null && json_last_error() !== JSON_ERROR_NONE) {
+                     // 尝试修复不完整的 JSON
+                     // 如果字符串被截断，尝试添加缺失的部分
+                     if (strpos($para, '{"') === 0 && strpos($para, '"}') === false) {
+                         $para .= '"}'; // 添加缺失的右花括号
+                     }
+                     
+                     // 再次尝试解析
+                     $result = json_decode($para, true);
+                 }
+                 
+                 return $result;
+             } else {
+                 // 不是 JSON 格式，直接返回
+                 return $para;
+             }
+         } else return $para;
+     }
+     ```
+   - 修改后：
+     ```php
+     function get_itmpara($para)
+     {
+         // 记录调试信息
+         $debug = "get_itmpara debug:\n";
+         $debug .= "Input type: " . gettype($para) . "\n";
+         $debug .= "Input value: " . (is_string($para) ? $para : (is_array($para) ? json_encode($para) : gettype($para))) . "\n";
+         
+         if(empty($para)) {
+             $debug .= "Empty input, returning empty array\n";
+             //error_log($debug);
+             return Array();
+         }
+         
+         if(!is_array($para)) {
+             // 如果是字符串，尝试解析为 JSON
+             if(is_string($para)) {
+                 $debug .= "Processing string input\n";
+                 
+                 // 去除空白字符
+                 $para = trim($para);
+                 $debug .= "After trim: " . $para . "\n";
+                 
+                 // 检查是否是 JSON 格式
+                 if(substr($para, 0, 1) == '{' && substr($para, -1) == '}') {
+                     $debug .= "Detected JSON format\n";
+                     
+                     // 尝试修复可能的 JSON 格式问题
+                     // 有时候 JSON 字符串可能被截断或损坏
+                     
+                     // 先尝试直接解析
+                     $result = json_decode($para, true);
+                     $error = json_last_error();
+                     $debug .= "First decode attempt: " . ($error === JSON_ERROR_NONE ? "success" : "failed") . "\n";
+                     $debug .= "Error code: " . $error . "\n";
+                     $debug .= "Error message: " . json_last_error_msg() . "\n";
+                     
+                     // 如果解析失败，尝试修复
+                     if($result === null && $error !== JSON_ERROR_NONE) {
+                         $debug .= "Attempting to fix JSON string\n";
+                         
+                         // 尝试修复常见问题
+                         
+                         // 1. 如果是被截断的 JSON，尝试添加右花括号
+                         if(substr_count($para, '{') > substr_count($para, '}')) {
+                             $para .= str_repeat('}', substr_count($para, '{') - substr_count($para, '}'));
+                             $debug .= "Added missing closing braces\n";
+                         }
+                         
+                         // 2. 如果有引号不匹配，尝试修复
+                         if(substr_count($para, '"') % 2 != 0) {
+                             $para .= '"';
+                             $debug .= "Added missing quote\n";
+                         }
+                         
+                         // 3. 尝试使用替代方法解析
+                         // 如果是简单的键值对，手动解析
+                         if(strpos($para, '{"') === 0) {
+                             $debug .= "Attempting manual parsing\n";
+                             
+                             // 去除花括号
+                             $content = substr($para, 1, -1);
+                             $debug .= "Content without braces: " . $content . "\n";
+                             
+                             // 尝试手动解析键值对
+                             $manual_result = array();
+                             
+                             // 尝试使用正则表达式提取键值对
+                             preg_match_all('/"([^"]+)"\s*:\s*([^,}]+)/', $content, $matches);
+                             
+                             if(!empty($matches[1]) && !empty($matches[2])) {
+                                 for($i = 0; $i < count($matches[1]); $i++) {
+                                     $key = $matches[1][$i];
+                                     $value = trim($matches[2][$i]);
+                                     
+                                     // 如果值是数字
+                                     if(is_numeric($value)) {
+                                         $value = strpos($value, '.') !== false ? (float)$value : (int)$value;
+                                     } 
+                                     // 如果值是字符串（带引号）
+                                     elseif(substr($value, 0, 1) == '"' && substr($value, -1) == '"') {
+                                         $value = substr($value, 1, -1);
+                                     }
+                                     
+                                     $manual_result[$key] = $value;
+                                 }
+                             }
+                             
+                             $debug .= "Manual parsing result: " . json_encode($manual_result) . "\n";
+                             
+                             // 如果手动解析成功，使用手动解析的结果
+                             if(!empty($manual_result)) {
+                                 $result = $manual_result;
+                             } else {
+                                 // 再次尝试使用 json_decode
+                                 $result = json_decode($para, true);
+                                 $debug .= "Second decode attempt: " . (json_last_error() === JSON_ERROR_NONE ? "success" : "failed") . "\n";
+                             }
+                         }
+                     }
+                     
+                     // 如果解析结果为空，返回空数组
+                     if($result === null) {
+                         $debug .= "Failed to parse JSON, returning empty array\n";
+                         //error_log($debug);
+                         return array();
+                     }
+                     
+                     $debug .= "Final result: " . json_encode($result) . "\n";
+                     //error_log($debug);
+                     return $result;
+                 } else {
+                     $debug .= "Not a JSON string, returning as is\n";
+                     //error_log($debug);
+                     return $para;
+                 }
+             } else {
+                 $debug .= "Not a string or array, returning empty array\n";
+                 //error_log($debug);
+                 return array();
+             }
+         } else {
+             $debug .= "Already an array, returning as is\n";
+             //error_log($debug);
+             return $para;
+         }
+     }
+     ```
+
+4. 修复 lore 处理
+   - 添加检查确保 `$itmpara` 是数组
+   - 修改前：
+     ```php
+     // 最后处理 lore，如果存在则显示
+     if(isset($itmpara['lore'])) {
+         $tooltip .= $itmpara['lore'] . "\r";
+     }
+     ```
+   - 修改后：
+     ```php
+     // 最后处理 lore，如果存在则显示
+     if(is_array($itmpara) && isset($itmpara['lore'])) {
+         $debug_info .= "\r\nProcessing lore key:";
+         $debug_info .= "\r\n - Value: {$itmpara['lore']}";
+         $tooltip .= $itmpara['lore'] . "\r";
+         $debug_info .= "\r\n - Added lore to tooltip";
+     } else {
+         $debug_info .= "\r\nNo lore key found or itmpara is not an array";
+     }
+     ```
+
+这些修改有助于我们了解 itmpara 字段的处理过程，找出问题所在。通过详细的调试输出，我们可以看到 itmpara 字段的原始值、解析过程和最终结果，从而确定问题的原因。

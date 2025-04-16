@@ -1,0 +1,102 @@
+2024年7月19日 $itmpara 字段 tooltip 显示问题修复记录（第五次）
+
+在2024年7月19日，我们实现了 $itmpara 字段在 tooltip 中的显示功能，但在实际使用中发现了一个问题：
+
+1. JSON 解析问题导致 itmpara 值显示不完整
+   - 在调试信息中，itmpara 值只显示了 "{" 而不是完整的 JSON 对象
+   - 实际的 itmpara 值应该是：{"AddDamageRaw":100,"AddDamagePercentage":10,"lore":"这是一件测试用的物品，起码不会按原样去桃箱。"}
+   - 但只显示了 "{"，这可能是导致前两个键值（AddDamageRaw 和 AddDamagePercentage）不显示的原因
+
+2. 修复 get_itmpara 函数中的 JSON 解析问题
+   - 修改前：
+     ```php
+     function get_itmpara($para)
+     {
+         if(empty($para)) $para = Array();
+         if(!is_array($para)) {
+             $result = json_decode($para, true);
+             return $result;
+         } else return $para;
+     }
+     ```
+   - 修改后：
+     ```php
+     function get_itmpara($para)
+     {
+         if(empty($para)) $para = Array();
+         if(!is_array($para)) {
+             // 尝试修复 JSON 解析问题
+             // 如果字符串中包含逗号，可能会导致 JSON 解析失败
+             // 确保字符串是有效的 JSON
+             $para = trim($para);
+             
+             // 检查是否是有效的 JSON 格式
+             if (substr($para, 0, 1) == '{' && substr($para, -1) == '}') {
+                 $result = json_decode($para, true);
+                 
+                 // 如果解析失败，尝试修复 JSON 字符串
+                 if ($result === null && json_last_error() !== JSON_ERROR_NONE) {
+                     // 尝试修复不完整的 JSON
+                     // 如果字符串被截断，尝试添加缺失的部分
+                     if (strpos($para, '{"') === 0 && strpos($para, '"}') === false) {
+                         $para .= '"}'; // 添加缺失的右花括号
+                     }
+                     
+                     // 再次尝试解析
+                     $result = json_decode($para, true);
+                 }
+                 
+                 return $result;
+             } else {
+                 // 不是 JSON 格式，直接返回
+                 return $para;
+             }
+         } else return $para;
+     }
+     ```
+
+3. 添加调试输出到 parse_itmpara_tooltip 函数
+   - 修改前：
+     ```php
+     // 如果 itmpara 不是数组，尝试将其转换为数组
+     if(!is_array($itmpara)) {
+         $itmpara = get_itmpara($itmpara);
+         if(empty($itmpara)) {
+             return '';
+         }
+     }
+     ```
+   - 修改后：
+     ```php
+     // 如果 itmpara 不是数组，尝试将其转换为数组
+     if(!is_array($itmpara)) {
+         // 添加调试输出，查看原始的 itmpara 值
+         $debug_info = "\r\nOriginal itmpara: {$itmpara}";
+         
+         $itmpara = get_itmpara($itmpara);
+         
+         // 添加调试输出，查看解析后的 itmpara 值
+         $debug_info .= "\r\nParsed itmpara: ".(is_array($itmpara) ? json_encode($itmpara) : $itmpara);
+         
+         if(empty($itmpara)) {
+             return $debug_info; // 返回调试信息而不是空字符串
+         }
+     }
+     ```
+
+4. 在 parse_itmpara_tooltip 函数的返回值中添加调试信息
+   - 修改前：
+     ```php
+     return rtrim($tooltip, "\r");
+     ```
+   - 修改后：
+     ```php
+     // 添加调试信息到返回的 tooltip
+     if(isset($debug_info)) {
+         $tooltip .= $debug_info;
+     }
+     
+     return rtrim($tooltip, "\r");
+     ```
+
+这些修改有助于我们了解 itmpara 字段的处理过程，找出问题所在。通过调试输出，我们可以看到 itmpara 字段的原始值和解析后的值，从而确定问题的原因。

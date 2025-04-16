@@ -1,0 +1,57 @@
+2024年7月19日 $itmpara 字段 tooltip 配置问题修复记录（第十次）
+
+在2024年7月19日，我们实现了 $itmpara 字段在 tooltip 中的显示功能，但在实际使用中发现了一个新问题：
+
+1. 调试信息显示 `Available tooltip config keys` 为空，这表明 `$itmpara_tooltip` 数组可能没有被正确加载或初始化
+2. 所有的键名匹配都返回 false，导致无法找到对应的配置信息
+
+修复内容：
+
+1. 修复 `$itmpara_tooltip` 数组的加载问题
+   - 在 `global.func.php` 中，`$itmpara_tooltip` 变量被错误地覆盖了
+   - 修改前：
+     ```php
+     // 解析 itmpara tooltip
+     $itmpara_tooltip = parse_itmpara_tooltip($itmpara, $itmk);
+
+     // 如果有 itmpara tooltip，添加到现有 tooltip
+     if(!empty($itmpara_tooltip))
+     {
+         if(!empty($info_tp)) $info_tp .= "\r";
+         $info_tp .= $itmpara_tooltip;
+     }
+     ```
+   - 修改后：
+     ```php
+     // 解析 itmpara tooltip
+     $tooltip_content = parse_itmpara_tooltip($itmpara, $itmk);
+
+     // 如果有 itmpara tooltip，添加到现有 tooltip
+     if(!empty($tooltip_content))
+     {
+         if(!empty($info_tp)) $info_tp .= "\r";
+         $info_tp .= $tooltip_content;
+     }
+     ```
+
+2. 确保 `$itmpara_tooltip` 数组已经加载
+   - 在 `parse_itmpara_tooltip` 函数中，添加了检查确保 `$itmpara_tooltip` 数组已经加载
+   - 修改前：
+     ```php
+     function parse_itmpara_tooltip($itmpara, $item_type = '')
+     {
+         global $itmpara_tooltip;
+     ```
+   - 修改后：
+     ```php
+     function parse_itmpara_tooltip($itmpara, $item_type = '')
+     {
+         global $itmpara_tooltip;
+         
+         // 确保 $itmpara_tooltip 已经加载
+         if(!isset($itmpara_tooltip) || empty($itmpara_tooltip)) {
+             include_once GAME_ROOT.'./gamedata/cache/itmpara_tooltip.php';
+         }
+     ```
+
+这些修改确保了 `$itmpara_tooltip` 数组能够正确加载和使用，从而使系统能够找到对应的配置信息。问题的根源是在 `global.func.php` 中，`$itmpara_tooltip` 变量被错误地覆盖为函数的返回值，而函数本身需要使用这个数组。

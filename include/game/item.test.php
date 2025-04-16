@@ -206,6 +206,15 @@ function item_test($itmn, &$data) {
         //global $rp;
         $rp = 0;
         $log .= "你使用了<span class=\"yellow\">$itm</span>。你的RP归零了。<br>";
+    } elseif ($itm == 'itmpara调试开关') {
+        // 切换 itmpara 调试模式
+        if(isset($clbpara['SetItmparaDebug']) && $clbpara['SetItmparaDebug'] === true) {
+            $clbpara['SetItmparaDebug'] = false;
+            $log .= "你关闭了 itmpara 调试模式。<br>现在物品的 tooltip 中不会显示调试信息。<br>";
+        } else {
+            $clbpara['SetItmparaDebug'] = true;
+            $log .= "你开启了 itmpara 调试模式。<br>现在物品的 tooltip 中会显示详细的调试信息。<br>";
+        }
     } elseif ($itm == '对话选择测试器') {
         // 带选择的对话测试
         $clbpara['dialogue'] = 'choiceTestingDialog';
