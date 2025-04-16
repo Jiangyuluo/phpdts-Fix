@@ -639,7 +639,7 @@ function itemdrop($item,&$data=NULL) {
 }
 
 function itemoff($item){
-	global $log,$mode,$cmd,$itm0,$itmk0,$itme0,$itms0,$itmsk0,$nosta,$pdata;
+	global $log,$mode,$cmd,$itm0,$itmk0,$itme0,$itms0,$itmsk0,$itmpara0,$nosta,$pdata;
 
 	if($item == 'wep'){
 		global $wep,$wepk,$wepe,$weps,$wepsk, $weppara;
