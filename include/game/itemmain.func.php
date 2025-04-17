@@ -243,10 +243,19 @@ function trap(&$data=NULL){
 	{
 		$bid = $itmsk0;
 
-		# 计算陷阱伤害
-		$damage = calc_trap_damage($data,NULL,$playerflag,$selflag);
-		# 检查陷阱是否被迎击
-		$damage = check_trap_def_event($data,$damage,$playerflag,$selflag);
+		# 「种火IV」效果判定：
+		if(!empty($data['clbpara']['skill']) && in_array('fireseed4', $data['clbpara']['skill']))
+		{
+			$log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
+			$damage = 0;
+		}
+		else
+		{
+			# 计算陷阱伤害
+			$damage = calc_trap_damage($data,NULL,$playerflag,$selflag);
+			# 检查陷阱是否被迎击
+			$damage = check_trap_def_event($data,$damage,$playerflag,$selflag);
+		}
 
 		if($damage)
 		{
@@ -1701,7 +1710,8 @@ function reload_set_items(&$pa)
 	if(!empty($pa['clbpara']['setitems']))
 	{
 		//获得对应的套装效果
-
+		include_once GAME_ROOT.'./include/game/setitems.func.php';
+		process_set_item_effects($pa);
 	}
 	return;
 }
@@ -1722,6 +1732,8 @@ function reload_single_set_item(&$pa,$eqp,$enm,$active=0)
 			$pa['clbpara']['setitems'][$sid] += 1;
 			$nownums = $pa['clbpara']['setitems'][$sid];
 			//获得对应的套装效果
+			include_once GAME_ROOT.'./include/game/setitems.func.php';
+			process_set_item_effects($pa);
 			//$log .= "激活了套装{$set_items_info[$sid]['name']}{$nownums}件套的效果。<br>";
 			//检查是否解锁对应套装成就
 		}
@@ -1730,6 +1742,8 @@ function reload_single_set_item(&$pa,$eqp,$enm,$active=0)
 			$pa['clbpara']['setitems'][$sid] -= 1;
 			$nownums = $pa['clbpara']['setitems'][$sid];
 			//失去对应的套装效果
+			include_once GAME_ROOT.'./include/game/setitems.func.php';
+			process_set_item_effects($pa);
 			//$log .= "套装{$set_items_info[$sid]['name']}组件数-1，重新激活{$nownums}件套的效果。<br>";
 		}
 	}

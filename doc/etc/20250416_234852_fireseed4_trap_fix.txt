@@ -1,0 +1,57 @@
+# 种火IV陷阱伤害免疫修复
+
+## 问题描述
+在种火IV技能生效时，玩家踩到陷阱仍然正常受到了伤害，而该伤害应该下降为0。
+
+## 问题原因
+问题出在 `itemmain.func.php` 文件中的陷阱伤害计算逻辑。原来的代码先计算陷阱伤害，然后再检查种火IV技能，这导致在某些情况下（可能是由于代码执行顺序或其他因素），种火IV的效果没有正确应用。
+
+## 修复内容
+1. 修改了 `itemmain.func.php` 文件中的陷阱伤害计算逻辑，将种火IV的检查移到了伤害计算之前
+2. 使用了 `if-else` 结构，确保当种火IV技能存在时，直接将伤害设为0，不再进行后续的伤害计算
+3. 改进了检查种火IV技能的方式，不再使用 `check_skill_unlock` 函数，而是直接检查玩家的 `clbpara['skill']` 数组中是否包含 'fireseed4'
+
+## 修复前代码
+```php
+# 计算陷阱伤害
+$damage = calc_trap_damage($data,NULL,$playerflag,$selflag);
+# 检查陷阱是否被迎击
+$damage = check_trap_def_event($data,$damage,$playerflag,$selflag);
+
+# 「种火IV」效果判定：
+if(check_skill_unlock('fireseed4', $data)) {
+    $log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
+    $damage = 0;
+}
+
+if($damage)
+```
+
+## 修复后代码
+```php
+# 「种火IV」效果判定：
+if(!empty($data['clbpara']['skill']) && in_array('fireseed4', $data['clbpara']['skill']))
+{
+    $log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
+    $damage = 0;
+}
+else
+{
+    # 计算陷阱伤害
+    $damage = calc_trap_damage($data,NULL,$playerflag,$selflag);
+    # 检查陷阱是否被迎击
+    $damage = check_trap_def_event($data,$damage,$playerflag,$selflag);
+}
+
+if($damage)
+```
+
+## 修复效果
+1. 现在当玩家拥有种火IV技能时，踩到陷阱会正确地将伤害降为0
+2. 玩家会看到提示消息，告知种火IV技能使伤害变为0
+3. 由于伤害为0，玩家不会受到任何陷阱伤害，也不会触发陷阱击杀事件
+
+## 注意事项
+1. 这个修复只影响陷阱伤害，不影响其他类型的伤害（战斗、毒物等）
+2. 修复使用了直接检查技能数组的方式，而不是使用 `check_skill_unlock` 函数，这与之前修复套装效果时的方法一致
+3. IDE报告了一些未使用的变量警告，但这些不影响功能，是原代码中就存在的问题

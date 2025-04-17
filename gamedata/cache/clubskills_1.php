@@ -74,9 +74,45 @@ $sktpemsdmg = "<span class=\"gold\" tooltip2=\"【亮晶晶】：造成纯粹伤
 # 技能登记：
 $cskills = Array
 (
+	'fireseed1' => Array
+	(
+		'name' => '种火I',
+		'tags' => Array('passive'),
+		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都降低为75%。',
+		'cost' => 10,
+		'input' => '学习',
+		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火I」。<br>',
+	),
+	'fireseed2' => Array
+	(
+		'name' => '种火II',
+		'tags' => Array('passive'),
+		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都降低为50%。',
+		'cost' => 20,
+		'input' => '学习',
+		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火II」。<br>',
+	),
+	'fireseed3' => Array
+	(
+		'name' => '种火III',
+		'tags' => Array('passive'),
+		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都变为1。',
+		'cost' => 30,
+		'input' => '学习',
+		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火III」。<br>',
+	),
+	'fireseed4' => Array
+	(
+		'name' => '种火IV',
+		'tags' => Array('passive'),
+		'desc' => '被动技能，使你受到的所有伤害（包括战斗、事件、陷阱、食用毒物等）都变为0。',
+		'cost' => 50,
+		'input' => '学习',
+		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火IV」。<br>',
+	),
 	// 可以通过在此文件中填写配置项来创建一个新技能，系统会自动生成模板。如果配置文件不能满足需求，可以自己创建一个模板文件
 	/*'技能编号' => Array
-	( 	
+	(
 		'name' => '技能名', //（必填）技能名
 		'tags' => Array(), //（非必填）定义一个技能带有的标签
 		'desc' => '', //（非必填）技能介绍，显示在技能面板上，可以使用[: :]设置一些静态参数，会在生成时自动替换对应参数。
@@ -122,9 +158,9 @@ $cskills = Array
 		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，你的生命上限增加了<span class="yellow">[:hp:]</span>点。<br>',
 		'status' => Array('hp','mhp'),
 		'effect' => Array(
-			0 => Array( 'hp' => '+=::3', 'mhp' => '+=::3',), 
-			12 => Array( 'hp' => '+=::6', 'mhp' => '+=::6',), 
-			20 => Array( 'hp' => '+=::4', 'mhp' => '+=::4',), 
+			0 => Array( 'hp' => '+=::3', 'mhp' => '+=::3',),
+			12 => Array( 'hp' => '+=::6', 'mhp' => '+=::6',),
+			20 => Array( 'hp' => '+=::4', 'mhp' => '+=::4',),
 		),
 	),
 	's_ad' => Array
@@ -284,7 +320,7 @@ $cskills = Array
 		持斩系武器方可发动，消耗<span class="yellow">[:ragecost:]</span>点怒气',
 		'bdesc' => '本次攻击附加<span class="yellow">[:fixdmg:]+[^lvl^]</span>点伤害，且武器损耗率减半，消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 5, 
+			'ragecost' => 5,
 			'fixdmg' => 30, //基础固定伤害
 			'wepimpr' => 0.5, //武器损耗率
 		),
@@ -336,7 +372,7 @@ $cskills = Array
 		'desc' => '本次攻击无视减半类防御属性，最终伤害<span class="yellow">+[:findmgr:]%</span>',
 		'bdesc' => '本次攻击攻击最终伤害<span class="yellow">+[:findmgr:]%</span>，无视敌方减半类防御属性；消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 70, 
+			'ragecost' => 70,
 			'findmgr' => 40, //最终伤害加成
 		),
 		'lockdesc' => Array(
@@ -383,7 +419,7 @@ $cskills = Array
 			'cd' => 900, //冷却时间
 		),
 		'svars' => Array(
-			'active' => 0, 
+			'active' => 0,
 		),
 		'lockdesc' => Array(
 			'lvl' => '21级时解锁',
@@ -437,7 +473,7 @@ $cskills = Array
 			'lvl' => 0, //初次获得时等级为0
 		),
 		'vars' => Array(
-			'countergain' => Array(0,20,40,60,80,100,125), 
+			'countergain' => Array(0,20,40,60,80,100,125),
 		),
 		'lockdesc' => Array(
 			'wepk+wep_kind' => '武器不适用，持<span class="yellow">投系武器</span>时生效',
@@ -458,7 +494,7 @@ $cskills = Array
 		'bdesc' => '<span tooltip="主动发动时，若角色身上不存在伤害类属性，则会为其临时附加一项随机属性。"><span class="grey">[附加提示]</span>
 		发动后将使某一随机属性伤害永久<span class="yellow">+[:exdmggain:]%</span>；消耗<span class="red">[:ragecost:]</span>怒气</span>',
 		'vars' => Array(
-			'ragecost' => 8, 
+			'ragecost' => 8,
 			'exdmggain' => 3, //单项属性伤害加成
 			'exdmgmax' => 150, //单项属性伤害加成上限
 			'exdmgarr' => Array( //单项属性与加成的对应关系
@@ -470,8 +506,8 @@ $cskills = Array
 				'd' => 'dr',
 			),
 			'exdmgdesc' => Array( //介绍该附魔对应的加成关系
-				'u' => '火焰/灼焰', 
-				'i' => '冻气/冰华', 
+				'u' => '火焰/灼焰',
+				'i' => '冻气/冰华',
 				'p' => '毒性',
 				'w' => '音波',
 				'e' => '电气',
@@ -479,12 +515,12 @@ $cskills = Array
 			),
 		),
 		'svars' => Array(
-			'ur' => 0, 
-			'ir' => 0, 
-			'pr' => 0, 
-			'er' => 0, 
-			'wr' => 0, 
-			'dr' => 0, 
+			'ur' => 0,
+			'ir' => 0,
+			'pr' => 0,
+			'er' => 0,
+			'wr' => 0,
+			'dr' => 0,
 			'active_t' => 0,//技能发动次数
 		),
 		'lockdesc' => Array(
@@ -505,8 +541,8 @@ $cskills = Array
 		持投系武器方可发动，消耗<span class="yellow">[:ragecost:]</span>点怒气',
 		'bdesc' => '攻击必中且物理伤害<span class="yellow">+[:phydmgr:]%</span><br>消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 70, 
-			'phydmgr' => 20, 
+			'ragecost' => 70,
+			'phydmgr' => 20,
 		),
 		'lockdesc' => Array(
 			'lvl' => '7级时解锁',
@@ -524,8 +560,8 @@ $cskills = Array
 		'desc' => '如果你的武器射程不小于敌人，你对其先制攻击率<span class="yellow">+[:actgain:]%</span>，<br>
 		其攻击你时命中率<span class="yellow">-[:accloss:]%</span>，连击命中率惩罚<span class="yellow">+[:rbloss:]%</span>',
 		'vars' => Array(
-			'actgain' => 10, 
-			'accloss' => 12, 
+			'actgain' => 10,
+			'accloss' => 12,
 			'rbloss' => 8,
 		),
 		'lockdesc' => Array(
@@ -558,7 +594,7 @@ $cskills = Array
 			'chancegainr' => 0.1,
 		),
 		'svars' => Array(
-			'active' => 1, 
+			'active' => 1,
 		),
 		'pvars' => Array('wc','skill-active'),
 		'lockdesc' => Array(
@@ -668,7 +704,7 @@ $cskills = Array
 		'bdesc' => '本次攻击物理伤害<span class="yellow">+[:phydmgr:]%</span>，<br>命中率<span class="yellow">+[:accgain:]%</span><br>
 		消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 20, 
+			'ragecost' => 20,
 			'accgain' => 15, //命中增益
 			'phydmgr' => 20, //物理伤害加成
 		),
@@ -689,7 +725,7 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => '当你在战斗中击杀敌人时，你立即获得<span class="yellow">(<span tooltip="基于你目前的等级">[^lvl^]</span>×[:goldr:])</span>点金钱。',
 		'vars' => Array(
-			'goldr' => 2, 
+			'goldr' => 2,
 		),
 		'pvars' => Array('lvl'),
 		'lockdesc' => Array(
@@ -709,8 +745,8 @@ $cskills = Array
 		'bdesc' => '物理伤害<span class="yellow">+[:phydmgr:]%</span>，属性伤害<span class="yellow">+[:exdmgr:]%</span>，
 		防具损坏效果<span class="yellow">+[:inftfix:]</span>。消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 75, 
-			'inftfix' => 2, 
+			'ragecost' => 75,
+			'inftfix' => 2,
 			'phydmgr' => 20, //物理伤害加成
 			'exdmgr' => 80, //属性伤害加成
 			'disableskill' => 'c4_sniper',
@@ -740,7 +776,7 @@ $cskills = Array
 		'bdesc' => '物理伤害<span class="yellow">+[:phydmgr:]%</span>，命中率<span class="yellow">+[:accgain:]%</span>，射程<span class="yellow">+[:rangegain:]</span>，<span class="yellow">连击</span>无效，
 		但<span class="yellow">[:prfix:]%概率贯穿</span>。消耗<span class="yellow">[:ragecost:]</span>点怒气',
 		'vars' => Array(
-			'ragecost' => 95, 
+			'ragecost' => 95,
 			'rangegain' => 1,
 			'phydmgr' => 80, //物理伤害加成
 			'accgain' => 20, //命中率加成
@@ -768,7 +804,7 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => '使用射系武器造成超过<span class="yellow">[:killline:]%</span>目标当前生命值的伤害时，自动将其秒杀',
 		'vars' => Array(
-			'killline' => 85, 
+			'killline' => 85,
 		),
 		'lockdesc' => Array(
 			'lvl' => '15级时解锁',
@@ -798,8 +834,8 @@ $cskills = Array
 		),
 		'svars' => Array('lvl' => 0),
 		'vars' => Array(
-			'hidegain' => Array(0,2,4,6,8,10), 
-			'actgain' => Array(0,2,4,6,8,10), 
+			'hidegain' => Array(0,2,4,6,8,10),
+			'actgain' => Array(0,2,4,6,8,10),
 		),
 	),
 	'c5_caution' => Array
@@ -817,8 +853,8 @@ $cskills = Array
 		),
 		'svars' => Array('lvl' => 0),
 		'vars' => Array(
-			'evgain' => Array(0,2,4,6,8,10), 
-			'reugain' => Array(0,4,8,12,16,20), 
+			'evgain' => Array(0,2,4,6,8,10),
+			'reugain' => Array(0,4,8,12,16,20),
 		),
 	),
 	'c5_review' => Array
@@ -827,7 +863,7 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => "使用爆系武器时，<br>即使攻击没有命中，也可以获得[:expgain:]点固定经验值",
 		'vars' => Array(
-			'expgain' => 1, 
+			'expgain' => 1,
 		),
 		'lockdesc' => Array(
 			'wepk+wep_kind' => '武器不适用，持<span class="yellow">爆系武器</span>时生效',
@@ -844,7 +880,7 @@ $cskills = Array
 		'clog' => "切换了「专注」的状态。",
 		'choice' => Array(0,1,2), //无效果/重视遇敌/重视探物
 		'svars' => Array(
-			'choice' => 1, 
+			'choice' => 1,
 		),
 		'vars' => Array(
 			'meetgain' => 15,
@@ -866,7 +902,7 @@ $cskills = Array
 		使用爆系武器方可发动，消耗<span class="yellow">[:ragecost:]</span>点怒气。',
 		'bdesc' => '本次攻击中爆炸属性伤害无视一切增益减益效果；消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
-			'ragecost' => 40, 
+			'ragecost' => 40,
 		),
 		'lockdesc' => Array(
 			'lvl' => '6级时解锁',
@@ -888,7 +924,7 @@ $cskills = Array
 			'active_t' => 0,
 		),
 		'vars' => Array(
-			'ragecost' => 0, 
+			'ragecost' => 0,
 			'chase_t' => 2,
 			'maxactive_t' => 2,
 		),
@@ -921,7 +957,7 @@ $cskills = Array
 			0 => Array('skillpara|c9_kotodama-lvl' => '+=::1'),
 		),
 		'svars' => Array(
-			'lvl' => 0, 
+			'lvl' => 0,
 		),
 		'vars' => Array(
 		),
@@ -944,7 +980,7 @@ $cskills = Array
 			'lvl' => 0, //初次获得时等级为0
 		),
 		'vars' => Array(
-			'accloss' => Array(0,4,8,12), 
+			'accloss' => Array(0,4,8,12),
 			'rbloss' => Array(0,2,3,4),
 			'spcloss' => Array(40,50,60,70),
 		),
@@ -959,7 +995,7 @@ $cskills = Array
 		'vars' => Array(
 			'ragecost' => 40,
 			'rageback' => 6,
-			'phydmgr' => 2, 
+			'phydmgr' => 2,
 		),
 		'lockdesc' => Array(
 			'lvl' => '3级时解锁',
@@ -977,8 +1013,8 @@ $cskills = Array
 		每通过技能解除1个异常/受伤状态，你的怒气提升<span class="yellow">[:ragegain:]</span>点',
 		'vars' => Array(
 			'hpshloss' => 80,
-			'purify' => 1, 
-			'ragegain' => 40, 
+			'purify' => 1,
+			'ragegain' => 40,
 		),
 		'lockdesc' => Array(
 			'lvl' => '7级时解锁',
@@ -1007,7 +1043,7 @@ $cskills = Array
 			'active_t' => 0,
 		),
 		'vars' => Array(
-			'rageadd' => 100, 
+			'rageadd' => 100,
 			'freet' => 2,
 			'cd' => 600, //冷却时间
 		),
@@ -1031,7 +1067,7 @@ $cskills = Array
 		'bdesc' => '本次攻击最终伤害<span class="yellow">×[:findmgr:]</span>，消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
 			'ragecost' => 60,
-			'findmgr' => 2, 
+			'findmgr' => 2,
 		),
 		'lockdesc' => Array(
 			'lvl' => '19级时解锁',
@@ -1061,8 +1097,8 @@ $cskills = Array
 			'accgain' => 0, 'rbgain' => 0, 'accloss' => 0, 'rbloss' => 0,
 		),
 		'vars' => Array(
-			'flucmin' => 1, 
-			'flucmax' => 3, 
+			'flucmin' => 1,
+			'flucmax' => 3,
 		),
 		'pvars' => Array('skillpara|c6_godluck-accgain','skillpara|c6_godluck-rbgain','skillpara|c6_godluck-accloss','skillpara|c6_godluck-rbloss'),
 	),
@@ -1087,8 +1123,8 @@ $cskills = Array
 			'actgain' => 0, 'countergain' => 0, 'hidegain' => 0,
 		),
 		'vars' => Array(
-			'flucmin' => 1, 
-			'flucmax' => 3, 
+			'flucmin' => 1,
+			'flucmax' => 3,
 		),
 		'pvars' => Array('skillpara|c6_godsend-actgain','skillpara|c6_godsend-countergain','skillpara|c6_godsend-hidegain'),
 	),
@@ -1129,7 +1165,7 @@ $cskills = Array
 		'bdesc' => '计算熟练度时增加<span class="yellow">([^rage^]×[^lvl^]/6)</span>点(最高220点)，消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
 			'ragecost' => 25,
-			'rageback' => 25, 
+			'rageback' => 25,
 			'skmax' => 220,
 			'mhpr' => 1.5,
 		),
@@ -1199,7 +1235,7 @@ $cskills = Array
 			'accgain' => 0, 'rbgain' => 0, 'accloss' => 0, 'rbloss' => 0,
 		),
 		'vars' => Array(
-			'svar' => Array(110,155,185,225,265,355), 
+			'svar' => Array(110,155,185,225,265,355),
 			'cd' => Array(150,120,120,90,60,45),
 			'hpalert' => Array(35,40,45,50,60,70),
 		),
@@ -1222,7 +1258,7 @@ $cskills = Array
 		'bdesc' => '本次攻击<span class="yellow">带电</span>，电击属性伤害<span class="yellow">+[:exdmgfix:]</span>，有<span class="yellow">[:infr:]%</span>概率<span class="yellow">麻痹</span>敌人，或使已麻痹敌人眩晕<span class="yellow">[:lasttimes:]</span>秒；消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
 			'ragecost' => 25,
-			'exdmgfix' => 60, 
+			'exdmgfix' => 60,
 			'infr' => 40,
 			'lasttimes' => 2,
 		),
@@ -1286,7 +1322,7 @@ $cskills = Array
 		消耗<span class="red">[:ragecost:]</span>怒气<br>本局已发动<span class="redseed"> [^skillpara|c7_emp-active_t^]/[:maxactive_t:] </span>次',
 		'vars' => Array(
 			'ragecost' => 60,
-			'maxactive_t' => 2, 
+			'maxactive_t' => 2,
 			'lasttimes' => 3,
 		),
 		'svars' => Array('active_t' => 0),
@@ -1315,7 +1351,7 @@ $cskills = Array
 		),
 		'svars' => Array('lvl' => 0),
 		'vars' => Array(
-			'exdmgr' => Array(10,20,30,40,50), 
+			'exdmgr' => Array(10,20,30,40,50),
 		),
 	),
 	'c8_infilt' => Array
@@ -1353,7 +1389,7 @@ $cskills = Array
 		'bdesc' => '本次攻击每造成1次<span class="purple">毒</span>属性伤害，最终属性伤害<span class="yellow">+[:exdmgr:]%</span>；消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
 			'ragecost' => 50,
-			'exdmgr' => 25, 
+			'exdmgr' => 25,
 		),
 		'lockdesc' => Array(
 			'lvl' => '7级时解锁',
@@ -1368,7 +1404,7 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => '不再受到<span class="purple">毒性</span>伤害，并将原本伤害的<span class="yellow">[:exdmgr:]%</span>转化为治疗效果',
 		'vars' => Array(
-			'exdmgr' => 75, 
+			'exdmgr' => 75,
 		),
 		'lockdesc' => Array(
 			'lvl' => '12级时解锁',
@@ -1397,7 +1433,7 @@ $cskills = Array
 		'events' => Array('getskill_buff_assassin','active_news'),
 		'link' => Array('buff_assassin'),
 		'vars' => Array(
-			'maxactive_t' => 2, 
+			'maxactive_t' => 2,
 		),
 		'svars' => Array('active' => 0, 'active_t' => 0,),
 		'pvars' => Array('skillpara|c8_assassin-active_t'),
@@ -1419,8 +1455,8 @@ $cskills = Array
 		'desc' => '<span class="lime">「暗杀」生效中！<br>
 		增益效果剩余时间：<span class="yellow">[^lasttimes^]</span> 秒</span>',
 		'vars' => Array(
-			'hidegain' => 90, 
-			'actgain' => 100, 
+			'hidegain' => 90,
+			'actgain' => 100,
 			'pdefbkr' => 25,
 		),
 		'slast' => Array(
@@ -1448,7 +1484,7 @@ $cskills = Array
 		),
 		'svars' => Array(
 			'lvl' => 0,
-			'choice' => 1, 
+			'choice' => 1,
 		),
 	),
 	'c10_insight' => Array
@@ -1483,7 +1519,7 @@ $cskills = Array
 		'bdesc' => '物理伤害<span class="yellow">+[:phydmgr:]%</span>,击杀时额外获得<span class="lime">敌人等级-(0.15×<span tooltip2="等同于你当前等级">[^lvl^]</span>)</span>点经验；消耗<span class="red">[:ragecost:]</span>怒气',
 		'vars' => Array(
 			'ragecost' => 18,
-			'phydmgr' => 20, 
+			'phydmgr' => 20,
 		),
 		'pvars' => Array('lvl'),
 		'lockdesc' => Array(
@@ -1511,7 +1547,7 @@ $cskills = Array
 	),
 	'c11_merc' => Array
 	(
-		'name' => '佣兵', 
+		'name' => '佣兵',
 		'tags' => Array('active','limit'),
 		'desc' => "本局已发动<span class=\"redseed\"> [^skillpara|c11_merc-active_t^]/[:maxactive_t:] </span>次<br>
 		消耗<span class='yellow'>[:mcost:]</span>元，在当前地点随机召唤一名佣兵；<br>
@@ -1552,7 +1588,7 @@ $cskills = Array
 	),
 	'c11_stock' => Array
 	(
-		'name' => '理财', 
+		'name' => '理财',
 		'tags' => Array('passive'),
 		'desc' => "每探索/移动<span class='yellow'>[:mst:]</span>次，你所持金钱增加<span class='yellow'>[:earn:]%</span>；<br>
 		所加金钱数最低不会低于<span class='yellow'>[:minmoney:]</span>元，最高不会超过<span class='yellow'>[:maxmoney:]</span>元<br>
@@ -1562,7 +1598,7 @@ $cskills = Array
 			'mst' => 50,
 			'earn' => 20,
 			'minmoney' => 100,
-			'maxmoney' => 2500, 
+			'maxmoney' => 2500,
 		),
 		'pvars' => Array('lvl','skillpara|c11_stock-ms'),
 		'lockdesc' => Array(
@@ -1574,7 +1610,7 @@ $cskills = Array
 	),
 	'c11_renjie' => Array
 	(
-		'name' => '人杰', 
+		'name' => '人杰',
 		'tags' => Array('passive'),
 		'desc' => "战斗中，你的熟练度始终取用最高熟练值。",
 		'lockdesc' => Array(
@@ -1590,7 +1626,7 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => '你对敌人的隐蔽率<span class="yellow">-[:hidegain:]%</span>；敌人对你的隐蔽率<span class="yellow">-[:hideloss:]%</span>',
 		'vars' => Array(
-			'hidegain' => 100, 
+			'hidegain' => 100,
 			'hideloss' => 75,
 		),
 	),
@@ -1642,7 +1678,7 @@ $cskills = Array
 		'bdesc' => "消耗<span class=\"red\">[:hpcost:]%</span>生命值，附加等于消耗值且受<span class=\"yellow\">「底力」</span>加成的{$sktpwhitedmg}；发动需消耗<span class=\"red\">[:ragecost:]</span>怒气",
 		'vars' => Array(
 			'ragecost' => 50,
-			'hpcost' => 25, 
+			'hpcost' => 25,
 		),
 		'lockdesc' => Array(
 			'lvl' => '7级时解锁',
@@ -1713,7 +1749,7 @@ $cskills = Array
 		你不能再埋设陷阱，且从陷阱处受到的伤害减少<span class="yellow">[:trapdmgloss:]%</span><br>',
 		'vars' => Array
 		(
-			'phydmgloss' => 90, 
+			'phydmgloss' => 90,
 			'phydmgloss_2' => 50,
 			'trapdmgloss' => 60,
 		),
@@ -1842,7 +1878,7 @@ $cskills = Array
 	),
 	'c19_nirvana' => Array
 	(
-		'name' => '涅槃', 
+		'name' => '涅槃',
 		'tags' => Array('passive','limit'),
 		'desc' => "本局已生效<span class=\"redseed\"> [^skillpara|c19_nirvana-active_t^]/[:maxactive_t:] </span>次<br>
 		因陷阱/战斗死亡时，转化所有的{$sktprp}并立刻复活<br>
@@ -1971,7 +2007,7 @@ $cskills = Array
 		'log' => '<span class="yellow">切换了「量心」的状态。</span>',
 		'events' => Array('active|c19_dispel'),
 		'svars' => Array(
-			'active' => 0, 
+			'active' => 0,
 		),
 		'pvars' => Array('skill-active'),
 		'lockdesc' => Array(
@@ -2005,7 +2041,7 @@ $cskills = Array
 		'vars' => Array(
 			'sscost' => 100,
 			'wtht' => 600,
-			'maxactive_t' => 1, 
+			'maxactive_t' => 1,
 		),
 		'svars' => Array('active_t' => 0,),
 		'pvars' => Array('skillpara|c19_woesea-active_t'),
@@ -2073,7 +2109,7 @@ $cskills = Array
 		<span class='grey'>当前累计发动次数：[^skillpara|c20_lighting-active_t^] 次</span>",
 		'bdesc' => "消耗<span class='yellow'>[:emcost:]</span>份随机元素，根据所消耗元素种类附加{$sktpemsdmg}；消耗<span class='red'>[:ragecost:]</span>怒气</span>",
 		'vars' => Array(
-			'ragecost' => 15, 
+			'ragecost' => 15,
 			'emcost' => 30,
 			'emextype' => Array( // 各类元素能造成的伤害类型
 				0 => 'white',
@@ -2105,7 +2141,7 @@ $cskills = Array
 		复活后的{$sktpzombie}有<span class=\"yellow\">50%</span>概率为你<span class='gold' tooltip2='当你攻击敌人且敌人未死亡时，与你在同一地点的灵俑有概率主动为你助战。'>协战</span>，并在你受到攻击时，<br>
 		为你抵挡最多不超过<span class=\"yellow\">[:maxdefhp:]%</span>灵俑当前生命的伤害",
 		'vars' => Array(
-			'maxdefhp' => 50, 
+			'maxdefhp' => 50,
 			'notype' => Array(1,9,19,88,92), //不能复活为灵俑的NPC
 		),
 		'lockdesc' => Array(
@@ -2129,7 +2165,7 @@ $cskills = Array
 		'log' => '<span class="yellow">切换了「火花」的状态。</span>',
 		'events' => Array('active|c20_sparkle'),
 		'svars' => Array(
-			'active' => 0, 
+			'active' => 0,
 			'active_t' => 0,
 		),
 		'vars' => Array(
@@ -2166,7 +2202,7 @@ $cskills = Array
 		'events' => Array('lotus','active_news'),
 		'vars' => Array(
 			'emsgain' => 3,
-			'maxactive_t' => 3, 
+			'maxactive_t' => 3,
 		),
 		'svars' => Array('active_t' => 0,),
 		'pvars' => Array('skillpara|c20_lotus-active_t'),
@@ -2261,11 +2297,11 @@ $cskills = Array
 		'input' => '切换',
 		'log' => '<span class="yellow">切换了「燃血」的状态。</span>',
 		'events' => Array('active|c21_sacrifice'),
-		'vars' => Array(	
+		'vars' => Array(
 			'death_obbs' => 50 //入乡随俗
 		),
 		'svars' => Array(
-			'active' => 0, 
+			'active' => 0,
 		),
 		'pvars' => Array('skill-active'),
 		'lockdesc' => Array(
@@ -2285,7 +2321,7 @@ $cskills = Array
 		你每因此受到<span class="yellow">[:dmgrate:]</span>点伤害，就随机造成敌人一处受伤。',
 		'bdesc' => "引爆身上的全部代码片段，根据片段的属性对双方造成额外伤害和效果；消耗<span class='red'>[:ragecost:]</span>怒气</span>",
 		'vars' => Array(
-			'ragecost' => 100, 
+			'ragecost' => 100,
 			'dmgrate' => 100, //造成一处部位受伤需要的伤害量
 		),
 		'lockdesc' => Array(
@@ -2302,7 +2338,7 @@ $cskills = Array
 		'desc' => '你不会受到反噬伤害，但不能造成除了毒性、冻气以外的属性伤害<br>
 		你造成的最终伤害降低<span class="yellow">[:findmgloss:]%</span>，从敌人处受到的伤害降低<span class="yellow">[:findmgr:]%</span>',
 		'vars' => Array(
-			'findmgloss' => 50, 
+			'findmgloss' => 50,
 			'findmgr' => 25,
 		),
 	),
@@ -2314,7 +2350,7 @@ $cskills = Array
 		武器的<span class="yellow">效耐</span>取决于尸体的<span class="yellow">最大生命</span>与<span class="yellow">体力</span>，上限为<span class="red">[:limit:]</span>点。<br>
 		优秀的尸源有概率为武器附加<span class="yellow">冲击</span>与<span class="yellow">精英</span>属性',
 		'vars' => Array(
-			'ragecost' => 100, 
+			'ragecost' => 100,
 			'limit' => 117007,
 			'notype' => Array(88,92),//不能用来抡的NPC
 		),

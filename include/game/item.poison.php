@@ -8,13 +8,13 @@ if (! defined ( 'IN_GAME' )) {
 function item_poison($itmn, &$data) {
 	global $log, $nosta, $db, $tablepre, $now;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	if (strpos($itmk, '2') === 2) {
 		$damage = round($itme * 2);
 	} elseif (strpos($itmk, '1') === 2) {
@@ -25,6 +25,13 @@ function item_poison($itmn, &$data) {
 	if (strpos($inf, 'p') === false) {
 		$inf .= 'p';
 	}
+
+	# 「种火IV」效果判定：
+	if(check_skill_unlock('fireseed4', $data)) {
+		$log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
+		$damage = 0;
+	}
+
 	$hp -= $damage;
 	if ($itmsk && is_numeric($itmsk)) {
 		$result = $db->query("SELECT * FROM {$tablepre}players WHERE pid='$itmsk'");

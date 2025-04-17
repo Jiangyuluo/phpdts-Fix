@@ -2487,8 +2487,11 @@ $anpcinfo = array(
 		'pls' => 99,
 		'mhp' => 17,
 		'msp' => 200,
+		'clubskill' => Array(
+			'fireseed3',
+		),
 		'att' => 27,
-		'def' => 99999,
+		'def' => 99,
 		'lvl' => 13,
 		'skill' => 1,
 		'money' => 250,
