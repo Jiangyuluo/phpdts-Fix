@@ -27,7 +27,7 @@ function item_poison($itmn, &$data) {
 	}
 
 	# 「种火IV」效果判定：
-	if(check_skill_unlock('fireseed4', $data)) {
+	if(!empty($data['clbpara']['skill']) && in_array('fireseed4', $data['clbpara']['skill'])) {
 		$log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
 		$damage = 0;
 	}

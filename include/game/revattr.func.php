@@ -2353,7 +2353,7 @@ namespace revattr
 	//防守方(pd)在受到伤害后触发的事件
 	function get_hurt_events(&$pa,&$pd,$active)
 	{
-		global $log,$infinfo,$exdmginf;
+		global $log,$infinfo,$exdmginf,$db,$tablepre;
 
 		# pd存在防具受损况，在这里应用
 		if(!empty($pd['armor_hurt']))
@@ -2373,6 +2373,91 @@ namespace revattr
 
 		# 将pa造成的伤害记录在pd的成就里
 		if(!$pd['type'] && $pa['final_damage'] >= 1000000) $pd['clbpara']['achvars']['takedmg'] = $pa['final_damage'];
+
+		# 核武器效果判定
+		if(!empty($pa['weppara']['isNuclearWeapon']))
+		{
+			// 计算伤害池
+			$damage_pool = $pa['final_damage'];
+			if(!empty($pa['clbpara']['randver1']))
+			{
+				if($pa['clbpara']['randver1'] == 128)
+				{
+					$damage_pool = $damage_pool * 7.77;
+				}
+				elseif($pa['clbpara']['randver1'] > 64)
+				{
+					$damage_pool = $damage_pool * 1.2;
+				}
+				else
+				{
+					$damage_pool = $damage_pool * 0.8;
+				}
+			}
+			else
+			{
+				$damage_pool = $damage_pool * 0.8; // 默认值
+			}
+
+			// 随机选择玩家数量
+			$player_count = rand(2, 22);
+
+			// 获取同一位置的玩家
+			$query = "SELECT * FROM {$tablepre}players WHERE pls='{$pa['pls']}' AND hp>0 AND pid<>'{$pa['pid']}' AND pid<>'{$pd['pid']}'";
+			$result = $db->query($query);
+			$players = array();
+			while($player = $db->fetch_array($result))
+			{
+				$players[] = $player;
+			}
+
+			// 将攻击者和防守者也加入列表
+			$players[] = $pa;
+			$players[] = $pd;
+
+			// 随机打乱玩家列表
+			shuffle($players);
+
+			// 限制玩家数量
+			$players = array_slice($players, 0, min($player_count, count($players)));
+
+			// 计算每个玩家受到的伤害
+			$damage_per_player = ceil($damage_pool / count($players));
+
+			$log .= "<span class='red'>{$pa['nm']}的核武器对区域内的所有人造成了伤害！</span><br>";
+
+			// 应用伤害
+			foreach($players as $player)
+			{
+				$actual_damage = $damage_per_player;
+
+				// 特殊条件检查
+				if(!empty($player['clbpara']['skill']) &&
+				   (in_array('fireseed3', $player['clbpara']['skill']) ||
+				    in_array('fireseed4', $player['clbpara']['skill'])) ||
+				   $player['def'] > 10000)
+				{
+					$actual_damage = 1;
+					$log .= "{$player['name']}受到了<span class='yellow'>1</span>点伤害！<br>";
+				}
+				else
+				{
+					// 生命值不能低于1
+					$new_hp = max(1, $player['hp'] - $actual_damage);
+					$actual_damage = $player['hp'] - $new_hp;
+					$player['hp'] = $new_hp;
+
+					$log .= "{$player['name']}受到了<span class='yellow'>{$actual_damage}</span>点伤害！<br>";
+
+					// 如果不是攻击者或防守者，更新数据库
+					if($player['pid'] != $pa['pid'] && $player['pid'] != $pd['pid'])
+					{
+						$query = "UPDATE {$tablepre}players SET hp='{$player['hp']}' WHERE pid='{$player['pid']}'";
+						$db->query($query);
+					}
+				}
+			}
+		}
 
 		return;
 	}

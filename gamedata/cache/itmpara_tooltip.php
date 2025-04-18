@@ -344,6 +344,16 @@ $itmpara_tooltip = [
         }
     ],
 
+    // 核武器相关
+    'isNuclearWeapon' => [
+        'title' => '群体攻击武器',
+        'format' => '此武器会对战斗区域内的所有人造成伤害',
+        'suffix' => '',
+        'condition' => function($item_type, $value) {
+            return $value == 1;
+        }
+    ],
+
     // lore 特殊处理，直接显示内容
     'lore' => [
         'title' => '',

@@ -129,9 +129,13 @@ function item_nouveau_booster1($itmn, &$data) {
                 $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
             }
 
-                $itm = $itmk = $itmsk = '';
-                $itme = $itms = 0;
-            // 消耗物品
+                // 消耗物品
+                ${'itm'.$itmn} = '';
+                ${'itmk'.$itmn} = '';
+                ${'itmsk'.$itmn} = '';
+                ${'itme'.$itmn} = 0;
+                ${'itms'.$itmn} = 0;
+                ${'itmpara'.$itmn} = '';
 
 
             return true;
@@ -152,9 +156,13 @@ function item_nouveau_booster1($itmn, &$data) {
                 $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
             }
 
-            $itm = $itmk = $itmsk = '';
-            $itme = $itms = 0;
-        // 消耗物品
+            // 消耗物品
+            ${'itm'.$itmn} = '';
+            ${'itmk'.$itmn} = '';
+            ${'itmsk'.$itmn} = '';
+            ${'itme'.$itmn} = 0;
+            ${'itms'.$itmn} = 0;
+            ${'itmpara'.$itmn} = '';
 
             return true;
         }
@@ -186,12 +194,56 @@ function item_nouveau_booster1($itmn, &$data) {
                 $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
             }
 
-            $itm = $itmk = $itmsk = '';
-            $itme = $itms = 0;
-        // 消耗物品
+            // 消耗物品
+            ${'itm'.$itmn} = '';
+            ${'itmk'.$itmn} = '';
+            ${'itmsk'.$itmn} = '';
+            ${'itme'.$itmn} = 0;
+            ${'itms'.$itmn} = 0;
+            ${'itmpara'.$itmn} = '';
 
             return true;
         }
+    }
+
+    // 核子核心武器改造物品
+    if ($itm == '☢核子核心☢' && $itmk == 'Y') {
+        // 检查是否装备了武器
+        if (empty($wep) || $weps == 0) {
+            $log .= "你必须装备武器才能使用<span class='red'>{$itm}</span>。<br>";
+            return true;
+        }
+
+        // 获取当前武器的itmpara数据
+        $weapon_para = !empty($weppara) ? $weppara : array();
+
+        // 如果武器已经是核武器，则不能再次改造
+        if (!empty($weapon_para['isNuclearWeapon'])) {
+            $log .= "你的<span class='yellow'>{$wep}</span>已经是核武器了，不需要再次改造。<br>";
+            return true;
+        }
+
+        // 添加isNuclearWeapon键值
+        $weapon_para['isNuclearWeapon'] = 1;
+
+        // 更新武器的itmpara数据
+        $weppara = $weapon_para;
+
+        // 更新武器名称
+        $wep = "☢" . $wep;
+
+        $log .= "你将<span class='red'>{$itm}</span>安装到了你的武器上。<br>";
+        $log .= "你的武器变成了<span class='yellow'>{$wep}</span>！现在它可以对战斗区域内的所有人造成伤害了。<br>";
+
+        // 消耗物品
+        ${'itm'.$itmn} = '';
+        ${'itmk'.$itmn} = '';
+        ${'itmsk'.$itmn} = '';
+        ${'itme'.$itmn} = 0;
+        ${'itms'.$itmn} = 0;
+        ${'itmpara'.$itmn} = '';
+
+        return true;
     }
 
     // 如果没有匹配的物品，返回 false
