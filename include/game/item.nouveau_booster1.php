@@ -112,6 +112,88 @@ function item_nouveau_booster1($itmn, &$data) {
         return true;
     }
 
+    // 处理技能书物品
+    if ($itmk == 'VS') {
+        // 现实逃避论 ～风中残烛之卷：获得奇机技能
+        if ($itm == '现实逃避论～风中残烛之卷' && $itmsk == 'tl_2ndchance') {
+            global $cskills, $now;
+            $flag = getclubskill('tl_2ndchance', $clbpara);
+            if ($flag) {
+                $log .= "你仔细阅读了<span class='red'>{$itm}</span>，书中详细描述了在危机时刻如何保持最后一丝生机的秘诀。<br>";
+                $log .= "哇！没想到这本书里竟然介绍了<span class='yellow'>「{$cskills['tl_2ndchance']['name']}」</span>的原理！<br>";
+                $log .= "获得了技能<span class='yellow'>「{$cskills['tl_2ndchance']['name']}」</span>！<br>";
+                $log .= "你心满意足地把<span class='red'>{$itm}</span>吃进了肚里。<br>";
+                //addnews($now, 'getsk_tl_2ndchance', $name, $itm, $nick);
+            } else {
+                $log .= "什么嘛！原来里面都是些你看过的东西了，你没有从书中学到任何新东西。<br>";
+                $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
+            }
+
+                $itm = $itmk = $itmsk = '';
+                $itme = $itms = 0;
+            // 消耗物品
+
+
+            return true;
+        }
+
+        // 现实逃避论 ～一转攻势之卷：获得起迹技能
+        if ($itm == '现实逃避论～一转攻势之卷' && $itmsk == 'tl_oncemore') {
+            global $cskills, $now;
+            $flag = getclubskill('tl_oncemore', $clbpara);
+            if ($flag) {
+                $log .= "你仔细阅读了<span class='red'>{$itm}</span>，书中详细描述了如何在生死一线之际转危为安的秘诀。<br>";
+                $log .= "哇！没想到这本书里竟然介绍了<span class='yellow'>「{$cskills['tl_oncemore']['name']}」</span>的原理！<br>";
+                $log .= "获得了技能<span class='yellow'>「{$cskills['tl_oncemore']['name']}」</span>！<br>";
+                $log .= "你心满意足地把<span class='red'>{$itm}</span>吃进了肚里。<br>";
+                //addnews($now, 'getsk_tl_oncemore', $name, $itm, $nick);
+            } else {
+                $log .= "什么嘛！原来里面都是些你看过的东西了，你没有从书中学到任何新东西。<br>";
+                $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
+            }
+
+            $itm = $itmk = $itmsk = '';
+            $itme = $itms = 0;
+        // 消耗物品
+
+            return true;
+        }
+
+        // 现实逃避论 ～全卷：同时获得奇机和起迹技能
+        if ($itm == '现实逃避论～全卷' ) {
+            global $cskills, $now;
+            $flag1 = getclubskill('tl_2ndchance', $clbpara);
+            $flag2 = getclubskill('tl_oncemore', $clbpara);
+
+            if ($flag1 || $flag2) {
+                $log .= "你仔细阅读了<span class='red'>{$itm}</span>，这是一本完整的生存指南，详细描述了如何在绝境中求生的各种技巧。<br>";
+
+                if ($flag1) {
+                    $log .= "哇！没想到这本书里竟然介绍了<span class='yellow'>「{$cskills['tl_2ndchance']['name']}」</span>的原理！<br>";
+                    $log .= "获得了技能<span class='yellow'>「{$cskills['tl_2ndchance']['name']}」</span>！<br>";
+                    //addnews($now, 'getsk_tl_2ndchance', $name, $itm, $nick);
+                }
+
+                if ($flag2) {
+                    $log .= "哇！没想到这本书里竟然还介绍了<span class='yellow'>「{$cskills['tl_oncemore']['name']}」</span>的原理！<br>";
+                    $log .= "获得了技能<span class='yellow'>「{$cskills['tl_oncemore']['name']}」</span>！<br>";
+                    //addnews($now, 'getsk_tl_oncemore', $name, $itm, $nick);
+                }
+
+                $log .= "你心满意足地把<span class='red'>{$itm}</span>吃进了肚里。<br>";
+            } else {
+                $log .= "什么嘛！原来里面都是些你看过的东西了，你没有从书中学到任何新东西。<br>";
+                $log .= "你一怒之下把这本破书撕了个稀巴烂！<br>";
+            }
+
+            $itm = $itmk = $itmsk = '';
+            $itme = $itms = 0;
+        // 消耗物品
+
+            return true;
+        }
+    }
+
     // 如果没有匹配的物品，返回 false
     return false;
 }

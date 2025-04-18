@@ -949,6 +949,13 @@
 			$hp += $uphp; $hp = min($hp, $mhp);
 			$uphp = $hp - $oldhp;
 			$uphp=max(0,$uphp);
+
+			# 「起迹」标记清除：
+			if($uphp > 0 && isset($clbpara['tl_oncemore_used'])) {
+				unset($clbpara['tl_oncemore_used']);
+				$log .= "<span class='yellow'>「起迹」技能恢复了效果！</span><br>";
+			}
+
 			if(!$uphp && $hp >= $mhp) $log .= "没有伤口需要治疗了。";
 			else $log .= "你的生命恢复了<span class=\"yellow b\">$uphp</span>点。";
 		}

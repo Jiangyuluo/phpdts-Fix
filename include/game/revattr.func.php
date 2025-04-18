@@ -256,6 +256,16 @@ namespace revattr
 							$pa['skill_c12_swell'] = $pa['hp'] <= $pa['mhp']*0.3 ? 2 : 1;
 						}
 					}
+					# 「奇机」特殊判定：
+					elseif($sk == 'tl_2ndchance')
+					{
+						$pa['skill_tl_2ndchance'] = 1;
+					}
+					# 「起迹」特殊判定：
+					elseif($sk == 'tl_oncemore')
+					{
+						$pa['skill_tl_oncemore'] = 1;
+					}
 					# 其他非特判技能，默认给一个触发标记
 					else
 					{
@@ -1935,6 +1945,24 @@ namespace revattr
 			$fin_dmg = 1;
 			return $fin_dmg;
 		}
+
+		# 「奇机」效果判定：
+		if(isset($pd['skill_tl_2ndchance']) && $fin_dmg > $pd['hp'] && $pd['hp'] > 1)
+		{
+			$fin_dmg = $pd['hp'] - 1;
+			$log .= "<span class='yellow'>「奇机」使{$pd['nm']}在危险时刻保留了1点生命值！</span><br>";
+			return $fin_dmg;
+		}
+
+		# 「起迹」效果判定：
+		if(isset($pd['skill_tl_oncemore']) && $pd['hp'] == 1 && !isset($pd['clbpara']['tl_oncemore_used']))
+		{
+			$pd['clbpara']['tl_oncemore_used'] = 1;
+			$fin_dmg = 0;
+			$log .= "<span class='yellow'>「起迹」使{$pd['nm']}在生命值为1时免疫了这次伤害！</span><br>";
+			return $fin_dmg;
+		}
+
 
 		# 「量心」效果判定 手加减：
 		if(isset($pa['askill_c19_dispel']) && $fin_dmg >= $pd['hp'])

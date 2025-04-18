@@ -78,37 +78,37 @@ $cskills = Array
 	(
 		'name' => '种火I',
 		'tags' => Array('passive'),
-		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都降低为75%。',
-		'cost' => 10,
-		'input' => '学习',
-		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火I」。<br>',
+		'desc' => '套装技能，使你因为战斗受到的所有最终伤害都降低为75%。',
 	),
 	'fireseed2' => Array
 	(
 		'name' => '种火II',
 		'tags' => Array('passive'),
-		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都降低为50%。',
-		'cost' => 20,
-		'input' => '学习',
-		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火II」。<br>',
+		'desc' => '套装技能，使你因为战斗受到的所有最终伤害都降低为50%。',
 	),
 	'fireseed3' => Array
 	(
 		'name' => '种火III',
 		'tags' => Array('passive'),
-		'desc' => '被动技能，使你因为战斗受到的所有最终伤害都变为1。',
-		'cost' => 30,
-		'input' => '学习',
-		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火III」。<br>',
+		'desc' => '套装技能，使你因为战斗受到的所有最终伤害都变为1。',
 	),
 	'fireseed4' => Array
 	(
 		'name' => '种火IV',
 		'tags' => Array('passive'),
-		'desc' => '被动技能，使你受到的所有伤害（包括战斗、事件、陷阱、食用毒物等）都变为0。',
-		'cost' => 50,
-		'input' => '学习',
-		'log' => '消耗了<span class="lime">[:cost:]</span>点技能点，学会了技能「种火IV」。<br>',
+		'desc' => '套装技能，使你受到的所有伤害（包括战斗、事件、陷阱、食用毒物等）都变为0。',
+	),
+	'tl_2ndchance' => Array
+	(
+		'name' => '奇机',
+		'tags' => Array('passive'),
+		'desc' => '在战斗中，受到将大于目前生命值的伤害时，以一线生机存活下来。',
+	),
+	'tl_oncemore' => Array
+	(
+		'name' => '起迹',
+		'tags' => Array('passive'),
+		'desc' => '在战斗中，只要自己的生命值为1，则只有一次可以免除下一次伤害（状态可刷新）。',
 	),
 	// 可以通过在此文件中填写配置项来创建一个新技能，系统会自动生成模板。如果配置文件不能满足需求，可以自己创建一个模板文件
 	/*'技能编号' => Array

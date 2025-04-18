@@ -8,13 +8,13 @@ if (! defined ( 'IN_GAME' )) {
 function item_recovery_stamina($itmn, &$data) {
 	global $log, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	if ($sp < $msp) {
 		$oldsp = $sp;
 		if($club == 12){
@@ -53,13 +53,13 @@ function item_recovery_stamina($itmn, &$data) {
 function item_recovery_health($itmn, &$data) {
 	global $log, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	if ($hp < $mhp) {
 		$oldhp = $hp;
 		if($club == 12){
@@ -75,7 +75,15 @@ function item_recovery_health($itmn, &$data) {
 			$addhp = diceroll($itme);
 			$log .= "随机数大神不喜欢给定值，你回复的生命被骰子改动了！<br>";
 		}
-		if($addhp > 0) $hp += $addhp;
+		if($addhp > 0) {
+			$hp += $addhp;
+
+			# 「起迹」标记清除：
+			if(isset($clbpara['tl_oncemore_used'])) {
+				unset($clbpara['tl_oncemore_used']);
+				$log .= "<span class='yellow'>「起迹」技能恢复了效果！</span><br>";
+			}
+		}
 		else $addhp = 0;
 		$log .= "你使用了<span class=\"red\">$itm</span>，恢复了<span class=\"yellow\">$addhp</span>点生命。<br>";
 		if ($itms != $nosta) {
@@ -85,7 +93,7 @@ function item_recovery_health($itmn, &$data) {
 				$itm = $itmk = $itmsk = '';
 				$itme = $itms = 0;
 			}
-		
+
 		}
 	} else {
 		$log .= '你的生命不需要恢复。<br>';
@@ -96,13 +104,13 @@ function item_recovery_health($itmn, &$data) {
 function item_recovery_soul_increase($itmn, &$data) {
 	global $log, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	$mss+=$itme;
 	$ss+=$itme;
 	$log .= "你使用了<span class=\"red\">$itm</span>，增加了<span class=\"yellow\">$itme</span>点歌魂。<br>";
@@ -128,13 +136,13 @@ function item_recovery_soul_increase($itmn, &$data) {
 function item_recovery_soul($itmn, &$data) {
 	global $log, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	$ssup=$itme;
 	if ($ss < $mss) {
 		$oldss = $ss;
@@ -149,7 +157,7 @@ function item_recovery_soul($itmn, &$data) {
 				$itm = $itmk = $itmsk = '';
 				$itme = $itms = 0;
 			}
-		
+
 		}
 	} else {
 		$log .= '你的歌魂不需要恢复。<br>';
@@ -160,13 +168,13 @@ function item_recovery_soul($itmn, &$data) {
 function item_recovery_rage($itmn, &$data) {
 	global $log, $nosta, $gamecfg;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	$rageup=$itme;
 	require config('gamecfg',$gamecfg);
 	if ($rage < $mrage) {
@@ -182,7 +190,7 @@ function item_recovery_rage($itmn, &$data) {
 				$itm = $itmk = $itmsk = '';
 				$itme = $itms = 0;
 			}
-		
+
 		}
 	} else {
 		$log .= '你已经出离愤怒了，动怒伤肝，还是歇歇吧！<br>';
@@ -193,20 +201,20 @@ function item_recovery_rage($itmn, &$data) {
 function item_recovery_both($itmn, &$data) {
 	global $log, $nosta;
 	extract($data, EXTR_REFS);
-	
+
 	$itm = & ${'itm' . $itmn};
 	$itmk = & ${'itmk' . $itmn};
 	$itme = & ${'itme' . $itmn};
 	$itms = & ${'itms' . $itmn};
 	$itmsk = & ${'itmsk' . $itmn};
-	
+
 	if (($hp < $mhp) || ($sp < $msp)) {
 		if($club == 12){
 			$bpup = round($itme*1.25);
 		}else{
 			$bpup = $itme;
 		}
-		//$oldsp = $sp; 
+		//$oldsp = $sp;
 		//$sp += $bpup;
 		//$sp = $sp > $msp ? $msp : $sp;
 		//$oldsp = $sp - $oldsp;
@@ -226,7 +234,15 @@ function item_recovery_both($itmn, &$data) {
 			$addhp = diceroll($itme);
 			$log .= "随机数大神不喜欢给定值，你回复的生命被骰子改动了！<br>";
 		}
-		if($addhp > 0) $hp += $addhp;
+		if($addhp > 0) {
+			$hp += $addhp;
+
+			# 「起迹」标记清除：
+			if(isset($clbpara['tl_oncemore_used'])) {
+				unset($clbpara['tl_oncemore_used']);
+				$log .= "<span class='yellow'>「起迹」技能恢复了效果！</span><br>";
+			}
+		}
 		else $addhp = 0;
 		$log .= "你使用了<span class=\"red\">$itm</span>，恢复了<span class=\"yellow\">$addhp</span>点生命和<span class=\"yellow\">$addsp</span>点体力。<br>";
 		//吃了无毒的围棋子饼干 真勇啊！
