@@ -98,6 +98,20 @@ $tps_name = Array
 	'✦ЦВЙΨХЩΗЖФ✦' =>Array('class'=>'spitem2', 'title'=>"看起来是一个黑色的，安静的盒子，里面可能放着好东西。可以加上一个焰火进一步合成。"),
 	'✦ЦΨЙЩЦΑПΨЁВЦЩΨ✦' =>Array('class'=>'spitem2', 'title'=>"看起来是一个橙色的，骚动的盒子，里面可能放着莫名其妙的东西。以及对脸系玩法有用的东西"),
 	'✦【自律AI呼唤器】' =>Array('title'=>"这是一个整蛊他人的NPC钥匙。会向游戏内部署大量特殊小兵NPC，你会因此遭到道德拷问。"),
+	# HOROU用
+	'悠久「铭刻时间的古代之风」' =>Array('class'=>'orange'),
+	'光翼「羽翼地带」' =>Array('class'=>'red'),
+	'幻想「世界遗产·佐渡金银弹」' =>Array('class'=>'darkviolet'),
+	'超妖精「深蓝儿童」' =>Array('class'=>'blue'),
+	'宝具「炼金银剑超级时镰」' =>Array('class'=>'darkcyan'),
+	'禁忌「生命炼金 - Hollow Friends」' =>Array('class'=>'seagreen'),
+	'橙符「沙漠色的热风」' =>Array('class'=>'orange'),
+	'赤符「红色箭羽选中你了！」' =>Array('class'=>'red'),
+	'紫符「佐渡的紫水晶弹」' =>Array('class'=>'darkviolet'),
+	'蓝符「木乃伊妖精」' =>Array('class'=>'blue'),
+	'青符「炼金水剑最后终结」' =>Array('class'=>'darkcyan'),
+	'绿符「呼唤同伴的绿色石板」' =>Array('class'=>'seagreen'),
+
 );
 
 $tps_name_lore = Array

@@ -249,6 +249,12 @@ function trap(&$data=NULL){
 			$log .= "<span class='yellow'>「种火IV」使{$name}受到的所有伤害变为0！</span><br>";
 			$damage = 0;
 		}
+		# 「勇谍」效果判定：
+		elseif(!empty($data['clbpara']['skill']) && in_array('npc_perfectspy', $data['clbpara']['skill']))
+		{
+			$log .= "<span class='yellow'>{$name}可谓完美间谍，久经百战啦！免疫了陷阱伤害！</span><br>";
+			$damage = 0;
+		}
 		else
 		{
 			# 计算陷阱伤害

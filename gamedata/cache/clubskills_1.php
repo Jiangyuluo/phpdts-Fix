@@ -110,6 +110,58 @@ $cskills = Array
 		'tags' => Array('passive'),
 		'desc' => '在战斗中，只要自己的生命值为1，则只有一次可以免除下一次伤害（状态可刷新）。',
 	),
+	'npc_overrainbow' => Array
+	(
+		'name' => '破虹',
+		'tags' => Array('passive'),
+		'desc' => '发动禁咒反「Over The Rainbow」，以七色弹幕对对手造成反弹伤害。微小几率发射出无缝弹幕。',
+	),
+	'npc_7colour' => Array
+	(
+		'name' => '七色', #HOROU用，无实际作用，逻辑直接写入Tooltip
+		'tags' => Array('passive'),
+		'desc' => '你拥有七种颜色的符卡。',
+	),
+	'npc_wrelease' => Array
+	(
+		'name' => '解放',
+		'tags' => Array('switch'),
+		'desc' => '打开后探索时消耗额外体力，但只在战斗中基础攻击力与防御力增加。',
+		'svars' => Array(
+			'active' => 1, // 初始激活
+			'level' => 2, // 初始倍数为2
+		),
+	),
+	'npc_flying' => Array
+	(
+		'name' => '飞行',
+		'tags' => Array('passive'),
+		'desc' => '你移动不消耗体力值。',
+	),
+	'npc_mecstasy' => Array
+	(
+		'name' => '来潮',
+		'tags' => Array('switch'),
+		'desc' => '打开后你对敌人以及敌人对你造成的伤害全部变为真实判定。（对防御特别高的玩家不适用）',
+		'svars' => Array(
+			'active' => 1, // 初始激活
+		),
+	),
+	'npc_perfectspy' => Array
+	(
+		'name' => '勇谍',
+		'tags' => Array('passive'),
+		'desc' => '你受到的来自陷阱的伤害成为0，且只要你的HP大于200，则在战斗中你的HP不会被下降到200以下。',
+	),
+	'npc_wisp' => Array
+	(
+		'name' => '指像',
+		'tags' => Array('passive'),
+		'desc' => '你对除<span class="yellow">[:targets:]%</span>以外其他玩家战斗造成和受到的伤害均变为0。',
+		'svars' => Array(
+			'targets' => Array(), // 初始无目标
+		),
+	),
 	// 可以通过在此文件中填写配置项来创建一个新技能，系统会自动生成模板。如果配置文件不能满足需求，可以自己创建一个模板文件
 	/*'技能编号' => Array
 	(

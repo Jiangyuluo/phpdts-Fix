@@ -39,6 +39,21 @@ function item_npc($itmn, &$data) {
         addnpc(7, 0, 1);
         addnpc(7, 1, 1);
         addnpc(7, 2, 1);
+        if ($clbpara['randver1'] < 64){
+            $log .= '【DEBUG】你触发了测试内容！<br>新机制执行官已额外部署进战场！<br>现在寻找并击败他们，<br>并且搜寻他们的ID卡吧！<br>';
+            addnpc(7, 3, 1);
+            addnpc(7, 4, 1);
+            addnpc(7, 5, 1);
+        }
+        addnews($now, 'secphase', $name, $nick);
+        $itm = $itmk = $itmsk = '';
+        $itme = $itms = 0;
+    } elseif ($itm == '挑战者之印Ⅱ') {
+        include_once GAME_ROOT . './include/system.func.php';
+        $log .= '你已经呼唤了幻影执行官，现在寻找并击败他们，<br>并且搜寻他们的ID卡吧！<br>';
+        addnpc(7, 3, 1);
+        addnpc(7, 4, 1);
+        addnpc(7, 5, 1);
         addnews($now, 'secphase', $name, $nick);
         $itm = $itmk = $itmsk = '';
         $itme = $itms = 0;

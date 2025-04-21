@@ -585,6 +585,62 @@ namespace revattr
 	{
 		global $log,$nosta;
 
+		# 「指像」效果判定：
+		if(($pa['type'] && !empty($pa['clbpara']['skill']) && in_array('npc_wisp', $pa['clbpara']['skill']) && !$pd['type']) ||
+		   ($pd['type'] && !empty($pd['clbpara']['skill']) && in_array('npc_wisp', $pd['clbpara']['skill']) && !$pa['type']))
+		{
+			$is_target = false;
+
+			// 检查玩家是否在NPC的目标列表中
+			if($pa['type'] && !empty($pa['clbpara']['skillpara']['npc_wisp']['targets']))
+			{
+				$targets = $pa['clbpara']['skillpara']['npc_wisp']['targets'];
+				if(in_array($pd['pid'], $targets)) $is_target = true;
+			}
+			elseif($pd['type'] && !empty($pd['clbpara']['skillpara']['npc_wisp']['targets']))
+			{
+				$targets = $pd['clbpara']['skillpara']['npc_wisp']['targets'];
+				if(in_array($pa['pid'], $targets)) $is_target = true;
+			}
+
+			// 如果玩家不在目标列表中，伤害变为0
+			if(!$is_target)
+			{
+				$npc_name = $pa['type'] ? $pa['nm'] : $pd['nm'];
+				$player_name = $pa['type'] ? $pd['nm'] : $pa['nm'];
+				$log .= "<span class='yellow'>「指像」技能发动！{$player_name}不是{$npc_name}的目标，伤害变为0！</span><br>";
+				return 0;
+			}
+		}
+
+		# 「来潮」效果判定：
+		if((!empty($pa['clbpara']['skill']) && in_array('npc_mecstasy', $pa['clbpara']['skill']) && !empty($pa['clbpara']['skillpara']['npc_mecstasy']['active'])) ||
+		   (!empty($pd['clbpara']['skill']) && in_array('npc_mecstasy', $pd['clbpara']['skill']) && !empty($pd['clbpara']['skillpara']['npc_mecstasy']['active'])))
+		{
+			# 检查是否对种火玩家无效
+			if((!empty($pd['clbpara']['skill']) && (in_array('fireseed3', $pd['clbpara']['skill']) || in_array('fireseed4', $pd['clbpara']['skill']))) || $pd['def'] > 10000)
+			{
+				$log .= "<span class='red'>{$pa['nm']}展开了Ecstasy Mode结界！但{$pd['nm']}早已不受这种东西的影响了！</span><br>";
+				return 0;
+			}
+
+			# 检查防守方是否有「勇谍」技能且HP大于200
+			if(!empty($pd['clbpara']['skill']) && in_array('npc_perfectspy', $pd['clbpara']['skill']) && $pd['hp'] > 200 && $pd['hp'] - $pa['wepe'] < 200)
+			{
+				# 先记录「来潮」效果的文案
+				$log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+
+				# 然后计算「勇谍」效果保护后的伤害
+				$damage = $pd['hp'] - 200;
+				$log .= "<span class='yellow'>「勇谍」技能发动！{$pd['nm']}的生命值不会低于200！</span><br>";
+				return $damage;
+			}
+
+			$damage = $pa['wepe'];
+			$log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+			return $damage;
+		}
+
 		# 黑熊吃香蕉事件：
 		if($pa['type'] && in_array('X',$pa['ex_keys']))
 		{
@@ -778,6 +834,14 @@ namespace revattr
 		$base_atk_per += $wth_atk_per+$pls_atk_per+$pose_atk_per+$tac_atk_per;
 		$base_atk_per = $base_atk_per > 0 ? $base_atk_per : 1;
 
+		# 「解放」技能判定：基础攻击力增加
+		if(!empty($pa['clbpara']['skill']) && in_array('npc_wrelease', $pa['clbpara']['skill']) && !empty($pa['clbpara']['skillpara']['npc_wrelease']['active']))
+		{
+			$level = isset($pa['clbpara']['skillpara']['npc_wrelease']['level']) ? $pa['clbpara']['skillpara']['npc_wrelease']['level'] : 2;
+			$base_att *= $level;
+			if(!$tooltip) $log .= "<span class='yellow'>{$pa['nm']}进行了野生解放，基础攻击力增加了{$level}倍！</span><br>";
+		}
+
 		# 计算受伤状态对pa攻击力的修正
 		$inf_atk_per = 100;
 		if(!empty($pa['inf']))
@@ -822,6 +886,15 @@ namespace revattr
 		if(!isset($pd['wep_kind'])) get_wep_kind($pd);
 		# pd基础防御力：
 		$base_def = $pd['def'];
+
+		# 「解放」技能判定：基础防御力增加
+		if(!empty($pd['clbpara']['skill']) && in_array('npc_wrelease', $pd['clbpara']['skill']) && !empty($pd['clbpara']['skillpara']['npc_wrelease']['active']))
+		{
+			$level = isset($pd['clbpara']['skillpara']['npc_wrelease']['level']) ? $pd['clbpara']['skillpara']['npc_wrelease']['level'] : 2;
+			$base_def *= $level;
+			if(!$tooltip) $log .= "<span class='yellow'>{$pa['nm']}进行了野生解放，基础防御力增加了{$level}倍！</span><br>";
+		}
+
 		# pd装备提供防御力：
 		$equip_def = $pd['arbe']+$pd['arhe']+$pd['arae']+$pd['arfe'];
 		# 是否受pa冲击效果影响：
@@ -1945,6 +2018,13 @@ namespace revattr
 			$fin_dmg = 1;
 			return $fin_dmg;
 		}
+		# 「勇谍」效果判定：
+		if(!empty($pd['clbpara']['skill']) && in_array('npc_perfectspy', $pd['clbpara']['skill']) && $pd['hp'] > 200 && ($pd['hp'] - $fin_dmg) < 200)
+		{
+			$fin_dmg = $pd['hp'] - 200;
+			$log .= "<span class='yellow'>{$pd['nm']}身经百战的经验让其留了一口气脱出了战斗！</span><br>";
+			return $fin_dmg;
+		}
 
 		# 「奇机」效果判定：
 		if(isset($pd['skill_tl_2ndchance']) && $fin_dmg > $pd['hp'] && $pd['hp'] > 1)
@@ -2373,6 +2453,80 @@ namespace revattr
 
 		# 将pa造成的伤害记录在pd的成就里
 		if(!$pd['type'] && $pa['final_damage'] >= 1000000) $pd['clbpara']['achvars']['takedmg'] = $pa['final_damage'];
+
+		# 「破虹」效果判定：
+		if(!empty($pd['clbpara']['skill']) && in_array('npc_overrainbow', $pd['clbpara']['skill']) && $pa['final_damage'] >= 1000)
+		{
+			// 进行d20暗骰
+			include_once GAME_ROOT.'./include/game/dice.func.php';
+			$dice_result = diceroll(20);
+
+			// 大成功（20）：不反弹伤害
+			if($dice_result == 20)
+			{
+				$log .= "<span class='minirainbow'>{$pd['nm']}发动了禁咒反「Over The Rainbow」！<br>七色的弹幕扑面而来！</span><br>";
+				$log .= "<span class='yellow'>但大概是因为奇迹保佑，七色弹幕被完全躲开了！</span><br>";
+			}
+			// 大失败（1）：伤害变为777.77倍
+			elseif($dice_result == 1)
+			{
+				$log .= "<span class='minirainbow'>{$pd['nm']}发动了禁咒反「Over The Rainbow」！<br>七色的弹幕扑面而来！</span><br>";
+				$log .= "<span class='minirainbow'>弹幕组成了真正意义上无缝的七色虹彩！</span><br>";
+
+				// 计算新伤害
+				$reflected_damage = round($pa['final_damage'] * 777.77);
+
+				// 对攻击者造成伤害
+				$pa['hp'] -= $reflected_damage;
+				if($pa['hp'] < 0) $pa['hp'] = 0;
+
+				$log .= "<span class='minirainbow'>{$pa['nm']}无法躲闪，被弹幕糊了一脸，受到了{$reflected_damage}点伤害！</span><br>";
+
+				// 处理攻击者被弹死
+				if($pa['hp'] <= 0)
+				{
+					include_once GAME_ROOT . './include/state.func.php';
+					death ( 'sdestruct' ); #暂时借用一下我头四物品的死法，反正蛮适合的
+				}
+
+				// 如果攻击者不是玩家，更新数据库
+				if($pa['type'])
+				{
+					$query = "UPDATE {$tablepre}players SET hp='{$pa['hp']}' WHERE pid='{$pa['pid']}'";
+					$db->query($query);
+				}
+			}
+			// 普通结果：反弹伤害
+			else
+			{
+				$log .= "<span class='minirainbow'>{$pd['nm']}发动了禁咒反「Over The Rainbow」！<br>七色的弹幕扑面而来！</span><br>";
+				$log .= "<span class='minirainbow'>{$pa['nm']}被卷入了{$pd['nm']}的弹幕之中！</span><br>";
+
+				// 对攻击者造成伤害
+				$pa['hp'] -= $pa['final_damage'];
+				if($pa['hp'] < 0) $pa['hp'] = 0;
+
+				$log .= "<span class='yellow'>{$pa['nm']}被弹幕击中，受到了{$pa['final_damage']}点伤害！</span><br>";
+
+				// 处理攻击者被弹死
+				if($pa['hp'] <= 0)
+				{
+					include_once GAME_ROOT . './include/state.func.php';
+					death ( 'sdestruct' ); #暂时借用一下我头四物品的死法，反正蛮适合的
+				}
+
+				// 如果攻击者不是玩家，更新数据库
+				if($pa['type'])
+				{
+					$query = "UPDATE {$tablepre}players SET hp='{$pa['hp']}' WHERE pid='{$pa['pid']}'";
+					$db->query($query);
+				}
+
+				// 防守者不受伤害
+				//$pd['hp'] += $pa['final_damage'];
+				//$pa['final_damage'] = 0;
+			}
+		}
 
 		# 核武器效果判定
 		if(!empty($pa['weppara']['isNuclearWeapon']))

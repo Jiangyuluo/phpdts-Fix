@@ -1,0 +1,49 @@
+# NPC技能修复：来潮（npc_mecstasy）和勇谍（npc_perfectspy）的协同问题
+
+## 问题描述
+
+当NPC同时拥有"来潮"（npc_mecstasy）和"勇谍"（npc_perfectspy）技能，且"来潮"处于激活状态时，"来潮"技能会在"勇谍"技能之前适用。这导致只要使用攻击力超过NPC血量的武器成功击中NPC，"勇谍"技能便不会发动，无法让NPC保留200点HP。
+
+## 问题原因
+
+在当前的实现中，"来潮"技能在 `get_fix_damage` 函数中处理，而"勇谍"技能在 `get_final_dmg_fix` 函数中处理。根据战斗流程，`get_fix_damage` 函数会先于 `get_final_dmg_fix` 函数执行，这导致"来潮"技能的真实伤害会直接返回，跳过后续的伤害处理流程，包括"勇谍"技能的HP保护效果。
+
+## 修复内容
+
+在 `include/game/revattr.func.php` 文件的 `get_fix_damage` 函数中，修改了"来潮"技能的处理逻辑，添加了对"勇谍"技能的检查：
+
+```php
+# 「来潮」效果判定：
+if((!empty($pa['clbpara']['skill']) && in_array('npc_mecstasy', $pa['clbpara']['skill']) && !empty($pa['clbpara']['skillpara']['npc_mecstasy']['active'])) || 
+   (!empty($pd['clbpara']['skill']) && in_array('npc_mecstasy', $pd['clbpara']['skill']) && !empty($pd['clbpara']['skillpara']['npc_mecstasy']['active'])))
+{
+    # 检查是否对种火玩家无效
+    if((!empty($pd['clbpara']['skill']) && (in_array('fireseed3', $pd['clbpara']['skill']) || in_array('fireseed4', $pd['clbpara']['skill']))) || $pd['def'] > 10000)
+    {
+        $log .= "<span class='red'>{$pa['nm']}展开了Ecstasy Mode结界！但{$pd['nm']}早已不受这种东西的影响了！</span><br>";
+        return 0;
+    }
+    
+    # 检查防守方是否有「勇谍」技能且HP大于200
+    if(!empty($pd['clbpara']['skill']) && in_array('npc_perfectspy', $pd['clbpara']['skill']) && $pd['hp'] > 200 && $pd['hp'] - $pa['wepe'] < 200)
+    {
+        # 先记录「来潮」效果的文案
+        $log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+        
+        # 然后计算「勇谍」效果保护后的伤害
+        $damage = $pd['hp'] - 200;
+        $log .= "<span class='yellow'>「勇谍」技能发动！{$pd['nm']}的生命值不会低于200！</span><br>";
+        return $damage;
+    }
+
+    $damage = $pa['wepe'];
+    $log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+    return $damage;
+}
+```
+
+## 修复效果
+
+通过这个修改，当NPC同时拥有"来潮"和"勇谍"技能时，系统会先检查"来潮"技能是否对当前玩家有效，然后检查NPC是否拥有"勇谍"技能且当前HP大于200，且受到的伤害会导致HP低于200。如果满足这些条件，则会先显示"来潮"技能的效果文案，然后计算"勇谍"技能保护后的伤害，确保NPC的HP不会低于200。
+
+这样，即使玩家使用攻击力超过NPC血量的武器成功击中NPC，"勇谍"技能也能正常发动，保护NPC的生命值不低于200点。
