@@ -134,6 +134,8 @@
 			$pd['state'] = 25;
 		} elseif ($death == 'F') {
 			$pd['state'] = 29;
+		} elseif ($death == 'B') {
+			$pd['state'] = 60;
 		} elseif ($death == 'poison') {
 			$pd['state'] = 26;
 		} elseif ($death == 'trap') {
