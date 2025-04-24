@@ -10,6 +10,7 @@ include_once GAME_ROOT.'./include/game/itemmain.func.php';
 include_once GAME_ROOT.'./include/game/revbattle.func.php';
 include_once GAME_ROOT.'./include/game/revbattle.calc.php';
 include_once GAME_ROOT.'./include/game/revcombat.func.php';
+include_once GAME_ROOT.'./include/game/revevent.func.php';
 
 function check_can_move($pls,$pgroup,$moveto)
 {
@@ -115,6 +116,9 @@ function move($moveto = 99,&$data=NULL)
 	move_search_events($data,'move');
 	if($hp <= 0) return;
 
+	# 更新charge值
+	process_charge_events($data);
+
 	$enemyrate =  \revbattle\calc_meetman_rate($data);
 	discover($enemyrate,$data);
 	return;
@@ -159,6 +163,9 @@ function search(&$data=NULL)
 	# 探索指定地点，结算探索事件
 	move_search_events($data,'search');
 	if($hp <= 0) return;
+
+	# 更新charge值
+	process_charge_events($data);
 
 	$enemyrate = \revbattle\calc_meetman_rate($data);
 	discover($enemyrate,$data);

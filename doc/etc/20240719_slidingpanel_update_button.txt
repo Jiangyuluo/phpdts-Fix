@@ -1,0 +1,136 @@
+修改日期：2024年7月19日
+
+问题描述：
+滑动面板中的charge值不会随着玩家的行动进行实时更新，必须重新刷新整个game.php才能看到最新值。需要一种简单的方式让用户手动更新面板中的信息。
+
+修改内容：
+1. 在滑动面板底部添加了"更新信息"按钮，用于手动更新面板中的信息
+2. 添加了manualUpdate函数，用于处理按钮点击事件
+3. 添加了showUpdateMessage函数，用于显示更新成功的消息
+4. 添加了相关的CSS样式，确保按钮与面板整体风格一致
+
+修改文件：
+- templates/default/slidingpanel.htm
+
+修改细节：
+
+1. 添加更新按钮HTML：
+```html
+<!-- 更新按钮 -->
+<div class="update-button-container">
+    <button id="update-button" class="update-button" onclick="manualUpdate()">更新信息</button>
+</div>
+```
+
+2. 添加按钮样式：
+```css
+/* 更新按钮样式 */
+.update-button-container {
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 10px;
+    border-top: 1px solid rgba(225, 124, 226, 0.2);
+}
+
+.update-button {
+    background-color: rgba(225, 124, 226, 0.8);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 20px;
+    font: bold 11pt "FusionPixel10px";
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.update-button:hover {
+    background-color: rgba(225, 124, 226, 1);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.update-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+```
+
+3. 添加manualUpdate函数：
+```javascript
+// 手动更新函数
+function manualUpdate() {
+    // 显示加载效果
+    const updateButton = document.getElementById('update-button');
+    if (updateButton) {
+        updateButton.textContent = '正在更新...';
+        updateButton.disabled = true;
+    }
+    
+    // 从服务器获取最新数据
+    fetchLatestClbpara();
+    
+    // 更新显示
+    setTimeout(function() {
+        updateChargeProgressBars();
+        
+        // 恢复按钮状态
+        if (updateButton) {
+            updateButton.textContent = '更新信息';
+            updateButton.disabled = false;
+        }
+        
+        // 显示更新成功消息
+        showUpdateMessage('信息已更新');
+    }, 500);
+}
+```
+
+4. 添加showUpdateMessage函数，用于显示更新成功的消息：
+```javascript
+// 显示更新消息
+function showUpdateMessage(message) {
+    // 创建消息元素
+    const messageElement = document.createElement('div');
+    messageElement.className = 'update-message';
+    messageElement.textContent = message;
+    
+    // 添加到面板
+    const panel = document.getElementById('sliding-panel');
+    if (panel) {
+        panel.appendChild(messageElement);
+        
+        // 添加样式
+        messageElement.style.position = 'absolute';
+        messageElement.style.bottom = '20px';
+        messageElement.style.left = '50%';
+        messageElement.style.transform = 'translateX(-50%)';
+        messageElement.style.backgroundColor = 'rgba(0, 200, 0, 0.8)';
+        messageElement.style.color = 'white';
+        messageElement.style.padding = '8px 15px';
+        messageElement.style.borderRadius = '5px';
+        messageElement.style.fontWeight = 'bold';
+        messageElement.style.zIndex = '1002';
+        messageElement.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+        messageElement.style.opacity = '0';
+        messageElement.style.transition = 'opacity 0.3s';
+        
+        // 显示消息
+        setTimeout(function() {
+            messageElement.style.opacity = '1';
+        }, 10);
+        
+        // 延时后移除
+        setTimeout(function() {
+            messageElement.style.opacity = '0';
+            setTimeout(function() {
+                if (panel.contains(messageElement)) {
+                    panel.removeChild(messageElement);
+                }
+            }, 300);
+        }, 2000);
+    }
+}
+```
+
+这些修改提供了一种简单的方式让用户手动更新面板中的信息，而不必刷新整个页面。当用户点击"更新信息"按钮时，系统会从服务器获取最新的clbpara数据，并更新面板中的显示。同时，系统会显示一个简短的成功消息，提供良好的用户反馈。

@@ -1,0 +1,191 @@
+修改日期：2024年7月19日
+
+问题描述：
+在点击"更新信息"按钮后，控制台显示错误信息："Could not find clbpara_data in response"，表明无法从响应中找到clbpara_data变量。
+
+修改内容：
+1. 修改了fetchLatestClbpara函数，使用更可靠的方法获取最新的clbpara数据
+2. 重写了manualUpdate函数，直接在函数内部处理AJAX请求，而不是调用fetchLatestClbpara函数
+3. 添加了handleUpdateError函数，用于处理更新失败的情况
+4. 修改了showUpdateMessage函数，使其能够显示不同类型的消息（成功/错误）
+
+修改文件：
+- templates/default/slidingpanel.htm
+
+修改细节：
+
+1. 修改fetchLatestClbpara函数，使用更可靠的方法获取最新数据：
+```javascript
+// 从服务器获取最新的clbpara数据
+function fetchLatestClbpara() {
+    // 创建XHR对象
+    const xhr = new XMLHttpRequest();
+    
+    // 请求当前页面，以获取最新的clbpara数据
+    // 添加时间戳防止缓存
+    xhr.open('GET', 'game.php?t=' + new Date().getTime(), true);
+    
+    // 处理响应
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // 尝试从响应中提取clbpara_data
+            const responseText = xhr.responseText;
+            
+            // 使用更精确的正则表达式
+            const scriptRegex = /var clbpara_data = ([\\s\\S]*?);/;
+            const match = responseText.match(scriptRegex);
+            
+            if (match && match[1]) {
+                try {
+                    // 尝试解析JSON
+                    const newClbpara = JSON.parse(match[1]);
+                    clbpara = newClbpara;
+                    console.log('clbpara updated from page:', clbpara);
+                } catch (e) {
+                    console.error('Failed to parse clbpara data:', e);
+                }
+            } else {
+                console.error('Could not find clbpara_data in response');
+                // 如果无法找到数据，尝试刷新整个页面
+                console.log('Attempting to refresh the page...');
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1000);
+            }
+        } else {
+            console.error('Failed to fetch page data:', xhr.statusText);
+        }
+    };
+    
+    // 处理错误
+    xhr.onerror = function() {
+        console.error('Network error when fetching page data');
+    };
+    
+    // 发送请求
+    xhr.send();
+}
+```
+
+2. 重写manualUpdate函数，直接在函数内部处理AJAX请求：
+```javascript
+// 手动更新函数
+function manualUpdate() {
+    // 显示加载效果
+    const updateButton = document.getElementById('update-button');
+    if (updateButton) {
+        updateButton.textContent = '正在更新...';
+        updateButton.disabled = true;
+    }
+    
+    // 创建XHR对象
+    const xhr = new XMLHttpRequest();
+    
+    // 请求当前页面，以获取最新的clbpara数据
+    // 添加时间戳防止缓存
+    xhr.open('GET', 'game.php?t=' + new Date().getTime(), true);
+    
+    // 处理响应
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // 尝试从响应中提取clbpara_data
+            const responseText = xhr.responseText;
+            
+            // 使用更精确的正则表达式
+            const scriptRegex = /var clbpara_data = ([\\s\\S]*?);/;
+            const match = responseText.match(scriptRegex);
+            
+            if (match && match[1]) {
+                try {
+                    // 尝试解析JSON
+                    const newClbpara = JSON.parse(match[1]);
+                    clbpara = newClbpara;
+                    console.log('clbpara updated from page:', clbpara);
+                    
+                    // 更新显示
+                    updateChargeProgressBars();
+                    
+                    // 恢复按钮状态
+                    if (updateButton) {
+                        updateButton.textContent = '更新信息';
+                        updateButton.disabled = false;
+                    }
+                    
+                    // 显示更新成功消息
+                    showUpdateMessage('信息已更新');
+                } catch (e) {
+                    console.error('Failed to parse clbpara data:', e);
+                    handleUpdateError(updateButton);
+                }
+            } else {
+                console.error('Could not find clbpara_data in response');
+                handleUpdateError(updateButton);
+            }
+        } else {
+            console.error('Failed to fetch page data:', xhr.statusText);
+            handleUpdateError(updateButton);
+        }
+    };
+    
+    // 处理错误
+    xhr.onerror = function() {
+        console.error('Network error when fetching page data');
+        handleUpdateError(updateButton);
+    };
+    
+    // 发送请求
+    xhr.send();
+}
+```
+
+3. 添加handleUpdateError函数，用于处理更新失败的情况：
+```javascript
+// 处理更新错误
+function handleUpdateError(updateButton) {
+    // 恢复按钮状态
+    if (updateButton) {
+        updateButton.textContent = '更新信息';
+        updateButton.disabled = false;
+    }
+    
+    // 显示错误消息
+    showUpdateMessage('更新失败，请刷新页面', 'error');
+    
+    // 使用当前数据更新显示
+    updateChargeProgressBars();
+}
+```
+
+4. 修改showUpdateMessage函数，使其能够显示不同类型的消息：
+```javascript
+// 显示更新消息
+function showUpdateMessage(message, type = 'success') {
+    // 创建消息元素
+    const messageElement = document.createElement('div');
+    messageElement.className = 'update-message';
+    messageElement.textContent = message;
+    
+    // 添加到面板
+    const panel = document.getElementById('sliding-panel');
+    if (panel) {
+        panel.appendChild(messageElement);
+        
+        // 添加样式
+        messageElement.style.position = 'absolute';
+        messageElement.style.bottom = '20px';
+        messageElement.style.left = '50%';
+        messageElement.style.transform = 'translateX(-50%)';
+        
+        // 根据消息类型设置颜色
+        if (type === 'error') {
+            messageElement.style.backgroundColor = 'rgba(200, 0, 0, 0.8)';
+        } else {
+            messageElement.style.backgroundColor = 'rgba(0, 200, 0, 0.8)';
+        }
+        
+        // 其他样式...
+    }
+}
+```
+
+这些修改解决了"Could not find clbpara_data in response"错误，使"更新信息"按钮能够正常工作。现在，当用户点击按钮时，系统会尝试从当前页面获取最新的clbpara数据，并更新面板中的显示。如果无法获取数据，系统会显示错误消息，提示用户刷新页面。
