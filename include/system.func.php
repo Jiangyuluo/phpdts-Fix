@@ -193,6 +193,9 @@ function rs_game($mode = 0) {
 				// 分割字符串
 				$item_parts = explode(',', $line);
 
+				// 确保数组有足够的元素
+				$item_parts = array_pad($item_parts, 9, '');
+
 				// 检查是否有itmpara字段
 				$itmpara = '';
 				if(count($item_parts) >= 9) {
@@ -307,6 +310,9 @@ function rs_game($mode = 0) {
 				// 分割字符串
 				$lst = explode(',', $line);
 
+				// 确保数组有足够的元素
+				$lst = array_pad($lst, 10, '');
+
 				// 检查是否有itmpara字段
 				$itmpara = '';
 				if(count($lst) >= 10) {
@@ -316,7 +322,6 @@ function rs_game($mode = 0) {
 						$itmpara = $json_content;
 					}
 				}
-				if(empty($lst[8])) $lst[8] = '';
 				list($kind,$num,$price,$area,$item,$itmk,$itme,$itms,$itmsk)=$lst;
 				if($kind != 0){
 					$qry .= "('$kind','$num','$price','$area','$item','$itmk','$itme','$itms','$itmsk','$itmpara'),";
@@ -1026,6 +1031,7 @@ function get_credit_up($data,$winner = '',$winmode = 0){
 function get_gambling_result($clist, $winner='',$winmode=''){
 	global $db,$tablepre,$gtablepre,$hdamage,$validnum,$now,$areanum,$areaadd,$gamevars;
 	$gblog = '';
+	$bwlist = array(); // Initialize $bwlist to avoid undefined variable
 	//$gbfile = GAME_ROOT.TPLDIR.'/lastgb.htm';
 	if(!in_array($winmode,Array(2,3,5,7))){//无人获胜，全部赌注被冴冴吃掉
 		$gblog .= '无人获胜，全部切糕被冴冴吃掉！';

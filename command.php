@@ -996,6 +996,8 @@ if(isset($opendialog)){$log.="<span style=\"display:none\" id=\"open-dialog\">{$
 if(isset($url)){$gamedata['url'] = $url;}
 $gamedata['innerHTML']['pls'] = (!isset($plsinfo[$pls]) && isset($hplsinfo[$pgroup])) ? $hplsinfo[$pgroup][$pls] : $plsinfo[$pls];
 $gamedata['innerHTML']['anum'] = $alivenum;
+// 传递位置ID给JavaScript，用于更新背景图片
+$gamedata['locationId'] = $pls;
 
 ob_clean();
 $main ? include template($main) : include template('profile');
