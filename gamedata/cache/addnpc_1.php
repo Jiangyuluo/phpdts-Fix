@@ -2575,6 +2575,7 @@ $anpcinfo = array(
 		'msp' => 200,
 		'clubskill' => Array(
 			'fireseed3',
+			'npc_purity',
 		),
 		'att' => 27,
 		'def' => 99,

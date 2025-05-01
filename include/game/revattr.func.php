@@ -861,8 +861,18 @@ namespace revattr
 			$club_atk_per *= $attfac;
 		}*/
 
+		# 「枝火歌者」效果判定：基础攻击力增加
+		$fireseed_bonus = 0;
+		if($pa['club'] == 22 && !empty($pa['clbpara']['fireseed']))
+		{
+			include_once GAME_ROOT.'./include/game/club22.func.php';
+			$fireseed_buff = FireseedBuffBonus();
+			$fireseed_bonus = $fireseed_buff['att'];
+			if(!$tooltip && $fireseed_bonus > 0) $log .= "<span class='yellow'>{$pa['nm']}的种火增幅了{$fireseed_bonus}点攻击力！</span><br>";
+		}
+
 		# 汇总
-		$base_att = round($base_att*($base_atk_per/100)*($inf_atk_per/100));
+		$base_att = round($base_att*($base_atk_per/100)*($inf_atk_per/100)) + $fireseed_bonus;
 		$base_att = max(1,$base_att);
 
 		if($tooltip)
@@ -983,10 +993,20 @@ namespace revattr
 			$sk_lvl = get_skilllvl('c12_garrison',$pd);
 			$sk_var = 100+round(get_skillvars('c12_garrison','defgain',$sk_lvl) * calc_garrison_losshpr($pa,$pd));
 		}
+		# 「枝火歌者」效果判定：基础防御力增加
+		$fireseed_bonus = 0;
+		if($pd['club'] == 22 && !empty($pd['clbpara']['fireseed']))
+		{
+			include_once GAME_ROOT.'./include/game/club22.func.php';
+			$fireseed_buff = FireseedBuffBonus();
+			$fireseed_bonus = $fireseed_buff['def'];
+			if(!$tooltip && $fireseed_bonus > 0) $log .= "<span class='yellow'>{$pd['nm']}的种火增幅了{$fireseed_bonus}点防御力！</span><br>";
+		}
+
 		# 汇总
 		$total_def = round($total_def*($base_def_per/100)*($inf_def_per/100));
 		if(isset($sk_var)) $total_def = round($total_def*($sk_var/100));
-		$total_def = max(0.01,$total_def);
+		$total_def = max(0.01,$total_def) + $fireseed_bonus;
 
 		if($tooltip)
 		{

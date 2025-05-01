@@ -529,6 +529,14 @@
 	function expup_rev(&$pa,&$pd,$active)
 	{
 		global $log,$baseexp;
+
+		# 「洁净」技能判定：战斗时无法获得经验值
+		if(!empty($pa['clbpara']['skill']) && in_array('npc_purity', $pa['clbpara']['skill']))
+		{
+			$log.='<span class="yellow">「洁净」使'.$pa['nm'].'无法获得经验值！</span><br>';
+			return;
+		}
+
 		# 攻击命中的情况下，计算获得经验
 		if($pa['hitrate_times'] > 0)
 		{

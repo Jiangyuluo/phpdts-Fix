@@ -1,0 +1,55 @@
+# 种火部署位置修复记录
+
+## 问题描述
+1. 种火部署位置选择下拉框显示了所有位置，包括禁区和隐藏位置，而不是只显示玩家可以移动到的位置
+2. 种火部署后没有正确移动到选择的位置
+
+## 问题原因
+1. 位置选择下拉框没有过滤掉禁区和隐藏位置
+2. FireseedDeploy 函数只更新了 clbpara 中的种火位置，但没有更新数据库中对应 NPC 的位置
+
+## 修复方法
+1. 修改 slidingpanel.htm 中的位置选择下拉框，使其只显示玩家可以移动到的位置
+2. 修改 club22.func.php 中的 FireseedDeploy 函数，确保种火正确移动到选择的位置
+
+## 修改文件
+1. templates/default/slidingpanel.htm - 修改位置选择下拉框
+2. include/game/club22.func.php - 修改 FireseedDeploy 函数
+
+## 修改详情
+1. 在 slidingpanel.htm 中修改位置选择下拉框：
+   ```html
+   <select id="deploy_pls_panel">
+       <!--{loop $plsinfo $pls_id $pls_name}-->
+       <!--{if $pls_id > 0 && !in_array($pls_id, $deepzones) && $pls_id < 100}-->
+       <option value="$pls_id" <!--{if $pls_id == $pls}-->selected<!--{/if}-->>$pls_name</option>
+       <!--{/if}-->
+       <!--{/loop}-->
+   </select>
+   ```
+
+2. 在 club22.func.php 中修改 FireseedDeploy 函数：
+   - 添加对位置有效性的检查
+   - 添加更新数据库中 NPC 位置的代码
+   ```php
+   // 检查位置是否有效（不是禁区或隐藏地图）
+   if(in_array($pls, $deepzones) || $pls < 0 || $pls >= 100) {
+       $log .= "<span class='red'>无法部署到指定位置！</span><br>";
+       return false;
+   }
+   
+   // 如果种火有对应的NPC，更新NPC的位置
+   $result = $db->query("SELECT * FROM {$tablepre}players WHERE pid='$fireseed_id'");
+   if($db->num_rows($result) > 0) {
+       $db->query("UPDATE {$tablepre}players SET pls='$pls' WHERE pid='$fireseed_id'");
+   }
+   ```
+
+## 优势
+1. 位置选择下拉框只显示玩家可以移动到的位置，避免玩家选择无效位置
+2. 种火部署后会正确移动到选择的位置，使得探物和索敌功能能够正常工作
+3. 添加了位置有效性检查，避免玩家部署到无效位置
+
+## 注意事项
+- 这个修复不会影响其他功能，只是修复了种火部署的问题
+- 种火部署后，如果有对应的 NPC，会更新 NPC 的位置，使得探物和索敌功能能够正常工作

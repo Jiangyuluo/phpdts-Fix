@@ -1,0 +1,53 @@
+# NPC技能实装：洁净（npc_purity）
+
+## 功能概述
+
+实现了一个专为NPC设计的技能：
+- **洁净（npc_purity）**：被动技，战斗时无法获得经验值。
+
+## 实装内容
+
+1. 在 `gamedata/cache/clubskills_1.php` 文件中添加了 `npc_purity` 技能的定义
+2. 在 `include/state.func.php` 文件中修改了 `expup_rev` 函数，使其检查是否有 `npc_purity` 技能
+
+## 实装细节
+
+### 1. 技能定义
+
+在 `clubskills_1.php` 文件中添加了以下技能定义：
+
+```php
+'npc_purity' => Array
+(
+    'name' => '洁净',
+    'tags' => Array('passive'),
+    'desc' => '战斗时无法获得经验值。',
+),
+```
+
+### 2. 经验值获取逻辑修改
+
+在 `state.func.php` 文件的 `expup_rev` 函数中添加了对 `npc_purity` 技能的检查：
+
+```php
+# 「洁净」技能判定：战斗时无法获得经验值
+if(!empty($pa['clbpara']['skill']) && in_array('npc_purity', $pa['clbpara']['skill']))
+{
+    $log.='<span class="yellow">「洁净」使'.$pa['nm'].'无法获得经验值！</span><br>';
+    return;
+}
+```
+
+## 使用方法
+
+### 为NPC添加洁净技能
+
+```php
+$npc['clbpara']['skill'][] = 'npc_purity';
+```
+
+## 注意事项
+
+1. 这个技能专为NPC设计，玩家不应该获得这个技能
+2. 技能会在战斗中完全阻止经验值获取，包括通过「反思」技能或「解构」技能获得的经验值
+3. 技能效果会在战斗日志中显示提示信息

@@ -28,7 +28,7 @@ $club_skillslist = Array
 	19 => Array('s_hp','s_ad','f_heal','c19_nirvana','c19_reincarn','c19_purity','c19_crystal','c19_redeem','c19_dispel','c19_woesea'), #'晶莹剔透', //晶莹剔透、决死结界合并为晶莹剔透
 	20 => Array('s_hp','s_ad','f_heal','c20_fertile','c20_windfall','c20_lighting','c20_zombie','c20_sparkle','c20_lotus'), #'元素大师', #商店购买社团卡
 	21 => Array('s_hp','s_ad','f_heal','c21_stormedge','c21_creation','c21_discovery','c21_sacrifice','c21_blaster'), #'码语行人', #商店购买社团卡
-	22 => Array('s_hp','s_ad','f_heal'), #'偶像大师', #暂定名，「除错大师」头衔奖励
+	22 => Array('s_hp','s_ad','f_heal','c22_fireseed'), #'枫火歌者', #暂定名，「除错大师」头衔奖励
 	98 => Array('s_hp','s_ad','f_heal'), #'换装迷宫',
 	99 => Array('s_hp','s_ad','f_heal'), #'第一形态'
 );
@@ -161,6 +161,18 @@ $cskills = Array
 		'svars' => Array(
 			'targets' => Array(), // 初始无目标
 		),
+	),
+	'npc_purity' => Array
+	(
+		'name' => '洁净',
+		'tags' => Array('passive'),
+		'desc' => '战斗时无法获得经验值。',
+	),
+	'c22_fireseed' => Array
+	(
+		'name' => '枫火',
+		'tags' => Array('passive'),
+		'desc' => '你可以通过在发现种火的尸体页面收纳种火，并通过侧边栏进行部署。<br>',
 	),
 	// 可以通过在此文件中填写配置项来创建一个新技能，系统会自动生成模板。如果配置文件不能满足需求，可以自己创建一个模板文件
 	/*'技能编号' => Array

@@ -70,6 +70,9 @@ $log = '';
 $chatdata = getchat(0,$teamID);
 //读取表情信息
 $emdata = get_emdata();
+
+
+
 //读取玩家互动信息
 $result = $db->query("SELECT lid,time,log FROM {$tablepre}log WHERE toid = '$pid' AND prcsd = 0 ORDER BY time,lid");
 $llist = '';

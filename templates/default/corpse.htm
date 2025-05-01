@@ -6,6 +6,8 @@
         <input type="radio" name="command" id="c20_zombie" value="c20_zombie" style="margin-left:5px;"><a onclick=sl('c20_zombie'); href="javascript:void(0);" ><span class="mtgblack">转化灵俑</span></a>
     <!--{/if}-->
     <br>
+<!--{elseif $club==22 && $w_type==92 && empty($w_clbpara['owner'])}-->
+<input type="radio" name="command" id="fireseed_recruit" value="fireseed_recruit" <!--{if !$w_money}-->checked<!--{/if}-->><a onclick=sl('fireseed_recruit'); href="javascript:void(0);" ><span class="lime">收纳种火</span></a><br>
 <!--{elseif $allow_destory_corpse && !in_array($w_type,$no_destory_corpse_type)}-->
 <input type="radio" name="command" id="destory" value="destory" <!--{if !$w_money}-->checked<!--{/if}-->><a onclick=sl('destory'); href="javascript:void(0);" >销毁尸体</a><br>
 <!--{/if}-->

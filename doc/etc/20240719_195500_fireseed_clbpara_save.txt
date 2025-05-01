@@ -1,0 +1,44 @@
+# 种火 clbpara 保存修复记录
+
+## 问题描述
+在部署种火后，种火的位置信息没有正确更新。虽然 FireseedDeploy 函数更新了 clbpara 中的种火位置信息，但没有将更新后的 clbpara 保存到数据库中，导致种火的位置信息在页面刷新后丢失。
+
+## 问题原因
+FireseedDeploy、FireseedSearch 和 FireseedEnhance 函数更新了 clbpara 数组，但没有将更新后的 clbpara 保存到数据库中。
+
+## 修复方法
+修改 FireseedDeploy、FireseedSearch 和 FireseedEnhance 函数，在更新 clbpara 数组后，将其使用 JSON 格式编码并保存到数据库中。
+
+## 修改文件
+1. include/game/club22.func.php - 修改 FireseedDeploy、FireseedSearch 和 FireseedEnhance 函数
+
+## 修改详情
+1. 在 FireseedDeploy 函数中添加：
+   ```php
+   // 将更新后的 clbpara 保存到数据库
+   $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+   $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
+   ```
+
+2. 在 FireseedSearch 函数中添加：
+   ```php
+   // 将更新后的 clbpara 保存到数据库
+   $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+   $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
+   ```
+
+3. 在 FireseedEnhance 函数中添加：
+   ```php
+   // 将更新后的 clbpara 保存到数据库
+   $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+   $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
+   ```
+
+## 优势
+1. 种火的位置信息会正确保存到数据库中，不会在页面刷新后丢失
+2. 种火的探物和索敌功能能够正常工作，因为种火的位置信息已经正确保存
+3. 种火的强化信息也会正确保存到数据库中
+
+## 注意事项
+- 这个修复不会影响其他功能，只是修复了种火相关功能的数据保存问题
+- 使用 json_encode($clbpara, JSON_UNESCAPED_UNICODE) 的方式保存 clbpara 数据，与系统其他部分的处理方式保持一致

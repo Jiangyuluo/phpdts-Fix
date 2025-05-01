@@ -392,6 +392,62 @@ if($hp > 0){
 						skill_tl_pickpocket_act($choice);
  					}
 					$mode = 'command';
+				}elseif($sp_cmd == 'sp_fireseed_deploy' && $club == 22){
+					include_once GAME_ROOT.'./include/game/club22.func.php';
+					if(isset($fireseed_id) && isset($deploy_mode)){
+						$deploy_pls = isset($deploy_pls) ? intval($deploy_pls) : $pls;
+						$log .= "<span class='yellow'>DEBUG: 部署位置 $deploy_pls</span><br>";
+						FireseedDeploy($fireseed_id, $deploy_mode, $deploy_pls);
+					}else{
+						$log .= '<span class="red">请选择要部署的种火和部署模式！</span><br>';
+					}
+					$mode = 'command';
+				}elseif($sp_cmd == 'sp_fireseed_getitem' && $club == 22){
+					include_once GAME_ROOT.'./include/game/club22.func.php';
+					if(isset($fireseed_item_id) && isset($item_id)){
+						// 从种火物品池中获取物品
+						if(isset($clbpara['fireseed'][$fireseed_item_id]['items'][$item_id])){
+							$item = $clbpara['fireseed'][$fireseed_item_id]['items'][$item_id];
+
+							// 查找空物品栏
+							$empty_slot = 0;
+							for($i=1; $i<=6; $i++){
+								if(empty(${'itm'.$i})){
+									$empty_slot = $i;
+									break;
+								}
+							}
+
+							if($empty_slot){
+								// 将物品添加到玩家物品栏
+								${'itm'.$empty_slot} = $item['itm'];
+								${'itmk'.$empty_slot} = $item['itmk'];
+								${'itme'.$empty_slot} = $item['itme'];
+								${'itms'.$empty_slot} = $item['itms'];
+								${'itmsk'.$empty_slot} = $item['itmsk'];
+
+								// 从种火物品池中移除物品
+								unset($clbpara['fireseed'][$fireseed_item_id]['items'][$item_id]);
+
+								$log .= '<span class="lime">你从种火「'.$clbpara['fireseed'][$fireseed_item_id]['name'].'」处获得了物品「'.$item['itm'].'」！</span><br>';
+							}else{
+								$log .= '<span class="red">你的物品栏已满，无法获取物品！</span><br>';
+							}
+						}else{
+							$log .= '<span class="red">指定的物品不存在！</span><br>';
+						}
+					}else{
+						$log .= '<span class="red">请选择要获取物品的种火和物品！</span><br>';
+					}
+					$mode = 'command';
+				}elseif($sp_cmd == 'sp_fireseed_enhance' && $club == 22){
+					include_once GAME_ROOT.'./include/game/club22.func.php';
+					if(isset($enhance_fireseed_id) && isset($enhance_item)){
+						FireseedEnhance($enhance_fireseed_id, $enhance_item);
+					}else{
+						$log .= '<span class="red">请选择要强化的种火和焰火物品！</span><br>';
+					}
+					$mode = 'command';
 				}else{
 					$mode = $sp_cmd;
 				}
@@ -478,8 +534,8 @@ if($hp > 0){
 						$opendialog = null;
 
 						// 保存玩家数据，确保选择被记录
-						$serialized_clbpara = serialize($clbpara);
-						$encoded_clbpara = base64_encode($serialized_clbpara);
+						//$serialized_clbpara = serialize($clbpara);
+						$encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
 						//$log .= "<!-- DEBUG: 序列化后的 clbpara 长度: " . strlen($serialized_clbpara) . " -->";
 						//$log .= "<!-- DEBUG: 编码后的 clbpara 长度: " . strlen($encoded_clbpara) . " -->";
 
@@ -489,30 +545,6 @@ if($hp > 0){
 						if($update_result) {
 							$log .= "<!-- DEBUG: 数据库更新成功 -->";
 
-							// 验证数据库中的值是否正确
-							$verify_query = "SELECT clbpara FROM {$tablepre}players WHERE pid='$pid'";
-							$verify_result = $db->query($verify_query);
-							if($verify_result && $db->num_rows($verify_result) > 0) {
-								$verify_data = $db->fetch_array($verify_result);
-								$db_clbpara = $verify_data['clbpara'];
-								$log .= "<!-- DEBUG: 数据库中的 clbpara 长度: " . strlen($db_clbpara) . " -->";
-
-								// 尝试解码和反序列化
-								try {
-									$decoded_clbpara = base64_decode($db_clbpara);
-									$unserialized_clbpara = unserialize($decoded_clbpara);
-
-									if(is_array($unserialized_clbpara) && isset($unserialized_clbpara['dialogue_choice'])) {
-										$log .= "<!-- DEBUG: 数据库中的 dialogue_choice 存在 -->";
-									} else {
-										$log .= "<!-- DEBUG: 数据库中的 dialogue_choice 不存在 -->";
-									}
-								} catch(Exception $e) {
-									$log .= "<!-- DEBUG: 反序列化失败: " . $e->getMessage() . " -->";
-								}
-							} else {
-								$log .= "<!-- DEBUG: 无法验证数据库中的值 -->";
-							}
 						} else {
 							$log .= "<!-- DEBUG: 数据库更新失败: " . $db->error() . " -->";
 						}
@@ -736,8 +768,18 @@ if($hp > 0){
 //			include_once GAME_ROOT.'./include/game/special.func.php';
 //			chgword($newmotto,$newlastword,$newkillmsg);
 		} elseif($mode == 'corpse') {
-			include_once GAME_ROOT.'./include/game/itemmain.func.php';
-			getcorpse($command);
+			if($command == 'fireseed_recruit' && $club == 22) {
+				include_once GAME_ROOT.'./include/game/club22.func.php';
+				$result = $db->query("SELECT * FROM {$tablepre}players WHERE pid='$bid' AND hp=0");
+				if($db->num_rows($result) > 0) {
+					$npc = $db->fetch_array($result);
+					FireseedRecruit($npc);
+				}
+				$mode = 'command';
+			} else {
+				include_once GAME_ROOT.'./include/game/itemmain.func.php';
+				getcorpse($command);
+			}
 		} elseif($mode == 'team') {
 			include_once GAME_ROOT.'./include/game/team.func.php';
 			if ($command=="teammake") teammake($nteamID,$nteamPass,(int)$ticon);

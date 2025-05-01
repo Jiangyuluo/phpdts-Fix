@@ -1,0 +1,57 @@
+# 种火探物和索敌逻辑移动记录
+
+## 问题描述
+在将种火设定在探物或索敌模式时，没有返回任何反馈，效果也没有生效。这是因为这些功能的触发逻辑在 game.php 中，但只有在玩家执行 command=move 时才会触发，而不会在其他移动或探索操作中触发。
+
+## 问题原因
+原来的代码在 game.php 中判断 `$mode == 'command' && $command == 'move'` 时才会触发种火的探物和索敌逻辑，但这种判断方式不够全面，无法覆盖所有的移动和探索场景。
+
+## 修复方法
+将种火的探物和索敌逻辑从 game.php 移动到 search.func.php 中的 move() 和 search() 函数中，这样无论玩家通过什么方式移动或探索，都能触发种火的相关功能。
+
+## 修改文件
+1. include/game/search.func.php - 在 move() 和 search() 函数中添加种火逻辑
+2. game.php - 移除原有的种火逻辑判断
+
+## 修改详情
+1. 在 search.func.php 的 move() 函数中添加：
+   ```php
+   # 如果是种火歌者，处理种火相关逻辑
+   if($club == 22) {
+       include_once GAME_ROOT.'./include/game/club22.func.php';
+       FireseedSearch($pls);
+       FireseedDrainNPC($pls);
+   }
+   ```
+
+2. 在 search.func.php 的 search() 函数中添加：
+   ```php
+   # 如果是种火歌者，处理种火相关逻辑
+   if($club == 22) {
+       include_once GAME_ROOT.'./include/game/club22.func.php';
+       FireseedSearch($pls);
+       FireseedDrainNPC($pls);
+   }
+   ```
+
+3. 从 game.php 中移除：
+   ```php
+   // 如果是种火歌者，处理种火相关逻辑
+   if($club == 22) {
+       include_once GAME_ROOT.'./include/game/club22.func.php';
+       // 如果玩家在移动时，触发种火探物和索敌逻辑
+       if($mode == 'command' && $command == 'move') {
+           FireseedSearch($pls);
+           FireseedDrainNPC($pls);
+       }
+   }
+   ```
+
+## 优势
+1. 无论玩家通过什么方式移动或探索，都能触发种火的探物和索敌逻辑
+2. 代码逻辑更加清晰，将相关功能放在更合适的位置
+3. 修复了种火探物和索敌功能不生效的问题
+
+## 注意事项
+- 这个修改不会影响其他功能，只是将种火的逻辑移动到更合适的位置
+- 种火的探物和索敌功能现在会在每次移动和探索时都触发，而不仅仅是在执行 command=move 时

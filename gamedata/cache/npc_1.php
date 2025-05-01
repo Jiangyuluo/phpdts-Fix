@@ -2088,6 +2088,7 @@
 	'gd' => 'f',
 	'clubskill' => Array(
 		'fireseed3',
+		'npc_purity',
 	),
 	//'pls' => 99,
 	'mhp' => 11,

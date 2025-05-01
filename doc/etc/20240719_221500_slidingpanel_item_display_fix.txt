@@ -1,0 +1,78 @@
+# 侧边栏（Sliding Panel）种火物品显示优化记录
+
+## 问题描述
+
+在种火物品列表中，物品类型和特殊属性栏位显示的是原始数据（如 "HH"、"f"），而不是对应的可读文本（如 "生命恢复"、"灼焰"）。这使得玩家难以理解物品的实际功能。
+
+## 修复内容
+
+1. **优化物品类型显示**
+   - 修改了物品类型的显示逻辑，使其显示 resources_1.php 中 $iteminfo 数组对应的可读文本
+   - 例如，将 "HH" 显示为 "生命恢复"，"DA" 显示为 "手臂装备"
+
+2. **优化物品特殊属性显示**
+   - 修改了物品特殊属性的显示逻辑，使其显示 resources_1.php 中 $itemspkinfo 数组对应的可读文本
+   - 对于多个特殊属性，会将它们以逗号分隔显示
+   - 例如，将 "f" 显示为 "灼焰"，"fu" 显示为 "灼焰, 火焰"
+
+3. **添加数据传递**
+   - 在页面加载时，将 PHP 中的 $iteminfo 和 $itemspkinfo 数组传递给 JavaScript
+   - 这样 JavaScript 可以使用这些数据来显示可读的物品信息
+
+## 修改文件
+- templates/default/slidingpanel.htm
+
+## 具体修改
+
+1. 在页面顶部添加 iteminfo 和 itemspkinfo 数据：
+```html
+<!--{eval echo "<script>var clbpara_data = ".json_encode($clbpara).";</script>";}-->
+<!--{eval echo "<script>var iteminfo = ".json_encode($iteminfo).";</script>";}-->
+<!--{eval echo "<script>var itemspkinfo = ".json_encode($itemspkinfo).";</script>";}-->
+```
+
+2. 修改物品类型的显示逻辑：
+```javascript
+// 类型
+const typeCell = row.insertCell();
+// 使用iteminfo显示物品类型
+if (typeof window.iteminfo !== 'undefined' && window.iteminfo[item.itmk]) {
+    typeCell.textContent = window.iteminfo[item.itmk];
+} else {
+    typeCell.textContent = item.itmk;
+}
+```
+
+3. 修改物品特殊属性的显示逻辑：
+```javascript
+// 特殊
+const specialCell = row.insertCell();
+// 使用itemspkinfo显示物品特殊属性
+if (item.itmsk && item.itmsk !== '--') {
+    if (typeof window.itemspkinfo !== 'undefined') {
+        let spkText = '';
+        // 遍历每个特殊属性字符
+        for (let i = 0; i < item.itmsk.length; i++) {
+            const spk = item.itmsk[i];
+            if (window.itemspkinfo[spk]) {
+                if (spkText) spkText += ', ';
+                spkText += window.itemspkinfo[spk];
+            } else {
+                if (spkText) spkText += ', ';
+                spkText += spk;
+            }
+        }
+        specialCell.innerHTML = spkText;
+    } else {
+        specialCell.textContent = item.itmsk;
+    }
+} else {
+    specialCell.textContent = '--';
+}
+```
+
+## 优势
+1. 提高了种火物品列表的可读性，使玩家能够更容易理解物品的功能
+2. 保持了与游戏其他部分的一致性，使用相同的物品类型和特殊属性描述
+3. 代码具有健壮性，能够处理未定义的物品类型和特殊属性
+4. 保持了与原有功能的兼容性

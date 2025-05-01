@@ -115,6 +115,19 @@ function item_test($itmn, &$data) {
             $itm = $itmk = $itmsk = '';
             $itme = $itms = 0;
         }
+    } elseif ($itm == '测试用枫火歌者社团卡') {
+        //-----------------------//
+        //未选择社团情况下才可以用社团卡
+        if($club) {
+            $log.="你已经是有身份的人了！不能再使用社团卡。<br>";
+        } else {
+            $log.="<br>加入了了<span class='sparkle'>{$sparkle}枫火歌者{$sparkle}</span>！<br>";
+            //社团变更
+            changeclub(22, $data);
+            //销毁道具
+            $itm = $itmk = $itmsk = '';
+            $itme = $itms = 0;
+        }
         //-----------------------//
     } elseif ($itm == '提示纸条A') {
         $log .= '你读着纸条上的内容：<br>"执行官其实都是幻影，那个红暮的身上应该有召唤幻影的玩意。"<br>"用那个东西然后打倒幻影的话能用游戏解除钥匙出去吧。"<br>';

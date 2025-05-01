@@ -1,0 +1,100 @@
+# 种火 clbpara 数据格式修复记录 (第二次)
+
+## 问题描述
+在收纳种火后，其 clbpara 中的 skill 数据仍然没有正确处理，数据库中的 clbpara 键值成为了类似于 `"4"skill":[fireseed3]}"` 这样的格式，而不是正确的 JSON 格式 `{"skill":["fireseed3"]}`。
+
+## 问题原因
+问题出在 FireseedRecruit 函数中处理 NPC 的 clbpara 数据的方式。虽然我们已经将 base64_encode(serialize()) 改为 json_encode()，但是在读取 NPC 的 clbpara 数据时没有正确处理 skill 字段。
+
+## 修复方法
+1. 修改 FireseedRecruit 函数，确保正确处理 NPC 的 clbpara 数据：
+   - 添加对 NPC clbpara 的检查，确保它是数组格式
+   - 添加对 skill 字段的检查，确保它是数组格式
+
+2. 修改 club22_fix.func.php 文件，增强修复功能：
+   - 添加对 skill 字段的特殊处理，将字符串格式的 skill 字段转换为数组格式
+   - 添加对非 base64 编码的 clbpara 数据的处理
+   - 添加对玩家 clbpara 中 fireseed 数据的修复
+
+## 修复文件
+1. include/game/club22.func.php - 修改 FireseedRecruit 函数
+2. include/game/club22_fix.func.php - 增强修复功能
+
+## 修复详情
+1. 在 FireseedRecruit 函数中，添加对 NPC clbpara 的检查：
+   ```php
+   // 确保 NPC 的 clbpara 是数组格式
+   if(!is_array($npc['clbpara'])) {
+       $npc['clbpara'] = get_clbpara($npc['clbpara']);
+   }
+   ```
+
+2. 在 FireseedRecruit 函数中，修改对 skill 字段的处理：
+   ```php
+   'skills' => isset($npc['clbpara']['skill']) && is_array($npc['clbpara']['skill']) ? $npc['clbpara']['skill'] : array(),
+   ```
+
+3. 在 club22_fix.func.php 文件中，添加对 skill 字段的特殊处理：
+   ```php
+   // 确保 skill 字段是数组
+   if(isset($unserialized['skill']) && !is_array($unserialized['skill'])) {
+       // 如果 skill 字段不是数组，尝试修复
+       $skill_str = $unserialized['skill'];
+       // 尝试从字符串中提取技能数组
+       if(preg_match('/\[(.*?)\]/', $skill_str, $matches)) {
+           $skills = explode(',', str_replace('"', '', $matches[1]));
+           $unserialized['skill'] = array_map('trim', $skills);
+       } else {
+           $unserialized['skill'] = array();
+       }
+   }
+   ```
+
+4. 在 club22_fix.func.php 文件中，添加对非 base64 编码的 clbpara 数据的处理：
+   ```php
+   // 如果不是 base64 编码，尝试直接解析
+   $clbpara_data = json_decode($npc['clbpara'], true);
+   if(is_array($clbpara_data)) {
+       // 确保 skill 字段是数组
+       if(isset($clbpara_data['skill']) && !is_array($clbpara_data['skill'])) {
+           // 如果 skill 字段不是数组，尝试修复
+           $skill_str = $clbpara_data['skill'];
+           // 尝试从字符串中提取技能数组
+           if(preg_match('/\[(.*?)\]/', $skill_str, $matches)) {
+               $skills = explode(',', str_replace('"', '', $matches[1]));
+               $clbpara_data['skill'] = array_map('trim', $skills);
+           } else {
+               $clbpara_data['skill'] = array();
+           }
+       }
+       
+       // 重新编码为JSON格式
+       $json_clbpara = json_encode($clbpara_data, JSON_UNESCAPED_UNICODE);
+       // 更新数据库
+       $db->query("UPDATE {$tablepre}players SET clbpara='$json_clbpara' WHERE pid='{$npc['pid']}'");
+       $fixed_count++;
+   }
+   ```
+
+5. 在 club22_fix.func.php 文件中，添加对玩家 clbpara 中 fireseed 数据的修复：
+   ```php
+   // 检查种火的skills字段是否为数组
+   if(isset($fs_data['skills']) && !is_array($fs_data['skills'])) {
+       // 如果 skills 字段不是数组，尝试修复
+       $skills_str = $fs_data['skills'];
+       // 尝试从字符串中提取技能数组
+       if(preg_match('/\[(.*?)\]/', $skills_str, $matches)) {
+           $skills = explode(',', str_replace('"', '', $matches[1]));
+           $clbpara['fireseed'][$fs_id]['skills'] = array_map('trim', $skills);
+       } else {
+           $clbpara['fireseed'][$fs_id]['skills'] = array();
+       }
+       $updated = true;
+   }
+   ```
+
+## 注意事项
+- 修复操作只能由枫火歌者（club=22）执行
+- 修复操作会尝试修复所有种火的数据格式问题，包括 skill 字段的格式问题
+- 修复操作会显示修复的记录数量
+- 修复按钮有确认提示，防止误操作

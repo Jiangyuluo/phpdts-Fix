@@ -1,4 +1,6 @@
 <!--{eval echo "<script>var clbpara_data = ".json_encode($clbpara).";</script>";}-->
+<!--{eval echo "<script>var iteminfo = ".json_encode($iteminfo).";</script>";}-->
+<!--{eval echo "<script>var itemspkinfo = ".json_encode($itemspkinfo).";</script>";}-->
 
 <!-- 副面板按钮 -->
 <button id="side-panel-button" class="side-panel-button" onclick="togglePanel()">
@@ -11,6 +13,9 @@
         <div class="tab-container">
             <button class="tab-button active" onclick="showTab('misc-tab', event)">任务窗体</button>
             <button class="tab-button" onclick="showTab('misc-tab2', event)">其他信息</button>
+            <!--{if $club==22}-->
+            <button class="tab-button" onclick="showTab('fireseed-tab', event)">种火管理</button>
+            <!--{/if}-->
             <!-- 预留更多标签的空间 -->
             <div class="tab-spacer"></div>
         </div>
@@ -148,6 +153,192 @@
                 </div>
             </div>
         </div>
+
+        <!-- 种火管理标签页 -->
+        <!--{if $club==22}-->
+        <div id="fireseed-tab" class="tab-pane">
+            <div class="section-container">
+                <h4 class="section-title">种火状态</h4>
+                <div class="section-content">
+                    <table class="fireseed-table">
+                        <tr>
+                            <th>名称</th>
+                            <th>等级</th>
+                            <th>状态</th>
+                            <th>位置</th>
+                            <th>生命</th>
+                            <th>体力</th>
+                            <th>攻击</th>
+                            <th>防御</th>
+                            <th>ID</th>
+                        </tr>
+                        <!--{if !empty($clbpara['fireseed'])}-->
+                        <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
+                        <tr>
+                            <td><span class="yellow">$fs_data['name']</span></td>
+                            <td>$fs_data['level']</td>
+                            <td><!--{if $fs_data['mode'] == 0}-->跟随<!--{elseif $fs_data['mode'] == 1}-->探物<!--{elseif $fs_data['mode'] == 2}-->索敌<!--{else}-->隐藏<!--{/if}--></td>
+                            <td>$plsinfo[$fs_data['pls']]</td>
+                            <td>$fs_data['hp']/$fs_data['mhp']</td>
+                            <td>$fs_data['sp']/$fs_data['msp']</td>
+                            <td>$fs_data['att']</td>
+                            <td>$fs_data['def']</td>
+                            <td><span class="lime">$fs_id</span></td>
+                        </tr>
+                        <!--{/loop}-->
+                        <!--{else}-->
+                        <tr>
+                            <td colspan="9">你还没有收纳任何种火。</td>
+                        </tr>
+                        <!--{/if}-->
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h4 class="section-title">种火部署</h4>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="fireseed_id_panel">选择种火：</label>
+                        <select id="fireseed_id_panel">
+                            <!--{if !empty($clbpara['fireseed'])}-->
+                            <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
+                            <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
+                            <!--{/loop}-->
+                            <!--{else}-->
+                            <option value="">你还没有收纳任何种火</option>
+                            <!--{/if}-->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deploy_mode_panel">部署模式：</label>
+                        <select id="deploy_mode_panel">
+                            <option value="0">跟随</option>
+                            <option value="1">探物</option>
+                            <option value="2">索敌</option>
+                            <option value="3">隐藏</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="deploy-location-group">
+                        <label for="deploy_pls_panel">部署位置：</label>
+                        <select id="deploy_pls_panel">
+                            <!--{loop $plsinfo $pls_id $pls_name}-->
+                            <!--{if $pls_id > 0 && !in_array($pls_id, $deepzones) && $pls_id < 100}-->
+                            <option value="$pls_id" <!--{if $pls_id == $pls}-->selected<!--{/if}-->>$pls_name</option>
+                            <!--{/if}-->
+                            <!--{/loop}-->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="cmdbutton" onclick="deployFireseed()">部署种火</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h4 class="section-title">种火物品</h4>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="fireseed_item_id_panel">选择种火：</label>
+                        <select id="fireseed_item_id_panel" onchange="updateFireseedItems(this.value)">
+                            <!--{if !empty($clbpara['fireseed'])}-->
+                            <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
+                            <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
+                            <!--{/loop}-->
+                            <!--{else}-->
+                            <option value="">你还没有收纳任何种火</option>
+                            <!--{/if}-->
+                        </select>
+                    </div>
+
+                    <div id="fireseed-items-list">
+                        <!--{if !empty($clbpara['fireseed'])}-->
+                        <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
+                        <div class="fireseed-items" id="fireseed-items-$fs_id" style="display: none;">
+                            <!--{if !empty($fs_data['items'])}-->
+                            <table class="fireseed-table">
+                                <tr>
+                                    <th>物品名称</th>
+                                    <th>类型</th>
+                                    <th>效果</th>
+                                    <th>数量</th>
+                                    <th>特殊</th>
+                                    <th>操作</th>
+                                </tr>
+                                <!--{loop $fs_data['items'] $item_id $item}-->
+                                <tr>
+                                    <td>$item['itm']</td>
+                                    <td>$item['itmk']</td>
+                                    <td>$item['itme']</td>
+                                    <td>$item['itms']</td>
+                                    <td>$item['itmsk']</td>
+                                    <td>
+                                        <input type="radio" name="item_id_panel" value="$item_id" data-fs-id="$fs_id">
+                                    </td>
+                                </tr>
+                                <!--{/loop}-->
+                            </table>
+                            <button type="button" class="cmdbutton" onclick="getFireseedItem('$fs_id')">获取物品</button>
+                            <!--{else}-->
+                            <p>该种火没有收集到任何物品。</p>
+                            <!--{/if}-->
+                        </div>
+                        <!--{/loop}-->
+                        <!--{/if}-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h4 class="section-title">种火强化</h4>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label for="enhance_fireseed_id_panel">选择种火：</label>
+                        <select id="enhance_fireseed_id_panel">
+                            <!--{if !empty($clbpara['fireseed'])}-->
+                            <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
+                            <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
+                            <!--{/loop}-->
+                            <!--{else}-->
+                            <option value="">你还没有收纳任何种火</option>
+                            <!--{/if}-->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="enhance_item_panel">选择焰火物品：</label>
+                        <select id="enhance_item_panel">
+                            <!--{if isset($itm1) && ($itm1 == '◆焰火' || $itm1 == '✦烈焰火' || $itm1 == '★华焰火★' || $itm1 == '☾真焰火☽' || $itm1 == '☼焰火☼')}-->
+                            <option value="1">$itm1 (效果: $itme1, 数量: $itms1)</option>
+                            <!--{/if}-->
+                            <!--{if isset($itm2) && ($itm2 == '◆焰火' || $itm2 == '✦烈焰火' || $itm2 == '★华焰火★' || $itm2 == '☾真焰火☽' || $itm2 == '☼焰火☼')}-->
+                            <option value="2">$itm2 (效果: $itme2, 数量: $itms2)</option>
+                            <!--{/if}-->
+                            <!--{if isset($itm3) && ($itm3 == '◆焰火' || $itm3 == '✦烈焰火' || $itm3 == '★华焰火★' || $itm3 == '☾真焰火☽' || $itm3 == '☼焰火☼')}-->
+                            <option value="3">$itm3 (效果: $itme3, 数量: $itms3)</option>
+                            <!--{/if}-->
+                            <!--{if isset($itm4) && ($itm4 == '◆焰火' || $itm4 == '✦烈焰火' || $itm4 == '★华焰火★' || $itm4 == '☾真焰火☽' || $itm4 == '☼焰火☼')}-->
+                            <option value="4">$itm4 (效果: $itme4, 数量: $itms4)</option>
+                            <!--{/if}-->
+                            <!--{if isset($itm5) && ($itm5 == '◆焰火' || $itm5 == '✦烈焰火' || $itm5 == '★华焰火★' || $itm5 == '☾真焰火☽' || $itm5 == '☼焰火☼')}-->
+                            <option value="5">$itm5 (效果: $itme5, 数量: $itms5)</option>
+                            <!--{/if}-->
+                            <!--{if isset($itm6) && ($itm6 == '◆焰火' || $itm6 == '✦烈焰火' || $itm6 == '★华焰火★' || $itm6 == '☾真焰火☽' || $itm6 == '☼焰火☼')}-->
+                            <option value="6">$itm6 (效果: $itme6, 数量: $itms6)</option>
+                            <!--{/if}-->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="cmdbutton" onclick="enhanceFireseed()">强化种火</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--{/if}-->
 
         <!-- 更新按钮 -->
         <div class="update-button-container">
@@ -475,6 +666,61 @@
         transform: translateY(1px);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
+
+    /* 种火管理样式 */
+    .fireseed-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+
+    .fireseed-table th, .fireseed-table td {
+        border: 1px solid rgba(225, 124, 226, 0.3);
+        padding: 5px;
+        text-align: center;
+        font-size: 9pt;
+    }
+
+    .fireseed-table th {
+        background-color: rgba(30, 30, 30, 0.7);
+        color: #cceafa;
+    }
+
+    .fireseed-table td {
+        color: #98fb98;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #ddd;
+        font: 10pt "FusionPixel10px";
+    }
+
+    .form-group select, .form-group input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        background-color: rgba(50, 50, 50, 0.7);
+        border: 1px solid rgba(225, 124, 226, 0.3);
+        border-radius: 4px;
+        color: #98fb98;
+        font: 10pt "FusionPixel10px";
+    }
+
+    .form-group select:focus, .form-group input[type="text"]:focus {
+        border-color: rgba(225, 124, 226, 0.7);
+        outline: none;
+    }
+
+    .fireseed-items p {
+        color: #98fb98;
+        font: 10pt "FusionPixel10px";
+        margin: 10px 0;
+    }
 </style>
 
 <script>
@@ -492,15 +738,8 @@
         // 初始化面板
         initPanel();
 
-        // 更新进度条
+        // 初始更新进度条（仅一次）
         updateChargeProgressBars();
-
-        // 定期更新进度条
-        setInterval(function() {
-            if (isPanelOpen()) {
-                updateChargeProgressBars();
-            }
-        }, 2000);
     });
 
     // 初始化面板
@@ -523,7 +762,226 @@
             }
         });
 
+        // 初始化种火管理功能
+        initFireseedManagement();
+
         console.log('Panel initialized');
+    }
+
+    // 初始化种火管理功能
+    function initFireseedManagement() {
+        // 添加部署模式变化事件
+        const deployMode = document.getElementById('deploy_mode');
+        if (deployMode) {
+            deployMode.addEventListener('change', function() {
+                const locationGroup = document.getElementById('deploy-location-group');
+                if (this.value === '0') { // 跟随模式
+                    if (locationGroup) locationGroup.style.display = 'none';
+                } else {
+                    if (locationGroup) locationGroup.style.display = 'block';
+                }
+            });
+
+            // 初始触发一次事件
+            const event = new Event('change');
+            deployMode.dispatchEvent(event);
+        }
+
+        // 初始化种火物品显示
+        const fireseedItemId = document.getElementById('fireseed_item_id');
+        if (fireseedItemId && fireseedItemId.value) {
+            updateFireseedItems(fireseedItemId.value);
+        }
+    }
+
+    // 更新种火物品显示
+    function updateFireseedItems(fsId) {
+        // 隐藏所有种火物品列表
+        const itemLists = document.querySelectorAll('.fireseed-items');
+        for(let i = 0; i < itemLists.length; i++) {
+            itemLists[i].style.display = 'none';
+        }
+
+        // 显示选中的种火物品列表
+        const selectedList = document.getElementById('fireseed-items-' + fsId);
+        if(selectedList) {
+            selectedList.style.display = 'block';
+        }
+    }
+
+    // 部署种火
+    function deployFireseed() {
+        const fireseedId = document.getElementById('fireseed_id_panel').value;
+        const deployMode = document.getElementById('deploy_mode_panel').value;
+        const deployPls = document.getElementById('deploy_pls_panel').value;
+
+        if(!fireseedId) {
+            alert('请选择要部署的种火！');
+            return;
+        }
+
+        console.log('部署种火 - ID:', fireseedId, '模式:', deployMode, '位置:', deployPls);
+
+        // 准备数据
+        const formData = new FormData();
+        formData.append('mode', 'command');
+        formData.append('command', 'special');
+        formData.append('sp_cmd', 'sp_fireseed_deploy');
+        formData.append('fireseed_id', fireseedId);
+        formData.append('deploy_mode', deployMode);
+
+        // 无论什么模式，都添加位置字段
+        formData.append('deploy_pls', deployPls);
+
+        // 使用AJAX提交
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'command.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // 将响应内容写入命令窗口
+                if (window.parent && window.parent.document.getElementById('cmd_window')) {
+                    window.parent.document.getElementById('cmd_window').contentWindow.document.body.innerHTML = xhr.responseText;
+                } else {
+                    console.log('命令已执行，但无法更新命令窗口');
+                }
+
+                // 更新clbpara数据
+                fetchLatestClbpara();
+
+                // 显示成功消息
+                showUpdateMessage('种火部署命令已执行');
+
+                // 延迟一段时间后再次更新种火标签页，确保数据已更新
+                setTimeout(function() {
+                    updateFireseedTab();
+                }, 500);
+            } else {
+                console.error('命令执行失败:', xhr.statusText);
+                showUpdateMessage('种火部署命令执行失败', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('网络错误，无法执行命令');
+            showUpdateMessage('网络错误，无法执行命令', 'error');
+        };
+
+        xhr.send(formData);
+    }
+
+    // 获取种火物品
+    function getFireseedItem(fsId) {
+        // 获取选中的物品
+        const selectedItem = document.querySelector('input[name="item_id_panel"]:checked');
+
+        if(!selectedItem) {
+            alert('请选择要获取的物品！');
+            return;
+        }
+
+        const itemId = selectedItem.value;
+
+        // 准备数据
+        const formData = new FormData();
+        formData.append('mode', 'command');
+        formData.append('command', 'special');
+        formData.append('sp_cmd', 'sp_fireseed_getitem');
+        formData.append('fireseed_item_id', fsId);
+        formData.append('item_id', itemId);
+
+        // 使用AJAX提交
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'command.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // 将响应内容写入命令窗口
+                if (window.parent && window.parent.document.getElementById('cmd_window')) {
+                    window.parent.document.getElementById('cmd_window').contentWindow.document.body.innerHTML = xhr.responseText;
+                } else {
+                    console.log('命令已执行，但无法更新命令窗口');
+                }
+
+                // 更新clbpara数据
+                fetchLatestClbpara();
+
+                // 显示成功消息
+                showUpdateMessage('物品获取命令已执行');
+
+                // 延迟一段时间后再次更新种火标签页，确保数据已更新
+                setTimeout(function() {
+                    updateFireseedTab();
+                }, 500);
+            } else {
+                console.error('命令执行失败:', xhr.statusText);
+                showUpdateMessage('物品获取命令执行失败', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('网络错误，无法执行命令');
+            showUpdateMessage('网络错误，无法执行命令', 'error');
+        };
+
+        xhr.send(formData);
+    }
+
+    // 强化种火
+    function enhanceFireseed() {
+        const fireseedId = document.getElementById('enhance_fireseed_id_panel').value;
+        const enhanceItem = document.getElementById('enhance_item_panel').value;
+
+        if(!fireseedId) {
+            alert('请选择要强化的种火！');
+            return;
+        }
+
+        if(!enhanceItem) {
+            alert('请选择用于强化的焰火物品！');
+            return;
+        }
+
+        // 准备数据
+        const formData = new FormData();
+        formData.append('mode', 'command');
+        formData.append('command', 'special');
+        formData.append('sp_cmd', 'sp_fireseed_enhance');
+        formData.append('enhance_fireseed_id', fireseedId);
+        formData.append('enhance_item', enhanceItem);
+
+        // 使用AJAX提交
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'command.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // 将响应内容写入命令窗口
+                if (window.parent && window.parent.document.getElementById('cmd_window')) {
+                    window.parent.document.getElementById('cmd_window').contentWindow.document.body.innerHTML = xhr.responseText;
+                } else {
+                    console.log('命令已执行，但无法更新命令窗口');
+                }
+
+                // 更新clbpara数据
+                fetchLatestClbpara();
+
+                // 显示成功消息
+                showUpdateMessage('种火强化命令已执行');
+
+                // 延迟一段时间后再次更新种火标签页，确保数据已更新
+                setTimeout(function() {
+                    updateFireseedTab();
+                }, 500);
+            } else {
+                console.error('命令执行失败:', xhr.statusText);
+                showUpdateMessage('种火强化命令执行失败', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('网络错误，无法执行命令');
+            showUpdateMessage('网络错误，无法执行命令', 'error');
+        };
+
+        xhr.send(formData);
     }
 
     // 切换标签页
@@ -665,6 +1123,8 @@
             fetchLatestClbpara();
             // 然后更新显示
             updateChargeProgressBars();
+            // 更新种火标签页
+            updateFireseedTab();
 
             console.log('Panel opened');
 
@@ -733,6 +1193,9 @@
                         const newClbpara = JSON.parse(match[1]);
                         clbpara = newClbpara;
                         console.log('clbpara updated from page:', clbpara);
+
+                        // 更新种火标签页
+                        updateFireseedTab();
                     } catch (e) {
                         console.error('Failed to parse clbpara data:', e);
                     }
@@ -793,6 +1256,9 @@
 
                         // 更新显示
                         updateChargeProgressBars();
+
+                        // 更新种火标签页
+                        updateFireseedTab();
 
                         // 恢复按钮状态
                         if (updateButton) {
@@ -890,5 +1356,374 @@
                 }, 300);
             }, 2000);
         }
+    }
+
+    // 更新种火标签页
+    function updateFireseedTab() {
+        // 检查是否有种火标签页
+        const fireseedTab = document.getElementById('fireseed-tab');
+        if (!fireseedTab) return;
+
+        // 检查是否有种火数据
+        if (!clbpara || !clbpara.fireseed) {
+            console.log('No fireseed data available');
+            return;
+        }
+
+        // 更新种火状态表格
+        updateFireseedStatusTable();
+
+        // 更新种火选择下拉框
+        updateFireseedSelects();
+
+        // 更新种火物品列表
+        updateFireseedItemsList();
+
+        console.log('Fireseed tab updated');
+    }
+
+    // 更新种火状态表格
+    function updateFireseedStatusTable() {
+        const statusTable = document.querySelector('#fireseed-tab .fireseed-table');
+        if (!statusTable) return;
+
+        // 清除现有行，保留表头
+        const headerRow = statusTable.rows[0];
+        while (statusTable.rows.length > 1) {
+            statusTable.deleteRow(1);
+        }
+
+        // 如果没有种火数据，显示提示行
+        if (!clbpara.fireseed || Object.keys(clbpara.fireseed).length === 0) {
+            const row = statusTable.insertRow();
+            const cell = row.insertCell();
+            cell.colSpan = 9; // 更新为9列
+            cell.textContent = '你还没有收纳任何种火。';
+            return;
+        }
+
+        // 添加种火数据行
+        for (const fsId in clbpara.fireseed) {
+            // 跳过非对象类型的条目或无效数据
+            if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
+                !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
+                console.log('跳过无效种火数据:', fsId, clbpara.fireseed[fsId]);
+                continue;
+            }
+
+            const fsData = clbpara.fireseed[fsId];
+            const row = statusTable.insertRow();
+
+            // 名称
+            const nameCell = row.insertCell();
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'yellow';
+            nameSpan.textContent = fsData.name;
+            nameCell.appendChild(nameSpan);
+
+            // 等级
+            const levelCell = row.insertCell();
+            levelCell.textContent = fsData.level;
+
+            // 状态
+            const modeCell = row.insertCell();
+            const modes = ['跟随', '探物', '索敌', '隐藏'];
+            modeCell.textContent = modes[fsData.mode] || '未知';
+
+            // 位置
+            const plsCell = row.insertCell();
+            // 获取位置名称
+            const plsName = getPlsName(fsData.pls);
+            plsCell.textContent = plsName;
+
+            // 生命
+            const hpCell = row.insertCell();
+            hpCell.textContent = fsData.hp + '/' + fsData.mhp;
+
+            // 体力
+            const spCell = row.insertCell();
+            spCell.textContent = fsData.sp + '/' + fsData.msp;
+
+            // 攻击
+            const attCell = row.insertCell();
+            attCell.textContent = fsData.att;
+
+            // 防御
+            const defCell = row.insertCell();
+            defCell.textContent = fsData.def;
+
+            // ID
+            const idCell = row.insertCell();
+            const idSpan = document.createElement('span');
+            idSpan.className = 'lime';
+            idSpan.textContent = fsId;
+            idCell.appendChild(idSpan);
+        }
+    }
+
+    // 获取位置名称
+    function getPlsName(plsId) {
+        // 尝试从页面中获取位置信息
+        const plsSelects = document.querySelectorAll('select[id$="pls_panel"]');
+        for (const select of plsSelects) {
+            for (const option of select.options) {
+                if (option.value == plsId) {
+                    return option.textContent;
+                }
+            }
+        }
+        return '未知位置';
+    }
+
+    // 更新种火选择下拉框
+    function updateFireseedSelects() {
+        const selects = [
+            document.getElementById('fireseed_id_panel'),
+            document.getElementById('fireseed_item_id_panel'),
+            document.getElementById('enhance_fireseed_id_panel')
+        ];
+
+        for (const select of selects) {
+            if (!select) continue;
+
+            // 保存当前选中值
+            const currentValue = select.value;
+
+            // 清除现有选项
+            select.innerHTML = '';
+
+            // 如果没有种火数据，添加提示选项
+            if (!clbpara.fireseed || Object.keys(clbpara.fireseed).length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '你还没有收纳任何种火';
+                select.appendChild(option);
+                continue;
+            }
+
+            // 添加种火选项
+            for (const fsId in clbpara.fireseed) {
+                // 跳过非对象类型的条目或无效数据
+                if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
+                    !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
+                    console.log('跳过无效种火数据(选择框):', fsId, clbpara.fireseed[fsId]);
+                    continue;
+                }
+
+                const fsData = clbpara.fireseed[fsId];
+                const option = document.createElement('option');
+                option.value = fsId;
+                option.textContent = fsData.name + ' (等级: ' + fsData.level + ', ID: ' + fsId + ')';
+                select.appendChild(option);
+            }
+
+            // 尝试恢复之前的选中值
+            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+                select.value = currentValue;
+            }
+        }
+    }
+
+    // 更新种火物品列表
+    function updateFireseedItemsList() {
+        const itemsList = document.getElementById('fireseed-items-list');
+        if (!itemsList) return;
+
+        // 清除现有内容
+        itemsList.innerHTML = '';
+
+        // 如果没有种火数据，返回
+        if (!clbpara.fireseed || Object.keys(clbpara.fireseed).length === 0) {
+            return;
+        }
+
+        // 为每个种火创建物品列表
+        for (const fsId in clbpara.fireseed) {
+            // 跳过非对象类型的条目或无效数据
+            if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
+                !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
+                console.log('跳过无效种火数据(物品列表):', fsId, clbpara.fireseed[fsId]);
+                continue;
+            }
+
+            const fsData = clbpara.fireseed[fsId];
+            const itemsDiv = document.createElement('div');
+            itemsDiv.className = 'fireseed-items';
+            itemsDiv.id = 'fireseed-items-' + fsId;
+            itemsDiv.style.display = 'none';
+
+            // 如果种火有物品
+            if (fsData.items && fsData.items.length > 0) {
+                const table = document.createElement('table');
+                table.className = 'fireseed-table';
+
+                // 添加表头
+                const headerRow = table.insertRow();
+                const headers = ['物品名称', '类型', '效果', '数量', '特殊', '操作'];
+                for (const header of headers) {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                }
+
+                // 添加物品行
+                for (let itemId = 0; itemId < fsData.items.length; itemId++) {
+                    const item = fsData.items[itemId];
+                    if (!item || item.itm === undefined) continue;
+
+                    const row = table.insertRow();
+
+                    // 物品名称
+                    const nameCell = row.insertCell();
+                    nameCell.textContent = item.itm;
+
+                    // 类型
+                    const typeCell = row.insertCell();
+                    // 使用iteminfo显示物品类型
+                    if (typeof window.iteminfo !== 'undefined' && window.iteminfo[item.itmk]) {
+                        typeCell.textContent = window.iteminfo[item.itmk];
+                    } else {
+                        typeCell.textContent = item.itmk;
+                    }
+
+                    // 效果
+                    const effectCell = row.insertCell();
+                    effectCell.textContent = item.itme;
+
+                    // 数量
+                    const amountCell = row.insertCell();
+                    amountCell.textContent = item.itms;
+
+                    // 特殊
+                    const specialCell = row.insertCell();
+                    // 使用itemspkinfo显示物品特殊属性
+                    if (item.itmsk && item.itmsk !== '--') {
+                        if (typeof window.itemspkinfo !== 'undefined') {
+                            let spkText = '';
+                            // 遍历每个特殊属性字符
+                            for (let i = 0; i < item.itmsk.length; i++) {
+                                const spk = item.itmsk[i];
+                                if (window.itemspkinfo[spk]) {
+                                    if (spkText) spkText += ', ';
+                                    spkText += window.itemspkinfo[spk];
+                                } else {
+                                    if (spkText) spkText += ', ';
+                                    spkText += spk;
+                                }
+                            }
+                            specialCell.innerHTML = spkText;
+                        } else {
+                            specialCell.textContent = item.itmsk;
+                        }
+                    } else {
+                        specialCell.textContent = '--';
+                    }
+
+                    // 操作
+                    const actionCell = row.insertCell();
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'item_id_panel';
+                    radio.value = itemId;
+                    radio.setAttribute('data-fs-id', fsId);
+                    actionCell.appendChild(radio);
+                }
+
+                itemsDiv.appendChild(table);
+
+                // 添加获取按钮
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'cmdbutton';
+                button.textContent = '获取物品';
+                button.onclick = function() { getFireseedItem(fsId); };
+                itemsDiv.appendChild(button);
+            } else {
+                // 如果种火没有物品
+                const p = document.createElement('p');
+                p.textContent = '该种火没有收集到任何物品。';
+                itemsDiv.appendChild(p);
+            }
+
+            itemsList.appendChild(itemsDiv);
+        }
+
+        // 显示第一个有效种火的物品列表
+        let validFireseeds = [];
+        for (const fsId in clbpara.fireseed) {
+            if (clbpara.fireseed[fsId] && typeof clbpara.fireseed[fsId] === 'object' &&
+                clbpara.fireseed[fsId].name && clbpara.fireseed[fsId].level) {
+                validFireseeds.push(fsId);
+            }
+        }
+
+        if (validFireseeds.length > 0) {
+            const firstFsId = validFireseeds[0];
+            const firstItemsList = document.getElementById('fireseed-items-' + firstFsId);
+            if (firstItemsList) {
+                firstItemsList.style.display = 'block';
+            }
+        }
+    }
+
+    // 修复种火数据
+    function fixFireseedData() {
+        if(!confirm('确定要修复种火数据吗？这将尝试修复所有种火的数据格式问题。')) {
+            return;
+        }
+
+        // 准备数据
+        const formData = new FormData();
+        formData.append('mode', 'command');
+        formData.append('command', 'special');
+        formData.append('sp_cmd', 'sp_fireseed_fix');
+
+        // 使用AJAX提交
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'command.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // 将响应内容写入命令窗口
+                if (window.parent && window.parent.document.getElementById('cmd_window')) {
+                    window.parent.document.getElementById('cmd_window').contentWindow.document.body.innerHTML = xhr.responseText;
+                } else {
+                    console.log('命令已执行，但无法更新命令窗口');
+                }
+
+                // 更新clbpara数据
+                fetchLatestClbpara();
+
+                // 显示成功消息
+                showUpdateMessage('种火数据修复命令已执行');
+
+                // 延迟一段时间后再次更新种火标签页，确保数据已更新
+                setTimeout(function() {
+                    updateFireseedTab();
+                }, 500);
+            } else {
+                console.error('命令执行失败:', xhr.statusText);
+                showUpdateMessage('种火数据修复命令执行失败', 'error');
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('网络错误，无法执行命令');
+            showUpdateMessage('网络错误，无法执行命令', 'error');
+        };
+
+        xhr.send(formData);
+    }
+
+    // 打开侧边栏并切换到种火管理标签页
+    function openSidePanelToFireseedTab() {
+        // 打开侧边栏
+        document.getElementById('sliding-panel').classList.add('open');
+        document.getElementById('side-panel-button').style.display = 'none';
+
+        // 切换到种火管理标签页
+        showTab('fireseed-tab', { target: document.querySelector('.tab-button[onclick*="fireseed-tab"]') });
+
+        // 更新种火数据
+        updateFireseedTab();
     }
 </script>

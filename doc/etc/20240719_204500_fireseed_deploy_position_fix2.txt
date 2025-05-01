@@ -1,0 +1,63 @@
+# 种火部署位置修复记录（第二次）
+
+## 问题描述
+在选择部署位置时，无论选择了什么位置，什么操作，实际上都只会将种火部署到玩家的目前位置而非选择的位置。第一次修复没有解决问题。
+
+## 问题原因
+在 club22.func.php 中的 FireseedDeploy 函数中，如果部署模式是跟随模式（mode == 0），位置会被强制设置为玩家当前位置：
+```php
+// 如果是跟随模式，位置设为玩家当前位置
+if($mode == 0) {
+    $pls = $data['pls'];
+} else {
+    // 检查位置是否有效（不是禁区或隐藏地图）
+    if(in_array($pls, $deepzones) || $pls < 0 || $pls >= 100) {
+        $log .= "<span class='red'>无法部署到指定位置！</span><br>";
+        return false;
+    }
+
+    // 确保使用传入的位置参数，而不是玩家当前位置
+    $pls = intval($pls);
+}
+```
+
+## 修复方法
+修改 club22.func.php 中的 FireseedDeploy 函数，使其在跟随模式下也使用传入的位置参数：
+```php
+// 确保使用传入的位置参数，而不是玩家当前位置
+$pls = intval($pls);
+
+// 检查位置是否有效（不是禁区或隐藏地图）
+if(in_array($pls, $deepzones) || $pls < 0 || $pls >= 100) {
+    $log .= "<span class='red'>无法部署到指定位置！</span><br>";
+    return false;
+}
+
+// 如果是跟随模式，记录一下但仍然使用传入的位置
+if($mode == 0) {
+    $log .= "<span class='yellow'>DEBUG: 跟随模式，部署位置 $pls</span><br>";
+}
+```
+
+同时，修复了 FireseedBuffBonus 函数中的一个未使用变量警告：
+```php
+// 计算跟随模式的种火加成
+foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
+```
+改为：
+```php
+// 计算跟随模式的种火加成
+foreach($clbpara['fireseed'] as $fs_data) {
+```
+
+## 修改文件
+1. include/game/club22.func.php - 修改 FireseedDeploy 函数和 FireseedBuffBonus 函数
+
+## 优势
+1. 种火部署后会正确移动到选择的位置，使得探物和索敌功能能够正常工作
+2. 修复了种火部署位置不正确的问题
+3. 修复了未使用变量警告
+
+## 注意事项
+- 这个修复不会影响其他功能，只是修复了种火部署位置不正确的问题
+- 调试信息可以在确认问题解决后移除

@@ -119,6 +119,16 @@ function move($moveto = 99,&$data=NULL)
 	# 更新charge值
 	process_charge_events($data);
 
+	# 如果是种火歌者，处理种火相关逻辑
+	if($club == 22) {
+		include_once GAME_ROOT.'./include/game/club22.func.php';
+		// 移动跟随状态的种火
+		FireseedFollow($pls);
+		// 处理探物和索敌逻辑
+		FireseedSearch($pls);
+		FireseedDrainNPC($pls);
+	}
+
 	$enemyrate =  \revbattle\calc_meetman_rate($data);
 	discover($enemyrate,$data);
 	return;
@@ -166,6 +176,13 @@ function search(&$data=NULL)
 
 	# 更新charge值
 	process_charge_events($data);
+
+	# 如果是种火歌者，处理种火相关逻辑
+	if($club == 22) {
+		include_once GAME_ROOT.'./include/game/club22.func.php';
+		FireseedSearch($pls);
+		FireseedDrainNPC($pls);
+	}
 
 	$enemyrate = \revbattle\calc_meetman_rate($data);
 	discover($enemyrate,$data);
