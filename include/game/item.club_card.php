@@ -82,7 +82,9 @@ function item_club_card($itmn, &$data) {
             $hp = $hp / 3;
             $sp = 1;
         } elseif ($itme == 22) { // 偶像大师特殊处理
-            $log .= "再等等吧……<br>";
+            //$log .= "再等等吧……<br>";
+            $clbpara['dialogue'] = 'club22entry';
+            changeclub(22, $data);
         } else { // 直接将社团卡的效果写入玩家club
             changeclub($itme, $data);
             $log .= "你的称号被改动了！";

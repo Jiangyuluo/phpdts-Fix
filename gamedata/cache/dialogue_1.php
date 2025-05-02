@@ -39,6 +39,11 @@ $dialogues = Array
 		4 => '你似乎看到了，听到了，感觉到了一个模糊的场景，<br>但你不知道这是什么。',
 		5 => '大量类似的场景掠过你的脑海，而你已经无力吸收。<br>你浑身疼痛，不禁口吐鲜血，无助地等待着一切结束。',
 	),
+	'club22entry' => Array
+	(
+		0 => '你打开了这本笔记本，<br>上面空无一物，<br>但你却感觉有声音进入了你的脑海……<br>你的意识在被一些非「你」之物所占据……',
+		1 => '这就是你正在寻找的……<br>种火……的力量吗？<br>那么总之……<br>去寻找他们吧！',
+	),
 
 	//NPC Platform Usage
 	'npcplatform' => Array
@@ -88,6 +93,7 @@ $dialogue_log = Array
 	'choiceTestingDialog_choice_0' => "<span class='yellow'>你选择了选项A！</span><br>这是选项A的结果。<br><br>",
 	'choiceTestingDialog_choice_1' => "<span class='yellow'>你选择了选项B！</span><br>这是选项B的结果。<br><br>",
 	'choiceTestingDialog_choice_2' => "<span class='yellow'>你选择了选项C！</span><br>这是选项C的结果。<br><br>",
+	'club22entry' => "<span class='yellow'>你获得了收纳种火的力量！</span><br>作为开始，去寻找种火的残骸吧……<br><br>",
 );
 
 # 单组对白结束时提供选择肢：

@@ -237,7 +237,7 @@ if(!defined('IN_GAME')) exit('Access Denied');
     "),
     # 58. 除错大师
     58 => Array('class' => 'tlime', 'title'=>" “我知道了——种火是————！”
-      - 入场奖励：入场获得「枫火歌者」称号卡（待实装）
+      - 入场奖励：入场获得「枫火歌者」称号卡
       - 获取方式：清除非常多的种火
     "),
     # 63. 实用主义者
@@ -391,6 +391,10 @@ if(!defined('IN_GAME')) exit('Access Denied');
     # 114. 大只佬
     114 => Array(
       'art' => '★闪耀护符★', 'artk' => 'A', 'arte' => 1, 'arts' => 1, 'artsk' => 'xv',
+    ),
+    # 58. 除错大师
+    58 => Array(
+      'itm6' => '「ПΑЫЙΨ」的记事本', 'itmk6' => 'ZB', 'itme6' => 22,  'itms6' => 1, 'itmsk6' => '',
     ),
   );
 

@@ -486,6 +486,14 @@ function itemmix_events(&$data=NULL)
 		$itmpara1 = $itmpara2 = $itmpara3 = $itmpara4 = $itmpara5 = $itmpara6 = '';
 		$itme1 = $itms1 = $itme2 = $itms2 = $itme3 = $itms3 = $itme4 = $itms4 = $itme5 = $itms5 = $itme6 = $itms6 = 0;
 	}
+
+	if($itm0 == '☢核子核心☢'){
+		$log .= "<span class='lime'>这是何等强大的力量——<br>
+			核子核心的能量融化了你背包里面全部的东西！</span><br>";
+		$itm1 = $itmk1 = $itmsk1 = $itm2 = $itmk2 = $itmsk2 = $itm3 = $itmk3 = $itmsk3 = $itm4 = $itmk4 = $itmsk4 = $itm5 = $itmk5 = $itmsk5 = $itm6 = $itmk6 = $itmsk6 = '';
+		$itmpara1 = $itmpara2 = $itmpara3 = $itmpara4 = $itmpara5 = $itmpara6 = '';
+		$itme1 = $itms1 = $itme2 = $itms2 = $itme3 = $itms3 = $itme4 = $itms4 = $itme5 = $itms5 = $itme6 = $itms6 = 0;
+	}
 	return;
 }
 

@@ -366,6 +366,14 @@ $mixinfo = array
 	array('class' => 'titles', 'stuff' => array('AZURE RONDO模样的杏仁豆腐','☆爆裂模式☆','★神卡认证★'),'result' => array('『AZURE RONDO · AQUAMARINE』Mk-II','WFK',1999,9999,'rknv'),),
 	array('class' => 'titles', 'stuff' => array('红杀铁剑','某种电子零件','造雾设备'),'result' => array('喷气式红杀铁剑','WGK',368,102,'jdNu'),),
 
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-巨环'),'result' => array('埃克法-核环','WP',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-玄铁'),'result' => array('埃克法-核铁','WK',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-斧枪'),'result' => array('埃克法-核枪','WG',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-八面'),'result' => array('埃克法-核面','WC',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-开海'),'result' => array('埃克法-核海','WD',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水','埃克法-破云'),'result' => array('埃克法-核云','WF',25,25,'cZ','{"isNuclearWeapon":1}'),),
+	array('class' => 'titles', 'stuff' => array('核子面包','核子矿泉水'),'result' => array('☢核子核心☢','Y',1,1,'Z','{"lore":"可以将你装备的武器变为核子武器的可怕改造核心。"}'),),
+
 	
 	array('class' => 'hidden', 'stuff' => array('红宝石方块','蓝宝石方块','绿宝石方块','非法枪械部件'),'result' => array('『宝石光束炮-试作型』','WG',1800,144,'ndo'),),
 	
