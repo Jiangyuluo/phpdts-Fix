@@ -95,7 +95,9 @@ function item_tool($itmn, &$data) {
         for($i = 1; $i <= 6; $i++) {
             if (${'itmk' . $i} == 'R') {
                 ${'itme' . $i} += $itme;
-                $itms--;
+                if ($itms != $nosta) {
+                    $itms--;
+                }
                 $flag = true;
                 $log .= "为<span class=\"yellow\">{${'itm'.$i}}</span>充了电。";
                 break;
@@ -108,14 +110,19 @@ function item_tool($itmn, &$data) {
         $log .= "使用了<span class=\"yellow\">$itm</span>。<br>";
         include_once GAME_ROOT . './include/game/item2.func.php';
         divining();
-        $itms--;
+        if ($itms != $nosta) {
+            $itms--;
+        }
     } elseif ($itm == '凸眼鱼') {
         $tm = $now - $corpseprotect; // 尸体保护
         $db->query("UPDATE {$tablepre}players SET weps='0',wep2s='0',arbs='0',arhs='0',aras='0',arfs='0',arts='0',itms0='0',itms1='0',itms2='0',itms3='0',itms4='0',itms5='0',itms6='0',money='0' WHERE hp <= 0 AND endtime <= $tm");
         $cnum = $db->affected_rows();
         addnews($now, 'corpseclear', $name, $cnum, $nick);
         $log .= "使用了<span class=\"yellow\">$itm</span>。<br>突然刮起了一阵怪风，吹走了地上的{$cnum}具尸体！<br>";
-        $itms--; $isk = $cnum;
+        if ($itms != $nosta) {
+            $itms--;
+        }
+        $isk = $cnum;
     } elseif ($itm == '鱼眼凸') {
         $tm = $now - $corpseprotect; // 尸体保护
         $db->query("UPDATE {$tablepre}players SET pls='$pls' WHERE hp <= 0 AND endtime <= $tm");
@@ -124,7 +131,10 @@ function item_tool($itmn, &$data) {
         $log .= "使用了<span class=\"yellow\">$itm</span>。<br>突然刮起了一阵怪风，将遍布全场的{$cnum}具尸体吹到了你所在的地方！<br>";
         $rp += diceroll(1024);
         $log .= "<span class=\"lime\">这过于惨无人道了！</span><br>你觉得罪恶感爬上了你的脊梁！<br>";
-        $itms--; $isk = $cnum;    
+        if ($itms != $nosta) {
+            $itms--;
+        }
+        $isk = $cnum;
     } elseif ($itm == '天候棒') {
         if($weather <= 13) {
             $weather = rand(10, 13);
@@ -136,14 +146,18 @@ function item_tool($itmn, &$data) {
             addnews($now, 'wthfail', $name, $weather, $nick);
             $log .= "你转动了几下天候棒。<br>但天气并未发生改变！<br>";
         }
-        $itms--;
+        if ($itms != $nosta) {
+            $itms--;
+        }
     } elseif ($itm == '消音器') {
         if (strpos($wepk, 'WG') !== 0) {
             $log .= '你没有装备枪械，不能使用消音器。<br>';
         } elseif (strpos($wepsk, 'S') === false) {
             $wepsk .= 'S';
             $log .= "你给<span class=\"yellow\">$wep</span>安装了<span class=\"yellow\">$itm</span>。<br>";
-            $itms--;
+            if ($itms != $nosta) {
+                $itms--;
+            }
         } else {
             $log .= "你的武器已经安装了消音器。<br>";
         }

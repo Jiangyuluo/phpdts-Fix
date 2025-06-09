@@ -17,10 +17,12 @@ function item_weather($itmn, &$data) {
 	
 	include_once GAME_ROOT . './include/game/item2.func.php';
 	wthchange($itm, $itmsk);
-	$itms--;
-	if ($itms <= 0) {
-		$log .= "<span class=\"red\">$itm</span>用光了。<br>";
-		$itm = $itmk = $itmsk = '';
-		$itme = $itms = 0;
+	if ($itms != $nosta) {
+		$itms--;
+		if ($itms <= 0) {
+			$log .= "<span class=\"red\">$itm</span>用光了。<br>";
+			$itm = $itmk = $itmsk = '';
+			$itme = $itms = 0;
+		}
 	}
 }

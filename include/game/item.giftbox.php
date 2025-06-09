@@ -17,7 +17,10 @@ function item_giftbox($itmn, &$data) {
 	
 	$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
 
-	$itms--; $oitm = $itm; $oitmk = $itmk;
+	$oitm = $itm; $oitmk = $itmk;
+	if ($itms != $nosta) {
+		$itms--;
+	}
 	//if($itms <= 0) destory_single_item($data,$itmn,1);
 
 	if(strpos($oitmk, 'ps') === 0){//银色盒子
@@ -131,7 +134,10 @@ function item_ygo_box($itmn, &$data) {
 	$itmsk = & ${'itmsk' . $itmn};
 	
 	$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
-	$itms--; $oitm = $itm;
+	$oitm = $itm;
+	if ($itms != $nosta) {
+		$itms--;
+	}
 	if($itms <= 0) destory_single_item($data,$itmn,1);
 
 	$file1 = config('box',$gamecfg);
@@ -158,7 +164,10 @@ function item_fy_box($itmn, &$data) {
 	$itmsk = & ${'itmsk' . $itmn};
 	
 	$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
-	$itms--; $oitm = $itm;
+	$oitm = $itm;
+	if ($itms != $nosta) {
+		$itms--;
+	}
 	if($itms <= 0) destory_single_item($data,$itmn,1);
 
 	$file1 = config('fy',$gamecfg);
@@ -185,7 +194,10 @@ function item_debug_box($itmn, &$data) {
 	$itmsk = & ${'itmsk' . $itmn};
 	
 	$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
-	$itms--; $oitm = $itm;
+	$oitm = $itm;
+	if ($itms != $nosta) {
+		$itms--;
+	}
 	if($itms <= 0) destory_single_item($data,$itmn,1);
 
 	$file1 = config('f99',$gamecfg);

@@ -407,7 +407,10 @@ function item_fireworks($itmn, &$data) {
 			# Officially dubbed Weird Box.
 			$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
 
-			$itms--; $oitm = $itm; $oitmk = $itmk;
+			$oitm = $itm; $oitmk = $itmk;
+			if ($itms != $nosta) {
+				$itms--;
+			}
 
 			include_once config('randomFSW',$gamecfg);
 

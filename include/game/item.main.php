@@ -215,14 +215,16 @@ function itemuse($itmn,&$data=NULL) {
 		$log .= "特征的元素组合起来，就有机会组合出【{$s_result}】属性。”</span><br>";
 		//阅后即焚
 		$log .="<br>……说这么多鬼记得住啊！<br>你思考了一下，决定把{$itm}吃进肚子里，以便慢慢消化其中的知识。<br>";
-		$itms--;
+		if ($itms != $nosta) {
+			$itms--;
+		}
 		# 将提示给到的次要特征组合加入笔记内
 		if(empty($clbpara['elements']['info']['sd']['sd'.$s_id]))
 			$clbpara['elements']['info']['sd']['sd'.$s_id] = 1;
 	}
 
 	// 消耗物品
-	if ($itms <= 0 && $itm) {
+	if ($itms <= 0 && $itms != $nosta && $itm) {
 		$log .= "<span class=\"red\">$itm</span>用光了。<br>";
 		$itm = $itmk = $itmsk = '';
 		$itme = $itms = 0;
