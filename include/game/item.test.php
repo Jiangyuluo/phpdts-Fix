@@ -157,6 +157,8 @@ function item_test($itmn, &$data) {
         $log .= '你读着纸条上的内容：<br>"火符？"<br>"你当然需要找把火，然后说到火那是什么颜色？"<br>"找一个颜色类似的东西合成就有了吧。"<br>';
     } elseif ($itm == '提示纸条N') {
         $log .= '你读着纸条上的内容：<br>"土符？"<br>"说到土那就是石头吧，然后说到石头那是什么颜色？"<br>"找一个颜色类似的东西合成就有了吧。"<br>';
+    } elseif ($itm == '提示纸条O') {
+        $log .= '你读着纸条上的内容：<br>"纸条O？"<br>"你确定你看到的是O而不是0？"<br>"大概需要看看眼睛？"<br>';
     } elseif ($itm == '提示纸条P') {
         $log .= '你读着纸条上的内容：<br>"金符？这个的确很绕人……"<br>"说到金那就是炼金，然后这是21世纪了，炼制一个金色方块需要什么？"<br>"总之祝你好运。"<br>';
     } elseif ($itm == '提示纸条Q') {
@@ -253,30 +255,6 @@ function item_test($itmn, &$data) {
             $log .= '这件长得很像猫的东西该怎么用呢？<br>';
         }
     }
-    	//元素大师使用提示纸条的特殊效果：
-		if($club == 20 && strpos($itmk,'Y')===0 && strpos($itm,'提示纸条')!==false)
-		{
-			$log.="<br>就在你读完内容打算把纸条收起来时，你愕然发现纸条背面竟然还有字！<br><br>";
-			include config('elementmix',$gamecfg);
-			$log.= $emix_slip[array_rand($emix_slip)];
-			//除商店纸条外：提供一条元素特征（TODO）、或一条固定配方、或一条随机属性组合
-			$log .= "<br><span class='yellow'>附：见面有缘，再送你一条提示吧：<br>“将带有";
-			if(!preg_match('/(A|B|C|D)/',$itm))
-			{
-				//野生纸条：给随机属性组合提示
-				$submix_list = array_merge_recursive($submix_list,$gamevars['rand_emixsubres']);
-			}
-			$s_id = array_rand($submix_list);
-			$s_result = $itemspkinfo[$submix_list[$s_id]['result']];
-			foreach($submix_list[$s_id]['stuff'] as $skey) $log .= "【$itemspkinfo[$skey]】";
-			$log .= "特征的元素组合起来，就有机会组合出【{$s_result}】属性。”</span><br>";
-			//阅后即焚
-			$log .="<br>……说这么多鬼记得住啊！<br>你思考了一下，决定把{$itm}吃进肚子里，以便慢慢消化其中的知识。<br>";
-			$itms--;
-			# 将提示给到的次要特征组合加入笔记内
-			if(empty($clbpara['elements']['info']['sd']['sd'.$s_id]))
-				$clbpara['elements']['info']['sd']['sd'.$s_id] = 1;
-		}
 
 }
 
