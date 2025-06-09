@@ -39,7 +39,15 @@ list($sec,$min,$hour,$day,$month,$year,$wday) = explode(',',date("s,i,H,j,n,Y,w"
 
 require GAME_ROOT.'./include/db_'.$database.'.class.php';
 $db = new dbstuff;
-$db->connect($dbhost, $dbuser, $dbpw, $dbname, $pconnect);
+
+// 检查是否直接使用主数据库 (slave_level = 3)
+if($slave_level == 3 && !empty($master_dbhost) && !empty($master_dbuser) && !empty($master_dbname)) {
+	$db->connect($master_dbhost, $master_dbuser, $master_dbpw, $master_dbname, $pconnect);
+	$gtablepre = $master_tablepre;
+} else {
+	$db->connect($dbhost, $dbuser, $dbpw, $dbname, $pconnect);
+	$gtablepre = $tablepre;
+}
 //$db->select_db($dbname);
 unset($dbhost, $dbuser, $dbpw, $dbname, $pconnect);
 
@@ -60,7 +68,10 @@ require config('audio',$gamecfg);
 require config('tooltip',$gamecfg);
 require config('titles',$gamecfg);
 
-$gtablepre = $tablepre;
+// $gtablepre 已在数据库连接时设置，这里不再重新赋值
+if(!isset($gtablepre)) {
+	$gtablepre = $tablepre;
+}
 
 if($need_update_db_structrue) roommng_verify_db_game_structure();
 

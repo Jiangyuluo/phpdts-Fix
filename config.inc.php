@@ -96,6 +96,31 @@
 	$salt = 'a29d8868b409591398e6ccca95f968ef';
 
 // ============================================================================
+// 主从数据库配置 (Master-Slave Database Configuration)
+// 以下配置项不能通过游戏后台修改，只能手动编辑或通过安装脚本配置
+
+	$slave_level = 0;				// 从服务器级别: 0=主服务器, 1=从服务器(手动迁移), 2=从服务器(自动同步), 3=从服务器(直接使用主数据库)
+								// Slave level: 0=master, 1=slave(manual migration), 2=slave(auto sync), 3=slave(direct master db)
+
+	$master_dbhost = '';			// 主数据库服务器地址 (仅在slave_level>0时有效)
+								// Master database server (only valid when slave_level>0)
+
+	$master_dbuser = '';			// 主数据库用户名 (仅在slave_level>0时有效)
+								// Master database username (only valid when slave_level>0)
+
+	$master_dbpw = '';			// 主数据库密码 (仅在slave_level>0时有效)
+								// Master database password (only valid when slave_level>0)
+
+	$master_dbname = '';			// 主数据库名 (仅在slave_level>0时有效)
+								// Master database name (only valid when slave_level>0)
+
+	$master_tablepre = '';			// 主数据库表前缀 (仅在slave_level>0时有效)
+								// Master database table prefix (only valid when slave_level>0)
+
+	$master_server_name = '';		// 主服务器名称 (用于显示)
+								// Master server name (for display)
+
+// ============================================================================
 
 
 ?>

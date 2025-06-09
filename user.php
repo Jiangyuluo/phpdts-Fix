@@ -3,6 +3,7 @@
 define('CURSCRIPT', 'user');
 
 require './include/common.inc.php';
+require './include/masterslave.func.php';
 //require './include/user.func.php';
 
 
@@ -15,7 +16,27 @@ if(!isset($mode)){
 	$mode = 'show';
 }
 
-if($mode == 'edit') {
+if($mode == 'sync_master') {
+	// 处理主从数据同步
+	$gamedata=Array();$gamedata['innerHTML']['info'] = '';
+
+	if($slave_level >= 1 && !empty($master_server_name)) {
+		if(!empty($master_username) && !empty($master_password)) {
+			$sync_result = sync_user_from_master($master_username, md5($master_password), $cuser);
+			$gamedata['innerHTML']['info'] .= $sync_result['message'] . '<br>';
+		} else {
+			$gamedata['innerHTML']['info'] .= '请输入主服务器的用户名和密码<br>';
+		}
+	} else {
+		$gamedata['innerHTML']['info'] .= '当前服务器不是从服务器或未配置主服务器信息<br>';
+	}
+
+	ob_clean();
+	$jgamedata = compatible_json_encode($gamedata);
+	echo $jgamedata;
+	ob_end_flush();
+
+} elseif($mode == 'edit') {
 	$gamedata=Array();$gamedata['innerHTML']['info'] = '';
 	if($opass && $npass && $rnpass){
 		$pass_right = true;
@@ -107,6 +128,15 @@ if($mode == 'edit') {
 	$select_icon = $icon;
 	//这里假定player表里有usertitle字段而且储存方式是这样蛋疼的。具体程序虚子你写。
 	$utlist = get_utitlelist();//然后去接收用户传来的$
+
+	// 主从同步相关变量
+	$show_sync_button = ($slave_level >= 1 && !empty($master_server_name));
+	$user_sync_status = get_user_sync_status($cuser);
+	if($user_sync_status) {
+		$user_sync_status['sync_time_formatted'] = date('Y-m-d H:i:s', $user_sync_status['sync_time']);
+	}
+	$sync_button_text = $user_sync_status ? "从{$master_server_name}同步已绑定的账号数据" : "从{$master_server_name}迁移用户和成就数据";
+
 	include template('user');
 }
 

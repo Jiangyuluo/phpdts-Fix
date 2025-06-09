@@ -3,8 +3,18 @@ if(!defined('IN_ADMIN')) {
 	exit('Access Denied');
 }
 
+// 主从配置只显示，不允许修改（移到条件外，确保总是可用）
+// 为模板提供单独的变量
+$display_slave_level = isset($slave_level) ? $slave_level : '';
+$display_master_server_name = isset($master_server_name) ? $master_server_name : '';
+$display_master_dbhost = isset($master_dbhost) ? $master_dbhost : '';
+$display_master_dbuser = isset($master_dbuser) ? $master_dbuser : '';
+$display_master_dbpw = isset($master_dbpw) ? $master_dbpw : '';
+$display_master_dbname = isset($master_dbname) ? $master_dbname : '';
+$display_master_tablepre = isset($master_tablepre) ? $master_tablepre : '';
+
 if($command == 'edit') {
-	
+
 	$ednum = 0;
 	$edfmt = Array('authkey'=>'','bbsurl'=>'','gameurl'=>'','homepage'=>'','moveut'=>'int','moveutmin'=>'int','tplrefresh'=>'b','errorinfo'=>'b');
 	$edlist = Array();
