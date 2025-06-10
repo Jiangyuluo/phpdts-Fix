@@ -13,7 +13,7 @@ if(!defined('IN_GAME')) {
  * @return bool 是否成功处理
  */
 function item_nouveau_booster1($itmn, &$data) {
-    global $log, $mode, $cmd, $command;
+    global $log, $mode, $cmd, $command, $nosta;
     extract($data, EXTR_REFS);
 
     // 如果是选择鱼篓子中的物品

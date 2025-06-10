@@ -12,7 +12,7 @@ if (! defined('IN_GAME')) {
  * @param array &$data 玩家数据
  */
 function item_nachster_booster($itmn, &$data) {
-    global $log, $db, $tablepre, $now, $plsinfo, $event_bgm, $elements_info;
+    global $log, $db, $tablepre, $now, $plsinfo, $event_bgm, $elements_info, $nosta;
     extract($data, EXTR_REFS);
     
     $itm = & ${'itm' . $itmn};
