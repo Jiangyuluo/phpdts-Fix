@@ -214,8 +214,8 @@ function item_nouveau_booster1($itmn, &$data) {
             return true;
         }
 
-        // 获取当前武器的itmpara数据
-        $weapon_para = !empty($weppara) ? $weppara : array();
+        // 正确获取当前武器的itmpara数据 - 使用get_itmpara函数确保正确解析
+        $weapon_para = get_itmpara($weppara);
 
         // 如果武器已经是核武器，则不能再次改造
         if (!empty($weapon_para['isNuclearWeapon'])) {
@@ -229,8 +229,10 @@ function item_nouveau_booster1($itmn, &$data) {
         // 更新武器的itmpara数据
         $weppara = $weapon_para;
 
-        // 更新武器名称
-        $wep = "☢" . $wep;
+        // 更新武器名称 - 避免重复添加☢符号
+        if (strpos($wep, '☢') === false) {
+            $wep = "☢" . $wep;
+        }
 
         $log .= "你将<span class='red'>{$itm}</span>安装到了你的武器上。<br>";
         $log .= "你的武器变成了<span class='yellow'>{$wep}</span>！现在它可以对战斗区域内的所有人造成伤害了。<br>";

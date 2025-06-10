@@ -15,11 +15,8 @@ function FireseedRecruit($npc) {
 
     // 检查数据库连接是否有效
     if(!$db) {
-        global $db;
-        if(!$db) {
-            $log .= "<span class='red'>数据库连接错误！</span><br>";
-            return false;
-        }
+        $log .= "<span class='red'>数据库连接错误！</span><br>";
+        return false;
     }
 
     if(!isset($data)) {
@@ -117,11 +114,8 @@ function FireseedDeploy($fireseed_id, $mode, $deploypls = 0) {
 
     // 检查数据库连接是否有效
     if(!$db) {
-        global $db;
-        if(!$db) {
-            $log .= "<span class='red'>数据库连接错误！</span><br>";
-            return false;
-        }
+        $log .= "<span class='red'>数据库连接错误！</span><br>";
+        return false;
     }
 
     // 加载配置文件
@@ -208,11 +202,8 @@ function FireseedSearch($pls) {
 
     // 检查数据库连接是否有效
     if(!$db) {
-        global $db;
-        if(!$db) {
-            $log .= "<span class='red'>数据库连接错误！</span><br>";
-            return false;
-        }
+        $log .= "<span class='red'>数据库连接错误！</span><br>";
+        return false;
     }
 
     // 加载配置文件
@@ -318,11 +309,8 @@ function FireseedDrainNPC($pls) {
 
     // 检查数据库连接是否有效
     if(!$db) {
-        global $db;
-        if(!$db) {
-            $log .= "<span class='red'>数据库连接错误！</span><br>";
-            return false;
-        }
+        $log .= "<span class='red'>数据库连接错误！</span><br>";
+        return false;
     }
 
     // 加载配置文件
@@ -420,12 +408,7 @@ function FireseedDrainNPC($pls) {
  * @return bool 是否成功强化
  */
 function FireseedEnhance($fireseed_id, $item_index) {
-    global $log, $db, $tablepre, $pid, $clbpara;
-    global $itm1, $itm2, $itm3, $itm4, $itm5, $itm6;
-    global $itmk1, $itmk2, $itmk3, $itmk4, $itmk5, $itmk6;
-    global $itme1, $itme2, $itme3, $itme4, $itme5, $itme6;
-    global $itms1, $itms2, $itms3, $itms4, $itms5, $itms6;
-    global $itmsk1, $itmsk2, $itmsk3, $itmsk4, $itmsk5, $itmsk6;
+    global $log, $db, $tablepre;
 
     // 检查数据库连接是否有效
     if(!$db) {
@@ -435,6 +418,12 @@ function FireseedEnhance($fireseed_id, $item_index) {
 
     // 加载配置文件
     include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+
+    if(!isset($data)) {
+        global $pdata;
+        $data = &$pdata;
+    }
+    extract($data, EXTR_REFS);
 
     // 检查种火是否存在
     if(!isset($clbpara['fireseed'][$fireseed_id])) {
@@ -547,11 +536,8 @@ function FireseedFollow($target_pls) {
 
     // 检查数据库连接是否有效
     if(!$db) {
-        global $db;
-        if(!$db) {
-            $log .= "<span class='red'>数据库连接错误！</span><br>";
-            return false;
-        }
+        $log .= "<span class='red'>数据库连接错误！</span><br>";
+        return false;
     }
 
     if(!isset($data)) {

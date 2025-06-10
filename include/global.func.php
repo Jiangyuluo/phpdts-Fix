@@ -956,8 +956,9 @@ function get_itmpara($para)
 	$debug .= "Input type: " . gettype($para) . "\n";
 	$debug .= "Input value: " . (is_string($para) ? $para : (is_array($para) ? json_encode($para) : gettype($para))) . "\n";
 
-	if(empty($para)) {
-		$debug .= "Empty input, returning empty array\n";
+	// 修复：正确处理空数组 - 空数组不应该被当作"空"处理
+	if(empty($para) && !is_array($para)) {
+		$debug .= "Empty input (not array), returning empty array\n";
 		//error_log($debug);
 		return Array();
 	}
@@ -971,94 +972,29 @@ function get_itmpara($para)
 			$para = trim($para);
 			$debug .= "After trim: " . $para . "\n";
 
-			// 检查是否是 JSON 格式
-			if(substr($para, 0, 1) == '{' && substr($para, -1) == '}') {
+			// 修复：检查是否是 JSON 格式（支持对象{}和数组[]）
+			if((substr($para, 0, 1) == '{' && substr($para, -1) == '}') ||
+			   (substr($para, 0, 1) == '[' && substr($para, -1) == ']')) {
 				$debug .= "Detected JSON format\n";
 
 				// 尝试修复可能的 JSON 格式问题
 				// 有时候 JSON 字符串可能被截断或损坏
 
-				// 先尝试直接解析
+				// 尝试解析JSON
 				$result = json_decode($para, true);
 				$error = json_last_error();
-				$debug .= "First decode attempt: " . ($error === JSON_ERROR_NONE ? "success" : "failed") . "\n";
-				$debug .= "Error code: " . $error . "\n";
-				$debug .= "Error message: " . json_last_error_msg() . "\n";
+				$debug .= "JSON decode attempt: " . ($error === JSON_ERROR_NONE ? "success" : "failed") . "\n";
 
-				// 如果解析失败，尝试修复
-				if($result === null && $error !== JSON_ERROR_NONE) {
-					$debug .= "Attempting to fix JSON string\n";
-
-					// 尝试修复常见问题
-
-					// 1. 如果是被截断的 JSON，尝试添加右花括号
-					if(substr_count($para, '{') > substr_count($para, '}')) {
-						$para .= str_repeat('}', substr_count($para, '{') - substr_count($para, '}'));
-						$debug .= "Added missing closing braces\n";
-					}
-
-					// 2. 如果有引号不匹配，尝试修复
-					if(substr_count($para, '"') % 2 != 0) {
-						$para .= '"';
-						$debug .= "Added missing quote\n";
-					}
-
-					// 3. 尝试使用替代方法解析
-					// 如果是简单的键值对，手动解析
-					if(strpos($para, '{"') === 0) {
-						$debug .= "Attempting manual parsing\n";
-
-						// 去除花括号
-						$content = substr($para, 1, -1);
-						$debug .= "Content without braces: " . $content . "\n";
-
-						// 尝试手动解析键值对
-						$manual_result = array();
-
-						// 尝试使用正则表达式提取键值对
-						preg_match_all('/"([^"]+)"\s*:\s*([^,}]+)/', $content, $matches);
-
-						if(!empty($matches[1]) && !empty($matches[2])) {
-							for($i = 0; $i < count($matches[1]); $i++) {
-								$key = $matches[1][$i];
-								$value = trim($matches[2][$i]);
-
-								// 如果值是数字
-								if(is_numeric($value)) {
-									$value = strpos($value, '.') !== false ? (float)$value : (int)$value;
-								}
-								// 如果值是字符串（带引号）
-								elseif(substr($value, 0, 1) == '"' && substr($value, -1) == '"') {
-									$value = substr($value, 1, -1);
-								}
-
-								$manual_result[$key] = $value;
-							}
-						}
-
-						$debug .= "Manual parsing result: " . json_encode($manual_result) . "\n";
-
-						// 如果手动解析成功，使用手动解析的结果
-						if(!empty($manual_result)) {
-							$result = $manual_result;
-						} else {
-							// 再次尝试使用 json_decode
-							$result = json_decode($para, true);
-							$debug .= "Second decode attempt: " . (json_last_error() === JSON_ERROR_NONE ? "success" : "failed") . "\n";
-						}
-					}
-				}
-
-				// 如果解析结果为空，返回空数组
-				if($result === null) {
-					$debug .= "Failed to parse JSON, returning empty array\n";
+				if($result !== null && $error === JSON_ERROR_NONE) {
+					$debug .= "JSON parsing successful\n";
+					//error_log($debug);
+					return $result;
+				} else {
+					$debug .= "JSON parsing failed: " . json_last_error_msg() . "\n";
+					$debug .= "Returning empty array\n";
 					//error_log($debug);
 					return array();
 				}
-
-				$debug .= "Final result: " . json_encode($result) . "\n";
-				//error_log($debug);
-				return $result;
 			} else {
 				$debug .= "Not a JSON string, returning as is\n";
 				//error_log($debug);
