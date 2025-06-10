@@ -49,37 +49,37 @@
 	<tr>
 	  <td>从服务器级别</td>
 	  <td><input type="text" value="$display_slave_level" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>0=主服务器, 1=从服务器(手动迁移), 2=从服务器(自动同步), 3=从服务器(直接使用主数据库)</td>
+	  <td>-1=反向迁移模式(本地主→远端从), 0=主服务器, 1=从服务器(手动迁移), 2=从服务器(自动同步), 3=从服务器(直接使用主数据库)</td>
 	</tr>
 	<tr>
-	  <td>主服务器名称</td>
+	  <td>目标服务器名称</td>
 	  <td><input type="text" value="$display_master_server_name" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>用于显示的主服务器名称</td>
+	  <td>用于显示的目标服务器名称（反向迁移模式下为远端从服务器）</td>
 	</tr>
 	<tr>
-	  <td>主数据库服务器</td>
+	  <td>目标数据库服务器</td>
 	  <td><input type="text" value="$display_master_dbhost" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>主数据库服务器地址</td>
+	  <td>目标数据库服务器地址（反向迁移模式下为远端从数据库）</td>
 	</tr>
 	<tr>
-	  <td>主数据库用户名</td>
+	  <td>目标数据库用户名</td>
 	  <td><input type="text" value="$display_master_dbuser" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>主数据库用户名</td>
+	  <td>目标数据库用户名（反向迁移模式下为远端从数据库）</td>
 	</tr>
 	<tr>
-	  <td>主数据库密码</td>
+	  <td>目标数据库密码</td>
 	  <td><input type="password" value="$display_master_dbpw" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>主数据库密码</td>
+	  <td>目标数据库密码（反向迁移模式下为远端从数据库）</td>
 	</tr>
 	<tr>
-	  <td>主数据库名</td>
+	  <td>目标数据库名</td>
 	  <td><input type="text" value="$display_master_dbname" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>主数据库名</td>
+	  <td>目标数据库名（反向迁移模式下为远端从数据库）</td>
 	</tr>
 	<tr>
-	  <td>主数据库表前缀</td>
+	  <td>目标数据库表前缀</td>
 	  <td><input type="text" value="$display_master_tablepre" size="30" disabled="true" style="background-color: #F5F5F5;"></td>
-	  <td>主数据库表前缀</td>
+	  <td>目标数据库表前缀（反向迁移模式下为远端从数据库）</td>
 	</tr>
 </table>
 <input type="submit" value="提交" onclick="$('command').value='edit';">

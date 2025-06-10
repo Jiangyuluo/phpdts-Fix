@@ -36,6 +36,26 @@ if($mode == 'sync_master') {
 	echo $jgamedata;
 	ob_end_flush();
 
+} elseif($mode == 'reverse_migrate') {
+	// 处理反向迁移
+	$gamedata=Array();$gamedata['innerHTML']['info'] = '';
+
+	if(is_reverse_migration_mode() && !empty($master_server_name)) {
+		if(!empty($remote_username) && !empty($remote_password)) {
+			$migrate_result = reverse_migrate_user($cuser, $remote_username, md5($remote_password));
+			$gamedata['innerHTML']['info'] .= $migrate_result['message'] . '<br>';
+		} else {
+			$gamedata['innerHTML']['info'] .= '请输入远端从服务器的用户名和密码<br>';
+		}
+	} else {
+		$gamedata['innerHTML']['info'] .= '当前服务器不是反向迁移模式或未配置目标服务器信息<br>';
+	}
+
+	ob_clean();
+	$jgamedata = compatible_json_encode($gamedata);
+	echo $jgamedata;
+	ob_end_flush();
+
 } elseif($mode == 'edit') {
 	$gamedata=Array();$gamedata['innerHTML']['info'] = '';
 	if($opass && $npass && $rnpass){
@@ -136,6 +156,14 @@ if($mode == 'sync_master') {
 		$user_sync_status['sync_time_formatted'] = date('Y-m-d H:i:s', $user_sync_status['sync_time']);
 	}
 	$sync_button_text = $user_sync_status ? "从{$master_server_name}同步已绑定的账号数据" : "从{$master_server_name}迁移用户和成就数据";
+
+	// 反向迁移相关变量
+	$show_reverse_migrate_button = (is_reverse_migration_mode() && !empty($master_server_name));
+	$user_reverse_migrate_status = get_reverse_migration_status($cuser);
+	if($user_reverse_migrate_status) {
+		$user_reverse_migrate_status['sync_time_formatted'] = date('Y-m-d H:i:s', $user_reverse_migrate_status['sync_time']);
+	}
+	$reverse_migrate_button_text = $user_reverse_migrate_status ? "重新推送到{$master_server_name}" : "推送到{$master_server_name}";
 
 	include template('user');
 }
