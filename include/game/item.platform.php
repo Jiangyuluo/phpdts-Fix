@@ -12,7 +12,7 @@ if (! defined('IN_GAME')) {
  * @param array &$data 玩家数据
  */
 function item_platform($itmn, &$data) {
-    global $log, $db, $tablepre;
+    global $log, $db, $tablepre, $nosta;
     extract($data, EXTR_REFS);
 
     $itm = & ${'itm' . $itmn};

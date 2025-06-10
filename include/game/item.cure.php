@@ -6,7 +6,7 @@ if (! defined ( 'IN_GAME' )) {
 
 // Handle cure/medicine items
 function item_cure($itmn, &$data) {
-	global $log, $exdmginf, $ex_inf;
+	global $log, $exdmginf, $ex_inf, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -49,8 +49,10 @@ function item_cure($itmn, &$data) {
 	}else{
 		$log .= "服用了<span class=\"red\">$itm</span>……发生了什么？<br>";
 	}
-	
-	$itms --;
+
+	if ($itms != $nosta) {
+		$itms --;
+	}
 	/*if (strpos ( $itm, '烧伤药剂' ) === 0) {
 		if (strpos ( $inf, 'u' ) !== false) {
 			$inf = str_replace ( 'u', '', $inf );

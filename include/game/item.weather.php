@@ -6,7 +6,7 @@ if (! defined ( 'IN_GAME' )) {
 
 // Handle weather control items
 function item_weather($itmn, &$data) {
-	global $log;
+	global $log, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};

@@ -78,13 +78,18 @@ function item_ammo_bullets($itmn, &$data) {
 	} elseif ($bullet >= $itms) {
 		$bullet = $itms;
 	}
-	$itms -= $bullet;
-	$weps += $bullet;
-	$log .= "为<span class=\"red\">$wep</span>装填了<span class=\"red\">$itm</span>，<span class=\"red\">$wep</span>残弹数增加<span class=\"yellow\">$bullet</span>。<br>";
-	if ($itms <= 0) {
-		$log .= "<span class=\"red\">$itm</span>用光了。<br>";
-		$itm = $itmk = $itmsk = '';
-		$itme = $itms = 0;
+	if ($itms != $nosta) {
+		$itms -= $bullet;
+		$weps += $bullet;
+		$log .= "为<span class=\"red\">$wep</span>装填了<span class=\"red\">$itm</span>，<span class=\"red\">$wep</span>残弹数增加<span class=\"yellow\">$bullet</span>。<br>";
+		if ($itms <= 0) {
+			$log .= "<span class=\"red\">$itm</span>用光了。<br>";
+			$itm = $itmk = $itmsk = '';
+			$itme = $itms = 0;
+		}
+	} else {
+		$weps += $bullet;
+		$log .= "为<span class=\"red\">$wep</span>装填了<span class=\"red\">$itm</span>，<span class=\"red\">$wep</span>残弹数增加<span class=\"yellow\">$bullet</span>。<br>";
 	}
 }
 

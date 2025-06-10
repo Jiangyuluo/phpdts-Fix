@@ -6,7 +6,7 @@ if (! defined ( 'IN_GAME' )) {
 
 // Handle gift box items
 function item_giftbox($itmn, &$data) {
-	global $log, $db, $tablepre, $now, $gamecfg;
+	global $log, $db, $tablepre, $now, $gamecfg, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -114,7 +114,7 @@ function item_giftbox($itmn, &$data) {
 		list($in,$ik,$ie,$is,$isk) = explode(',',$plist[$rand]);
 	}		
 	//global $itm0,$itmk0,$itme0,$itms0,$itmsk0,$mode;
-	if($itms <= 0) destory_single_item($data,$itmn,1);
+	if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 	$itm0 = $in;$itmk0=$ik;$itme0=$ie;$itms0=$is;$itmsk0=$isk;
 	addnews($now,'present',$name,$oitm,$in,$nick);
 
@@ -124,7 +124,7 @@ function item_giftbox($itmn, &$data) {
 
 // Handle YGO box items
 function item_ygo_box($itmn, &$data) {
-	global $log, $now, $gamecfg;
+	global $log, $now, $gamecfg, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -138,7 +138,7 @@ function item_ygo_box($itmn, &$data) {
 	if ($itms != $nosta) {
 		$itms--;
 	}
-	if($itms <= 0) destory_single_item($data,$itmn,1);
+	if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 
 	$file1 = config('box',$gamecfg);
 	$plist1 = openfile($file1);
@@ -154,7 +154,7 @@ function item_ygo_box($itmn, &$data) {
 
 // Handle FY box items
 function item_fy_box($itmn, &$data) {
-	global $log, $now, $gamecfg;
+	global $log, $now, $gamecfg, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -168,7 +168,7 @@ function item_fy_box($itmn, &$data) {
 	if ($itms != $nosta) {
 		$itms--;
 	}
-	if($itms <= 0) destory_single_item($data,$itmn,1);
+	if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 
 	$file1 = config('fy',$gamecfg);
 	$plist1 = openfile($file1);
@@ -184,7 +184,7 @@ function item_fy_box($itmn, &$data) {
 
 // Handle debug box items
 function item_debug_box($itmn, &$data) {
-	global $log, $now, $gamecfg;
+	global $log, $now, $gamecfg, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -198,7 +198,7 @@ function item_debug_box($itmn, &$data) {
 	if ($itms != $nosta) {
 		$itms--;
 	}
-	if($itms <= 0) destory_single_item($data,$itmn,1);
+	if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 
 	$file1 = config('f99',$gamecfg);
 	$plist1 = openfile($file1);

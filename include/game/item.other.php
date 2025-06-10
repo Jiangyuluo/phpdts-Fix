@@ -6,7 +6,7 @@ if (! defined ( 'IN_GAME' )) {
 
 // Handle fireworks items
 function item_fireworks($itmn, &$data) {
-	global $log;
+	global $log, $nosta;
 	extract($data, EXTR_REFS);
 	
 	$itm = & ${'itm' . $itmn};
@@ -279,7 +279,7 @@ function item_fireworks($itmn, &$data) {
 
 			}
 			}else{
-				$addw = $itme;
+				$addmhp = $itme;
 				$mhp += $addmhp;
 
 				$log.="你将<span class=\"yellow\">{$itm}</span>吞下了肚。<br>
@@ -372,7 +372,10 @@ function item_fireworks($itmn, &$data) {
 			# Officially dubbed Silent Box.
 			$log.="你打开了<span class=\"yellow\">$itm</span>。<br>";
 
-			$itms--; $oitm = $itm; $oitmk = $itmk;
+			$oitm = $itm; $oitmk = $itmk;
+			if ($itms != $nosta) {
+				$itms--;
+			}
 
 			include_once config('randomFS',$gamecfg);
 
@@ -395,7 +398,7 @@ function item_fireworks($itmn, &$data) {
 				list($in,$ik,$ie,$is,$isk) = explode(',',$itemflag[$rand]);
 			}
 
-			if($itms <= 0) destory_single_item($data,$itmn,1);
+			if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 			$itm0 = $in;$itmk0=$ik;$itme0=$ie;$itms0=$is;$itmsk0=$isk;
 			if($itemflag = $sundata) addnews($now,'present',$name,$oitm,$in,$nick);
 	
@@ -429,7 +432,7 @@ function item_fireworks($itmn, &$data) {
 				list($in,$ik,$ie,$is,$isk) = explode(',',$itemflag[$rand]);
 			}
 
-			if($itms <= 0) destory_single_item($data,$itmn,1);
+			if($itms <= 0 && $itms != $nosta) destory_single_item($data,$itmn,1);
 			$itm0 = $in;$itmk0=$ik;$itme0=$ie;$itms0=$is;$itmsk0=$isk;
 			if($itemflag = $sundata) addnews($now,'present',$name,$oitm,$in,$nick);
 	

@@ -64,11 +64,13 @@ function item_trap_detector($itmn, &$data) {
 	
 	$trapresult = $db->query("SELECT * FROM {$tablepre}maptrap WHERE pls = '$pls' AND itme>='$itme'");
 	$trpnum = $db->num_rows($trapresult);
-	$itms--;
-	if ($itms <= 0) {
-		$log .= "<span class=\"red\">$itm</span>用光了。<br>";
-		$itm = $itmk = $itmsk = '';
-		$itme = $itms = 0;
+	if ($itms != $nosta) {
+		$itms--;
+		if ($itms <= 0) {
+			$log .= "<span class=\"red\">$itm</span>用光了。<br>";
+			$itm = $itmk = $itmsk = '';
+			$itme = $itms = 0;
+		}
 	}
 	if ($trpnum>0){
 		$itemno = rand(0,$trpnum-1);
