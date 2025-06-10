@@ -71,7 +71,7 @@ function item_weapon($itmn, &$data) {
 		//global $itmnumlimit;
 		$itmnumlimit = $itme>=$itms ? $itms : $itme;
 	}
-	if (($noeqp && strpos(${$eqp.'k'}, $noeqp) === 0) || !${$eqp.'s'}) {
+	if (($noeqp && strpos(${$eqp.'k'}, $noeqp) === 0) || (empty(${$eqp.'s'}) && ${$eqp.'s'} !== $nosta)) {
 
 		// 装备道具时，进行单次套装检测
 		include_once GAME_ROOT.'./include/game/itemmain.func.php';

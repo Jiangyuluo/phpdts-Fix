@@ -224,7 +224,7 @@ function itemuse($itmn,&$data=NULL) {
 	}
 
 	// 消耗物品
-	if ($itms <= 0 && $is != $nosta && $itm) {
+	if ($itms <= 0 && $itm && $itms !== $nosta) {
 		$log .= "<span class=\"red\">$itm</span>用光了。<br>";
 		$itm = $itmk = $itmsk = '';
 		$itme = $itms = 0;

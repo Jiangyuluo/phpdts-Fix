@@ -538,7 +538,7 @@ function itemget(&$data=NULL)
 
 
 function itemdrop($item,&$data=NULL) {
-	global $db,$tablepre,$log,$mode;
+	global $db,$tablepre,$log,$mode,$nosta;
 
 	if(!isset($data))
 	{
@@ -612,7 +612,7 @@ function itemdrop($item,&$data=NULL) {
 		$mode = 'command';
 		return;
 	}
-	if(!$itms||!$itmk||$itmk=='WN'||$itmk=='DN'){
+	if((empty($itms) && $itms !== $nosta)||!$itmk||$itmk=='WN'||$itmk=='DN'){
 		$log .= '该物品不存在！<br>';
 		$mode = 'command';
 		return;
@@ -674,7 +674,7 @@ function itemoff($item){
 		$itmsk = & ${'ar'.$itmn.'sk'};
 		$itmpara = & ${'ar'.$itmn.'para'};
 	}
-	if(!$itms||!$itmk||$itmk=='WN'||$itmk=='DN'){
+	if((empty($itms) && $itms !== $nosta)||!$itmk||$itmk=='WN'||$itmk=='DN'){
 		$log .= '该物品不存在！<br>';
 		$mode = 'command';
 		return;
@@ -721,7 +721,7 @@ function itemoff($item){
 
 function itemadd(&$data=NULL)
 {
-	global $log,$mode,$cmd;
+	global $log,$mode,$cmd,$nosta;
 
 	if(!isset($data))
 	{
@@ -730,14 +730,14 @@ function itemadd(&$data=NULL)
 	}
 	extract($data,EXTR_REFS);
 
-	if(!$itms0){
+	if(empty($itms0) && $itms0 !== $nosta){
 		$log .= '你没有捡取物品。<br>';
 		$mode = 'command';
 		return;
 	}
 	for($i = 1;$i <= 6;$i++){
 		//global ${'itm'.$i},${'itmk'.$i},${'itme'.$i},${'itms'.$i},${'itmsk'.$i};
-		if(!${'itms'.$i}){
+		if(empty(${'itms'.$i})){
 			$log .= "将<span class=\"yellow\">$itm0</span>放入包裹。<br>";
 			${'itm'.$i} = $itm0;
 			${'itmk'.$i} = $itmk0;
@@ -791,7 +791,7 @@ function itemmerge($itn1,$itn2){
 	$itsk2 = & ${'itmsk'.$itn2};
 	$itpara2 = & ${'itmpara'.$itn2};
 
-	if(!$its1 || !$its2) {
+	if((empty($its1) && $its1 !== $nosta) || (empty($its2) && $its2 !== $nosta)) {
 		$log .= '请选择正确的物品进行合并！';
 		$mode = 'itemmerge';
 		return;
@@ -1169,7 +1169,7 @@ function itemmix($mlist, $itemselect=-1) {
 	return;
 }*/
 function itemreduce($item,$mode=0){ //只限合成使用！！
-	global $log;
+	global $log, $nosta;
 	if(strpos($item,'itm') === 0) {
 		$itmn = substr($item,3,1);
 		global ${'itm'.$itmn},${'itmk'.$itmn},${'itme'.$itmn},${'itms'.$itmn},${'itmsk'.$itmn},${'itmpara'.$itmn};
@@ -1183,12 +1183,12 @@ function itemreduce($item,$mode=0){ //只限合成使用！！
 		return;
 	}
 
-	if(!$itms) { return; }
+	if(empty($itms) && $itms !== $nosta) { return; }
 	# 素材类道具作合成素材时只消耗耐久
 	if(preg_match('/^(Y|B|C|X|TN|GB|H|P|V|M)/',$itmk))
 	{
 		# Added one additional check to deal with infinite stamina item - destroy it when used in mix.
-		if($itms == '∞'){
+		if($itms == $nosta){
 			$itms = 0;
 			$log .= "<span class=\"red\">$itm</span>消失了……它已被";
 			$itm = $itmk = $itmsk = $itmpara = '';
@@ -1212,7 +1212,7 @@ function itemreduce($item,$mode=0){ //只限合成使用！！
 }
 
 function itemmove($from,$to){
-	global $log;
+	global $log,$nosta;
 	if(!$from || !is_numeric($from) || !$to || !is_numeric($to) || $from < 1 || $to < 1 || $from > 6 || $to > 6){
 		$log .= '错误的包裹位置参数。<br>';
 		return;
@@ -1233,11 +1233,11 @@ function itemmove($from,$to){
 	$ts = & ${'itms'.$to};
 	$tsk = & ${'itmsk'.$to};
 	$tpara = & ${'itmpara'.$to};
-	if(!$fs){
+	if(empty($fs) && $fs !== $nosta){
 		$log .= '错误的道具参数。<br>';
 		return;
 	}
-	if(!$ts){
+	if(empty($ts)){
 		$log .= "将<span class=\"yellow\">{$f}</span>移动到了<span class=\"yellow\">包裹{$to}</span>。<br>";
 		$t = $f;
 		$tk = $fk;
@@ -1367,7 +1367,7 @@ function getcorpse($item,&$data=NULL)
 	global $db,$tablepre,$log,$mode,$now;
 	//global $itm0,$itmk0,$itme0,$itms0,$itmsk0,$money,$pls,$action,$rp,$name;
 	//global $club,$allow_destory_corpse,$no_destory_corpse_type,$rpup_destory_corpse;
-	global $allow_destory_corpse,$no_destory_corpse_type,$rpup_destory_corpse;
+	global $allow_destory_corpse,$no_destory_corpse_type,$rpup_destory_corpse,$nosta;
 
 	if(!isset($data))
 	{
@@ -1533,7 +1533,7 @@ function getcorpse($item,&$data=NULL)
 
 	player_save($edata);
 
-	if(!$itms0||!$itmk0||$itmk0=='WN'||$itmk0=='DN') {
+	if((empty($itms0) && $itms0 !== $nosta)||!$itmk0||$itmk0=='WN'||$itmk0=='DN') {
 		$log .= '该物品不存在！';
 	} else {
 		itemget($data);
@@ -1655,7 +1655,7 @@ function reload_equip_items(&$pa)
 {
 	global $nowep,$noarb,$nosta;
 
-	if(empty($pa['wep']) || empty($pa['weps']))
+	if(empty($pa['wep']) || (empty($pa['weps']) && $pa['weps'] !== $nosta))
 	//if(empty($pa['weps']) && $pa['wep'] !== $nowep)
 	{
 		$pa['wep'] = $nowep;
@@ -1666,7 +1666,7 @@ function reload_equip_items(&$pa)
 		$pa['weppara'] = '';
 	}
 
-	if(empty($pa['arb']) || empty($pa['arbs']))
+	if(empty($pa['arb']) || (empty($pa['arbs']) && $pa['arbs'] !== $nosta))
 	{
 		$pa['arb'] = $noarb;
 		$pa['arbk'] = 'DN';
@@ -1844,7 +1844,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 					else $log.= "<span class='grey'>{$pa['nm']}的{$pa['wep']}的耐久度上升了".abs($hurtvalue)."！……为什么啊？</span><br>";
 				}
 			}
-			if(empty($pa['weps']) || empty($pa['wepe']))
+			if((empty($pa['weps']) && $pa['weps'] !== $nosta) || empty($pa['wepe']))
 			{
 				$log .= "{$pa['nm']}的<span class=\"red\">{$pa['wep']}</span>使用过度，已经损坏，无法再装备了！<br>";
 				$wep_loss_flag = 1;
@@ -1863,7 +1863,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 						if($hurtvalue > 0) $log .= "<span class='grey'>{$pa['nm']}用掉了{$hurtvalue}个{$pa['wep']}。</span><br>";
 						else $log .= "<span class='grey'>{$pa['wep']}凭空增殖出了".abs($hurtvalue)."个……啊？？</span><br>";
 					}
-					if(empty($pa['weps']))
+					if(empty($pa['weps']) && $pa['weps'] !== $nosta)
 					{
 						$log .= "{$pa['nm']}的<span class=\"red\">{$pa['wep']}</span>用光了！<br>";
 						$wep_loss_flag = 1;
@@ -1876,7 +1876,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 						if($hurtvalue > 0) $log .= "<span class='grey'>{$pa['nm']}的{$pa['wep']}的弹药数减少了{$hurtvalue}。</span><br>";
 						else $log .= "<span class='grey'>{$pa['wep']}的弹药数凭空多出了".abs($hurtvalue)."……啊？？</span><br>";
 					}
-					if(empty($pa['weps']))
+					if(empty($pa['weps']) && $pa['weps'] !== $nosta)
 					{
 						$log .= "{$pa['nm']}的<span class=\"red\">{$pa['wep']}</span>弹药用光了！<br>";
 						$pa['weps'] = $nosta;
@@ -1889,7 +1889,7 @@ function weapon_loss(&$pa,$hurtvalue,$force_imp=0,$check_sk=0)
 						if($hurtvalue > 0) $log .= "<span class='grey'>{$pa['nm']}的{$pa['wep']}用掉了{$hurtvalue}支箭。</span><br>";
 						else $log .= "<span class='grey'>{$pa['wep']}的箭矢数凭空多出了".abs($hurtvalue)."……啊？？</span><br>";
 					}
-					if(empty($pa['weps']))
+					if(empty($pa['weps']) && $pa['weps'] !== $nosta)
 					{
 						$log .= "{$pa['nm']}的<span class=\"red\">{$pa['wep']}</span>的箭矢用光了！<br>";
 						$pa['weps'] = $nosta;
