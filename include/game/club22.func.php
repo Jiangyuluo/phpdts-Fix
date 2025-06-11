@@ -375,7 +375,7 @@ function FireseedDrainNPC($pls) {
  * @return bool 是否成功强化
  */
 function FireseedEnhance($fireseed_id, $item_index) {
-    global $log, $fireseed_enhance_multipliers;
+    global $log, $fireseed_enhance_multipliers, $db, $tablepre;
 
     if(!isset($data)) {
         global $pdata;
