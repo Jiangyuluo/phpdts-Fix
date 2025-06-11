@@ -337,6 +337,18 @@ function FireseedDrainNPC($pls) {
                 continue;
             }
 
+            // 跳过同玩家的其他种火NPC
+            if($npc['type'] == 92) {
+                // 确保 NPC 的 clbpara 是数组格式
+                if(!is_array($npc['clbpara'])) {
+                    $npc['clbpara'] = get_clbpara($npc['clbpara']);
+                }
+                // 检查是否为同玩家的种火
+                if(!empty($npc['clbpara']['owner']) && $npc['clbpara']['owner'] == $pid) {
+                    continue; // 跳过对同玩家种火的攻击
+                }
+            }
+
             // 计算削减成功率（每个种火增加一次成功机会）
             $success = false;
             foreach($location_fireseeds as $fs_id => $fs_data) {

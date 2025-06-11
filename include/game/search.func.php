@@ -741,6 +741,20 @@ function discover($schmode = 0,&$data=NULL)
 					# 暂时直接略过盟友单位
 					if(!empty($edata['clbpara']['mate']) && in_array($pid,$edata['clbpara']['mate'])) continue;
 
+					# 枫火歌者遇到自己配下的种火时的特殊处理
+					if($club == 22 && $edata['type'] == 92) {
+						// 确保 NPC 的 clbpara 是数组格式
+						if(!is_array($edata['clbpara'])) {
+							$edata['clbpara'] = get_clbpara($edata['clbpara']);
+						}
+						// 检查是否为自己配下的种火
+						if(!empty($edata['clbpara']['owner']) && $edata['clbpara']['owner'] == $pid) {
+							$log .= "<span class='yellow'>你遇到了自己配下的种火「{$edata['name']}」。</span><br>";
+							$log .= "<span class='lime'>「{$edata['name']}」友好地看着你，你们没有发生冲突。</span><br>";
+							continue; // 跳过战斗，继续寻找其他敌人
+						}
+					}
+
 					# 「量心」技能效果判定（不会遭遇HP为1的敌人）：
 					if(!check_skill_unlock('c19_dispel',$data) && !empty(get_skillpara('c19_dispel','active',$clbpara)) && $edata['hp'] == 1) continue;
 
