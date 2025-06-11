@@ -13,12 +13,6 @@ include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
 function FireseedRecruit($npc) {
     global $log, $now, $fireseed_recruit_rate, $db, $tablepre;
 
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
-
     if(!isset($data)) {
         global $pdata;
         $data = &$pdata;
@@ -110,16 +104,7 @@ function FireseedRecruit($npc) {
  * @return bool 是否成功部署
  */
 function FireseedDeploy($fireseed_id, $mode, $deploypls = 0) {
-    global $log, $plsinfo, $deepzones, $db, $tablepre, $poseinfo;
-
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
-
-    // 加载配置文件
-    include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+    global $log, $fireseed_deploy_modes, $plsinfo, $deepzones, $db, $tablepre, $poseinfo;
 
     if(!isset($data)) {
         global $pdata;
@@ -198,16 +183,7 @@ function FireseedDeploy($fireseed_id, $mode, $deploypls = 0) {
  * @return void
  */
 function FireseedSearch($pls) {
-    global $log, $db, $tablepre, $plsinfo;
-
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
-
-    // 加载配置文件
-    include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+    global $log, $fireseed_search_rate, $db, $tablepre, $plsinfo;
 
     if(!isset($data)) {
         global $pdata;
@@ -305,16 +281,7 @@ function FireseedSearch($pls) {
  * @return void
  */
 function FireseedDrainNPC($pls) {
-    global $log, $db, $tablepre, $plsinfo;
-
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
-
-    // 加载配置文件
-    include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+    global $log, $fireseed_drain_rate, $db, $tablepre, $plsinfo;
 
     if(!isset($data)) {
         global $pdata;
@@ -408,16 +375,7 @@ function FireseedDrainNPC($pls) {
  * @return bool 是否成功强化
  */
 function FireseedEnhance($fireseed_id, $item_index) {
-    global $log, $db, $tablepre;
-
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
-
-    // 加载配置文件
-    include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+    global $log, $fireseed_enhance_multipliers;
 
     if(!isset($data)) {
         global $pdata;
@@ -443,80 +401,43 @@ function FireseedEnhance($fireseed_id, $item_index) {
         return false;
     }
 
-    // 检查物品数量
-    if($$items_var <= 0) {
-        $log .= "<span class='red'>该物品数量不足！</span><br>";
-        return false;
-    }
-
     // 检查物品是否为焰火类物品
     $item_name = $$item_var;
     if(!isset($fireseed_enhance_multipliers[$item_name])) {
-        $log .= "<span class='red'>这不是可用于强化的焰火物品！可用物品：" . implode('、', array_keys($fireseed_enhance_multipliers)) . "</span><br>";
+        $log .= "<span class='red'>这不是可用于强化的焰火物品！</span><br>";
         return false;
     }
 
     // 获取强化倍率
     $multiplier = $fireseed_enhance_multipliers[$item_name];
 
-    // 检查种火是否有level字段，如果没有则初始化为1
-    if(!isset($clbpara['fireseed'][$fireseed_id]['level'])) {
-        $clbpara['fireseed'][$fireseed_id]['level'] = 1;
-    }
-
     // 更新种火属性
     $old_level = $clbpara['fireseed'][$fireseed_id]['level'];
     $clbpara['fireseed'][$fireseed_id]['level'] = $multiplier;
+    $clbpara['fireseed'][$fireseed_id]['hp'] *= $multiplier / $old_level;
+    $clbpara['fireseed'][$fireseed_id]['mhp'] *= $multiplier / $old_level;
+    $clbpara['fireseed'][$fireseed_id]['sp'] *= $multiplier / $old_level;
+    $clbpara['fireseed'][$fireseed_id]['msp'] *= $multiplier / $old_level;
+    $clbpara['fireseed'][$fireseed_id]['att'] *= $multiplier / $old_level;
+    $clbpara['fireseed'][$fireseed_id]['def'] *= $multiplier / $old_level;
 
-    // 避免除零错误
-    if($old_level > 0) {
-        $ratio = $multiplier / $old_level;
-        $clbpara['fireseed'][$fireseed_id]['hp'] = intval($clbpara['fireseed'][$fireseed_id]['hp'] * $ratio);
-        $clbpara['fireseed'][$fireseed_id]['mhp'] = intval($clbpara['fireseed'][$fireseed_id]['mhp'] * $ratio);
-        $clbpara['fireseed'][$fireseed_id]['sp'] = intval($clbpara['fireseed'][$fireseed_id]['sp'] * $ratio);
-        $clbpara['fireseed'][$fireseed_id]['msp'] = intval($clbpara['fireseed'][$fireseed_id]['msp'] * $ratio);
-        $clbpara['fireseed'][$fireseed_id]['att'] = intval($clbpara['fireseed'][$fireseed_id]['att'] * $ratio);
-        $clbpara['fireseed'][$fireseed_id]['def'] = intval($clbpara['fireseed'][$fireseed_id]['def'] * $ratio);
-
-        // 更新武器和防具效果
-        if(!empty($clbpara['fireseed'][$fireseed_id]['wepe'])) {
-            $clbpara['fireseed'][$fireseed_id]['wepe'] = intval($clbpara['fireseed'][$fireseed_id]['wepe'] * $ratio);
-        }
-        if(!empty($clbpara['fireseed'][$fireseed_id]['arbe'])) {
-            $clbpara['fireseed'][$fireseed_id]['arbe'] = intval($clbpara['fireseed'][$fireseed_id]['arbe'] * $ratio);
-        }
+    // 更新武器和防具效果
+    if(!empty($clbpara['fireseed'][$fireseed_id]['wepe'])) {
+        $clbpara['fireseed'][$fireseed_id]['wepe'] *= $multiplier / $old_level;
     }
+    if(!empty($clbpara['fireseed'][$fireseed_id]['arbe'])) {
+        $clbpara['fireseed'][$fireseed_id]['arbe'] *= $multiplier / $old_level;
+    }
+
+    // 将更新后的 clbpara 保存到数据库
+    $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+    $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
 
     // 消耗物品
     $$items_var--;
     if($$items_var <= 0) {
         $$item_var = $$itemk_var = $$itemsk_var = '';
         $$iteme_var = $$items_var = 0;
-    }
-
-    // 构建更新查询，同时更新物品和clbpara
-    $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
-    if($encoded_clbpara === false) {
-        $log .= "<span class='red'>数据编码失败！</span><br>";
-        return false;
-    }
-
-    // 转义单引号以防SQL注入
-    $encoded_clbpara = addslashes($encoded_clbpara);
-
-    $update_query = "UPDATE {$tablepre}players SET
-        clbpara='$encoded_clbpara',
-        $item_var='" . addslashes($$item_var) . "',
-        $itemk_var='" . addslashes($$itemk_var) . "',
-        $itemsk_var='" . addslashes($$itemsk_var) . "',
-        $iteme_var='" . intval($$iteme_var) . "',
-        $items_var='" . intval($$items_var) . "'
-        WHERE pid='$pid'";
-
-    $result = $db->query($update_query);
-    if(!$result) {
-        $log .= "<span class='red'>数据库更新失败：" . $db->error() . "</span><br>";
-        return false;
     }
 
     $log .= "<span class='lime'>你使用「{$item_name}」强化了种火「{$clbpara['fireseed'][$fireseed_id]['name']}」！</span><br>";
@@ -533,12 +454,6 @@ function FireseedEnhance($fireseed_id, $item_index) {
  */
 function FireseedFollow($target_pls) {
     global $log, $db, $tablepre, $plsinfo;
-
-    // 检查数据库连接是否有效
-    if(!$db) {
-        $log .= "<span class='red'>数据库连接错误！</span><br>";
-        return false;
-    }
 
     if(!isset($data)) {
         global $pdata;
@@ -600,8 +515,7 @@ function FireseedFollow($target_pls) {
  * @return array 返回加成的攻击和防御值
  */
 function FireseedBuffBonus() {
-    // 加载配置文件
-    include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
+    global $fireseed_follow_bonus_rate;
 
     if(!isset($data)) {
         global $pdata;

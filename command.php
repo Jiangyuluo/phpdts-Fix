@@ -1019,23 +1019,6 @@ if($teamID){
 //writeover('a.txt',$w);
 ob_clean();
 $jgamedata = compatible_json_encode($gamedata);
-
-// 检查 JSON 编码是否成功
-if($jgamedata === false || $jgamedata === null) {
-    // JSON 编码失败，尝试清理数据
-    $error_msg = json_last_error_msg();
-    error_log("JSON encoding failed in command.php: " . $error_msg);
-
-    // 创建简化的错误响应
-    $error_gamedata = array(
-        'innerHTML' => array(
-            'cmd' => '<span class="red">数据处理错误，请刷新页面重试。错误信息：' . htmlspecialchars($error_msg) . '</span>'
-        ),
-        'mode' => 'command'
-    );
-    $jgamedata = compatible_json_encode($error_gamedata);
-}
-
 //$json = new Services_JSON();
 //$jgamedata = $json->encode($gamedata);
 //if(!strstr($_SERVER['HTTP_REFERER'], 'php')) {
