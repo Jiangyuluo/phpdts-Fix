@@ -866,7 +866,8 @@ namespace revattr
 		if($pa['club'] == 22 && !empty($pa['clbpara']['fireseed']))
 		{
 			include_once GAME_ROOT.'./include/game/club22.func.php';
-			$fireseed_buff = FireseedBuffBonus();
+			// 传递当前计算出的基础攻击力（包含武器加成）
+			$fireseed_buff = FireseedBuffBonus($base_att, null);
 			$fireseed_bonus = $fireseed_buff['att'];
 			if(!$tooltip && $fireseed_bonus > 0) $log .= "<span class='yellow'>{$pa['nm']}的种火增幅了{$fireseed_bonus}点攻击力！</span><br>";
 		}
@@ -878,6 +879,7 @@ namespace revattr
 		if($tooltip)
 		{
 			$tooltip .= "天气修正：{$wth_atk_per}%\r 地点修正：{$pls_atk_per}%\r 姿态修正：{$pose_atk_per}%\r 策略修正：{$tac_atk_per}%";
+			if($fireseed_bonus > 0) $tooltip .=" \r 种火增幅：{$fireseed_bonus}";
 			if($inf_atk_per <> 100) $tooltip .=" \r 异常状态修正：{$inf_atk_per}%";
 			//if($club_atk_per <> 100) $tooltip .=" \r 称号技能修正：{$club_atk_per}%";
 			$tooltip .="\">".$base_att."</span>";
@@ -998,7 +1000,8 @@ namespace revattr
 		if($pd['club'] == 22 && !empty($pd['clbpara']['fireseed']))
 		{
 			include_once GAME_ROOT.'./include/game/club22.func.php';
-			$fireseed_buff = FireseedBuffBonus();
+			// 传递当前计算出的基础防御力（包含装备加成）
+			$fireseed_buff = FireseedBuffBonus(null, $total_def);
 			$fireseed_bonus = $fireseed_buff['def'];
 			if(!$tooltip && $fireseed_bonus > 0) $log .= "<span class='yellow'>{$pd['nm']}的种火增幅了{$fireseed_bonus}点防御力！</span><br>";
 		}
@@ -1012,6 +1015,7 @@ namespace revattr
 		{
 			$tooltip .= "天气修正：{$wth_def_per}% \r 地点修正：{$pls_def_per}% \r 姿态修正：{$pose_def_per}% \r 策略修正：{$tac_def_per}%";
 			if($inf_def_per <> 100) $tooltip .=" \r 异常状态修正：{$inf_def_per}%";
+			if($fireseed_bonus > 0) $tooltip .=" \r 种火增幅：{$fireseed_bonus}";
 			//if($club_def_per <> 100) $tooltip .=" \r 称号技能修正：{$club_def_per}%";
 			if(isset($sk_var)) $tooltip .=" \r 技能修正：".($sk_var-100)."%";
 			$tooltip .="\">".$total_def."</span>";
