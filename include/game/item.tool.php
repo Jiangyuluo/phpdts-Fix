@@ -56,39 +56,45 @@ function item_tool($itmn, &$data) {
         }
         return;
     } elseif ($itm == '残响兵器') {
+        global $cmd, $mode;
         foreach(Array('wep','arb','arh','ara','arf','art') as $val) {
             // 全局变量已在extract中处理
         }
         for($i = 1; $i <= 6; $i++) {
             // 全局变量已在extract中处理
         }
-        
+
         include template('nametag');
-        
+
         $cmd = ob_get_contents();
         ob_clean();
+        // 不要设置mode，让二级菜单显示
         return;
     } elseif ($itm == '超臆想时空') {
+        global $cmd, $mode;
         foreach(Array('wep','arb','arh','ara','arf','art') as $val) {
             // 全局变量已在extract中处理
         }
         for($i = 1; $i <= 6; $i++) {
             // 全局变量已在extract中处理
         }
-        
+
         include template('supernametag');
-        
+
         $cmd = ob_get_contents();
         ob_clean();
+        // 不要设置mode，让二级菜单显示
         return;
     } elseif ($itm == '毒药') {
+        global $cmd, $mode;
         for($i = 1; $i <= 6; $i++) {
             // 全局变量已在extract中处理
         }
         include template('poison');
-        
+
         $cmd = ob_get_contents();
         ob_clean();
+        // 不要设置mode，让二级菜单显示
         return;
     } elseif ($itm == '探测器电池') {
         $flag = false;
@@ -162,6 +168,7 @@ function item_tool($itmn, &$data) {
             $log .= "你的武器已经安装了消音器。<br>";
         }
     } elseif ($itm == '■DeathNote■') {
+        global $mode;
         $mode = 'deathnote';
         $log .= '你翻开了■DeathNote■<br>';
         return;

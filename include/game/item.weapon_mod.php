@@ -231,7 +231,7 @@ function item_weapon_mod($itmn, &$data) {
         }
         $itms--;
     } elseif ($itm == '『灵魂宝石』' || $itm == '『祝福宝石』') {
-        //global $cmd;
+        global $cmd, $mode;
         //码语行人，$club==21的时候不能使用宝石
         if ($club == 21) {
             $log .= "<span class=\"yellow\">突然，你的眼前出现了扭曲的字符！</span><br>";
@@ -257,7 +257,8 @@ function item_weapon_mod($itmn, &$data) {
             $log .='唔？你的包裹里没有可以强化的装备，是不是没有脱下来呢？DA☆ZE<br><br>';
         }else{
             $log .="宝石在你的手上发出异样的光芒，似乎有个奇怪的女声在你耳边说道<span class=\"yellow\">\"我是从天界来的凯丽\"</span>.";
-        }				
+        }
+        // 不要设置mode，让二级菜单显示
         return;
     } elseif ($itm == '水果刀') {
         $flag = false;

@@ -234,6 +234,10 @@ function itemuse($itmn,&$data=NULL) {
 	include_once GAME_ROOT.'./include/game/achievement.func.php';
 	check_item_achievement_rev($name,$i,$ie,$is,$ik,$isk);
 
-	$mode = 'command';
+	// 只有在没有设置二级菜单时才设置为command模式
+	global $cmd;
+	if (empty($cmd)) {
+		$mode = 'command';
+	}
 	return;
 }
