@@ -564,11 +564,17 @@ function FireseedBuffBonus($base_att = null, $base_def = null) {
 
     // 计算跟随模式的种火加成
     // 注意：这里仍然只考虑与玩家在同一位置的种火，因为这是战斗加成
+
+    // 调试代码已注释 - 问题已修复
+    /*
     global $log;
     $debug_info = "【种火调试】玩家位置: {$pls}, 基础攻击: {$base_att}, 基础防御: {$base_def}, 种火数量: " . count($clbpara['fireseed']) . ", 加成系数: {$fireseed_follow_bonus_rate}<br>";
+    */
 
     foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
+        /*
         $debug_info .= "【种火调试】种火ID: {$fs_id}, 位置: {$fs_data['pls']}, 模式: " . (isset($fs_data['pose']) ? $fs_data['pose'] : $fs_data['mode']) . ", 等级: {$fs_data['level']}<br>";
+        */
 
         // 使用 pose 值 1 表示作战姿态（跟随）
         if((isset($fs_data['pose']) && $fs_data['pose'] == 1 && $fs_data['pls'] == $pls) ||
@@ -577,12 +583,16 @@ function FireseedBuffBonus($base_att = null, $base_def = null) {
             $bonus_percent = 1 * $fs_data['level'] * $fireseed_follow_bonus_rate;
             $att_bonus += ceil($base_att * $bonus_percent / 100);
             $def_bonus += ceil($base_def * $bonus_percent / 100);
+            /*
             $debug_info .= "【种火调试】种火{$fs_id}符合条件，加成百分比: {$bonus_percent}%, 加成系数: {$fireseed_follow_bonus_rate}, 加成等级: {$fs_data['level']}<br>";
+            */
         }
     }
 
+    /*
     $debug_info .= "【种火调试】最终攻击加成: {$att_bonus}, 防御加成: {$def_bonus}<br>";
     if(!empty($log)) $log .= $debug_info;
+    */
 
     return array('att' => $att_bonus, 'def' => $def_bonus);
 }
