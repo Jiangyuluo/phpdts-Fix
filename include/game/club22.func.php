@@ -391,7 +391,7 @@ function FireseedDrainNPC($pls) {
  * @return bool 是否成功强化
  */
 function FireseedEnhance($fireseed_id, $item_index) {
-    global $log, $fireseed_enhance_multipliers, $db, $tablepre;
+    global $log, $fireseed_enhance_multipliers;
 
     if(!isset($data)) {
         global $pdata;
@@ -444,10 +444,6 @@ function FireseedEnhance($fireseed_id, $item_index) {
     if(!empty($clbpara['fireseed'][$fireseed_id]['arbe'])) {
         $clbpara['fireseed'][$fireseed_id]['arbe'] *= $multiplier / $old_level;
     }
-
-    // 将更新后的 clbpara 保存到数据库
-    $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
-    $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
 
     // 消耗物品
     $$items_var--;

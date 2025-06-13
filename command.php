@@ -409,41 +409,62 @@ if($hp > 0){
 						if(isset($clbpara['fireseed'][$fireseed_item_id]['items'][$item_id])){
 							$item = $clbpara['fireseed'][$fireseed_item_id]['items'][$item_id];
 
-							// 查找空物品栏
-							$empty_slot = 0;
-							for($i=1; $i<=6; $i++){
-								if(empty(${'itm'.$i})){
-									$empty_slot = $i;
-									break;
-								}
-							}
-
-							if($empty_slot){
-								// 将物品添加到玩家物品栏
-								${'itm'.$empty_slot} = $item['itm'];
-								${'itmk'.$empty_slot} = $item['itmk'];
-								${'itme'.$empty_slot} = $item['itme'];
-								${'itms'.$empty_slot} = $item['itms'];
-								${'itmsk'.$empty_slot} = $item['itmsk'];
+							// 检查itm0是否为空
+							if(empty($itm0)){
+								// 将物品放入itm0（发现物品栏位）
+								$itm0 = $item['itm'];
+								$itmk0 = $item['itmk'];
+								$itme0 = $item['itme'];
+								$itms0 = $item['itms'];
+								$itmsk0 = $item['itmsk'];
+								$itmpara0 = isset($item['itmpara']) ? $item['itmpara'] : '';
 
 								// 从种火物品池中移除物品
 								unset($clbpara['fireseed'][$fireseed_item_id]['items'][$item_id]);
 
-								$log .= '<span class="lime">你从种火「'.$clbpara['fireseed'][$fireseed_item_id]['name'].'」处获得了物品「'.$item['itm'].'」！</span><br>';
+								$log .= '<span class="lime">你从种火「'.$clbpara['fireseed'][$fireseed_item_id]['name'].'」处取回了探索到的物品！</span><br>';
+
+								// 调用itemfind函数触发物品发现流程
+								include_once GAME_ROOT.'./include/game/itemmain.func.php';
+								itemfind($pdata);
 							}else{
-								$log .= '<span class="red">你的物品栏已满，无法获取物品！</span><br>';
+								// itm0已被占用，将物品放入地图并添加到玩家视野
+								$db->query("INSERT INTO {$tablepre}mapitem (itm, itmk, itme, itms, itmsk, itmpara, pls) VALUES ('{$item['itm']}', '{$item['itmk']}', '{$item['itme']}', '{$item['itms']}', '{$item['itmsk']}', '".addslashes(isset($item['itmpara']) ? $item['itmpara'] : '')."', '$pls')");
+								$new_item_id = $db->insert_id();
+
+								// 从种火物品池中移除物品
+								unset($clbpara['fireseed'][$fireseed_item_id]['items'][$item_id]);
+
+								// 将物品添加到玩家视野
+								include_once GAME_ROOT.'./include/game.func.php';
+								check_add_searchmemory($new_item_id, 'itm', $item['itm'], $pdata);
+
+								// 保存更新后的clbpara数据到数据库
+								$encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+								$db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
+
+								$log .= '<span class="lime">你从种火「'.$clbpara['fireseed'][$fireseed_item_id]['name'].'」处取回了探索到的物品「'.$item['itm'].'」！</span><br>';
+								$log .= '<span class="yellow">由于你的双手已经拿着其他物品，取回的物品出现在了你的视野中。</span><br>';
+								$mode = 'command';
 							}
 						}else{
 							$log .= '<span class="red">指定的物品不存在！</span><br>';
+							$mode = 'command';
 						}
 					}else{
 						$log .= '<span class="red">请选择要获取物品的种火和物品！</span><br>';
+						$mode = 'command';
 					}
-					$mode = 'command';
 				}elseif($sp_cmd == 'sp_fireseed_enhance' && $club == 22){
 					include_once GAME_ROOT.'./include/game/club22.func.php';
 					if(isset($enhance_fireseed_id) && isset($enhance_item)){
-						FireseedEnhance($enhance_fireseed_id, $enhance_item);
+						$enhance_result = FireseedEnhance($enhance_fireseed_id, $enhance_item);
+						if($enhance_result) {
+							// 添加侧边栏刷新标记，确保侧边栏能够实时更新
+							$log .= "<span id='HsUipfcGhU'></span>";
+							$log .= '<span class="lime">种火强化成功！</span><br>';
+							$mode = 'command';
+						}
 					}else{
 						$log .= '<span class="red">请选择要强化的种火和焰火物品！</span><br>';
 					}
