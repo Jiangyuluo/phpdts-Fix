@@ -469,6 +469,21 @@ if($hp > 0){
 						$log .= '<span class="red">请选择要强化的种火和焰火物品！</span><br>';
 					}
 					$mode = 'command';
+				}elseif($sp_cmd == 'sp_save_fireseed_select' && $club == 22){
+					// 保存种火选择状态到clbpara
+					if(isset($select_type) && isset($fireseed_id)){
+						if(!isset($clbpara['fireseed_ui_state'])) {
+							$clbpara['fireseed_ui_state'] = array();
+						}
+						$clbpara['fireseed_ui_state'][$select_type] = $fireseed_id;
+
+						// 保存到数据库
+						$encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+						$db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
+
+						$log .= "<!-- 种火选择状态已保存: {$select_type} = {$fireseed_id} -->";
+					}
+					$mode = 'command';
 				}else{
 					$mode = $sp_cmd;
 				}

@@ -200,7 +200,7 @@
                 <div class="section-content">
                     <div class="form-group">
                         <label for="fireseed_id_panel">选择种火：</label>
-                        <select id="fireseed_id_panel">
+                        <select id="fireseed_id_panel" onchange="saveFireseedSelectToServer('deploy', this.value);">
                             <!--{if !empty($clbpara['fireseed'])}-->
                             <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
                             <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
@@ -243,7 +243,7 @@
                 <div class="section-content">
                     <div class="form-group">
                         <label for="fireseed_item_id_panel">选择种火：</label>
-                        <select id="fireseed_item_id_panel" onchange="updateFireseedItems(this.value)">
+                        <select id="fireseed_item_id_panel" onchange="updateFireseedItems(this.value); saveFireseedSelectToServer('items', this.value);">
                             <!--{if !empty($clbpara['fireseed'])}-->
                             <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
                             <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
@@ -297,7 +297,7 @@
                 <div class="section-content">
                     <div class="form-group">
                         <label for="enhance_fireseed_id_panel">选择种火：</label>
-                        <select id="enhance_fireseed_id_panel">
+                        <select id="enhance_fireseed_id_panel" onchange="saveFireseedSelectToServer('enhance', this.value);">
                             <!--{if !empty($clbpara['fireseed'])}-->
                             <!--{loop $clbpara['fireseed'] $fs_id $fs_data}-->
                             <option value="$fs_id">$fs_data['name'] (等级: $fs_data['level'], ID: $fs_id)</option>
@@ -794,6 +794,97 @@
         }
     }
 
+    // 保存种火选择状态到服务器
+    function saveFireseedSelectToServer(selectType, fireseedId) {
+        if (!fireseedId) return;
+
+        console.log('保存种火选择状态到服务器:', selectType, '=', fireseedId);
+
+        // 准备数据
+        const formData = new FormData();
+        formData.append('mode', 'command');
+        formData.append('command', 'special');
+        formData.append('sp_cmd', 'sp_save_fireseed_select');
+        formData.append('select_type', selectType);
+        formData.append('fireseed_id', fireseedId);
+
+        // 使用AJAX提交
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'command.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                console.log('种火选择状态已保存到服务器');
+            } else {
+                console.error('保存种火选择状态失败:', xhr.statusText);
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('网络错误，无法保存种火选择状态');
+        };
+
+        xhr.send(formData);
+    }
+
+    // 从clbpara恢复种火下拉框选中状态
+    function restoreFireseedSelectStates() {
+        if (!clbpara || !clbpara.fireseed_ui_state) {
+            console.log('没有保存的种火选择状态');
+            return;
+        }
+
+        console.log('开始恢复种火选择状态，保存的状态:', clbpara.fireseed_ui_state);
+
+        const selectMappings = {
+            'deploy': 'fireseed_id_panel',
+            'items': 'fireseed_item_id_panel',
+            'enhance': 'enhance_fireseed_id_panel'
+        };
+
+        for (const [stateKey, selectId] of Object.entries(selectMappings)) {
+            const savedValue = clbpara.fireseed_ui_state[stateKey];
+            const select = document.getElementById(selectId);
+
+            console.log('处理选择框:', selectId, '保存的值:', savedValue);
+
+            if (select && savedValue) {
+                // 先列出所有可用选项
+                console.log('选择框', selectId, '的所有选项:');
+                for (let i = 0; i < select.options.length; i++) {
+                    console.log('  选项', i, ':', select.options[i].value, '=', select.options[i].textContent);
+                }
+
+                // 检查保存的值是否仍然存在于选项中
+                // 使用更可靠的方法查找选项，避免选择器语法问题
+                let optionFound = false;
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === savedValue) {
+                        optionFound = true;
+                        break;
+                    }
+                }
+
+                if (optionFound) {
+                    select.value = savedValue;
+                    console.log('恢复种火选择状态:', selectId, '=', savedValue);
+
+                    // 如果是种火物品选择框，需要更新物品显示
+                    if (selectId === 'fireseed_item_id_panel') {
+                        updateFireseedItems(savedValue);
+                    }
+                } else {
+                    console.log('无法恢复选择状态，种火不存在:', selectId, '=', savedValue);
+                    // 检查种火是否真的存在于clbpara中
+                    if (clbpara.fireseed && clbpara.fireseed[savedValue]) {
+                        console.log('种火在clbpara中存在，但不在选择框中:', savedValue, clbpara.fireseed[savedValue]);
+                    } else {
+                        console.log('种火在clbpara中不存在:', savedValue);
+                    }
+                }
+            }
+        }
+    }
+
     // 更新种火物品显示
     function updateFireseedItems(fsId) {
         // 隐藏所有种火物品列表
@@ -819,6 +910,9 @@
             alert('请选择要部署的种火！');
             return;
         }
+
+        // 保存当前选择状态到服务器
+        saveFireseedSelectToServer('deploy', fireseedId);
 
         console.log('部署种火 - ID:', fireseedId, '模式:', deployMode, '位置:', deployPls);
 
@@ -878,6 +972,9 @@
             alert('请选择要获取的物品！');
             return;
         }
+
+        // 保存当前选择状态到服务器
+        saveFireseedSelectToServer('items', fsId);
 
         const itemId = selectedItem.value;
 
@@ -939,6 +1036,9 @@
             alert('请选择用于强化的焰火物品！');
             return;
         }
+
+        // 保存当前选择状态到服务器
+        saveFireseedSelectToServer('enhance', fireseedId);
 
         // 准备数据
         const formData = new FormData();
@@ -1379,6 +1479,11 @@
         // 更新种火物品列表
         updateFireseedItemsList();
 
+        // 恢复种火选择状态
+        setTimeout(function() {
+            restoreFireseedSelectStates();
+        }, 100);
+
         console.log('Fireseed tab updated');
     }
 
@@ -1477,6 +1582,8 @@
 
     // 更新种火选择下拉框
     function updateFireseedSelects() {
+        console.log('开始更新种火选择下拉框，clbpara.fireseed:', clbpara.fireseed);
+
         const selects = [
             document.getElementById('fireseed_id_panel'),
             document.getElementById('fireseed_item_id_panel'),
@@ -1486,14 +1593,14 @@
         for (const select of selects) {
             if (!select) continue;
 
-            // 保存当前选中值
-            const currentValue = select.value;
+            console.log('更新选择框:', select.id);
 
             // 清除现有选项
             select.innerHTML = '';
 
             // 如果没有种火数据，添加提示选项
             if (!clbpara.fireseed || Object.keys(clbpara.fireseed).length === 0) {
+                console.log('没有种火数据');
                 const option = document.createElement('option');
                 option.value = '';
                 option.textContent = '你还没有收纳任何种火';
@@ -1503,23 +1610,43 @@
 
             // 添加种火选项
             for (const fsId in clbpara.fireseed) {
+                const fsData = clbpara.fireseed[fsId];
+                console.log('检查种火数据:', fsId, fsData);
+
                 // 跳过非对象类型的条目或无效数据
-                if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
-                    !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
-                    console.log('跳过无效种火数据(选择框):', fsId, clbpara.fireseed[fsId]);
+                if (!fsData || typeof fsData !== 'object') {
+                    console.log('跳过无效种火数据(非对象):', fsId, fsData);
                     continue;
                 }
 
-                const fsData = clbpara.fireseed[fsId];
+                // 检查必要字段，但更宽松一些
+                if (!fsData.name && !fsData.level) {
+                    console.log('跳过无效种火数据(缺少name和level):', fsId, fsData);
+                    continue;
+                }
+
                 const option = document.createElement('option');
                 option.value = fsId;
-                option.textContent = fsData.name + ' (等级: ' + fsData.level + ', ID: ' + fsId + ')';
-                select.appendChild(option);
-            }
 
-            // 尝试恢复之前的选中值
-            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-                select.value = currentValue;
+                // 构建显示文本，处理可能缺失的字段
+                let displayText = '';
+                if (fsData.name) {
+                    displayText += fsData.name;
+                } else {
+                    displayText += '种火' + fsId;
+                }
+
+                if (fsData.level) {
+                    displayText += ' (等级: ' + fsData.level;
+                } else {
+                    displayText += ' (等级: 未知';
+                }
+
+                displayText += ', ID: ' + fsId + ')';
+
+                option.textContent = displayText;
+                select.appendChild(option);
+                console.log('添加种火选项:', fsId, displayText);
             }
         }
     }
