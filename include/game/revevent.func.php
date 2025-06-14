@@ -34,11 +34,21 @@ function update_charge_values(&$data)
 		$clbpara['charge1'] = min(101, $clbpara['charge1'] + $increase);
 	}
 	
+	// 确保 clbpara 是数组
+	if(!is_array($clbpara)) {
+		if(is_string($clbpara)) {
+			$clbpara = json_decode($clbpara, true);
+		}
+		if(!is_array($clbpara)) {
+			$clbpara = array();
+		}
+	}
+
 	// 更新charge2：不设上限，提升速度按照randver2而定，最高100点每次
-	if(!isset($clbpara['charge2'])) {
+	if(!isset($clbpara['charge2']) || !is_numeric($clbpara['charge2'])) {
 		$clbpara['charge2'] = 0;
 	}
-	
+
 	// 计算提升值，基于randver2，最高100点
 	$increase = min(100, max(1, ceil($clbpara['randver2'] / 3)));
 	$clbpara['charge2'] += $increase;
@@ -55,10 +65,10 @@ function update_charge_values(&$data)
 	$clbpara['charge3'] = max(-128, min(128, $clbpara['charge3'] + $change));
 	
 	// 更新charge4：没有上限或下限，可提升或削减
-	if(!isset($clbpara['charge4'])) {
+	if(!isset($clbpara['charge4']) || !is_numeric($clbpara['charge4'])) {
 		$clbpara['charge4'] = 0;
 	}
-	
+
 	// 随机决定是提升还是削减
 	$direction = (rand(0, 1) == 1) ? 1 : -1;
 	// 变化量在1-10之间随机

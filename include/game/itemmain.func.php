@@ -622,7 +622,7 @@ function itemdrop($item,&$data=NULL) {
 	{
 		$theitem = array('itm' => &$itm, 'itmk' => &$itmk, 'itme' => &$itme,'itms' => &$itms,'itmsk' => &$itmsk);
 		$log .= "<span class=\"yellow b\">{$itm}</span>似乎发生了变化……<br>";
-		include_once GAME_ROOT . './include/game/item.func.php';
+		include_once GAME_ROOT . './include/game/item.nachster_booster.php';
 		octitem_rotate($theitem, 7);
 	}
 

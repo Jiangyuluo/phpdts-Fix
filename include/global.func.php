@@ -70,13 +70,16 @@ function gstrfilter($str) {
 }
 
 function language($file, $templateid = 0, $tpldir = '') {
-	$tpldir = $tpldir ? $tpldir : TPLDIR;
-	$templateid = $templateid ? $templateid : TEMPLATEID;
+	global $TEMPLATEID_OVERRIDE, $TPLDIR_OVERRIDE;
+
+	// 使用覆盖变量（如果存在）
+	$tpldir = $tpldir ? $tpldir : (isset($TPLDIR_OVERRIDE) && $TPLDIR_OVERRIDE ? $TPLDIR_OVERRIDE : TPLDIR);
+	$templateid = $templateid ? $templateid : (isset($TEMPLATEID_OVERRIDE) && $TEMPLATEID_OVERRIDE ? $TEMPLATEID_OVERRIDE : TEMPLATEID);
 
 	$languagepack = GAME_ROOT.'./'.$tpldir.'/'.$file.'.lang.php';
 	if(file_exists($languagepack)) {
 		return $languagepack;
-	} elseif($templateid != 1 && $tpldir != './templates/default') {
+	} elseif($tpldir != './templates/default') {
 		// Fallback到默认模板的语言包
 		return language($file, 1, './templates/default');
 	} else {
@@ -85,10 +88,11 @@ function language($file, $templateid = 0, $tpldir = '') {
 }
 
 function template($file, $templateid = 0, $tpldir = '') {
-	global $tplrefresh;
+	global $tplrefresh, $TEMPLATEID_OVERRIDE, $TPLDIR_OVERRIDE;
 
-	$tpldir = $tpldir ? $tpldir : TPLDIR;
-	$templateid = $templateid ? $templateid : TEMPLATEID;
+	// 使用覆盖变量（如果存在）
+	$tpldir = $tpldir ? $tpldir : (isset($TPLDIR_OVERRIDE) && $TPLDIR_OVERRIDE ? $TPLDIR_OVERRIDE : TPLDIR);
+	$templateid = $templateid ? $templateid : (isset($TEMPLATEID_OVERRIDE) && $TEMPLATEID_OVERRIDE ? $TEMPLATEID_OVERRIDE : TEMPLATEID);
 
 	$tplfile = GAME_ROOT.'./'.$tpldir.'/'.$file.'.htm';
 	$objfile = GAME_ROOT.'./gamedata/templates/'.$templateid.'_'.$file.'.tpl.php';
@@ -96,7 +100,7 @@ function template($file, $templateid = 0, $tpldir = '') {
 	// 改进的fallback机制，支持nouveau模板
 	if(!file_exists($tplfile)) {
 		// 如果当前模板文件不存在，尝试fallback到默认模板
-		if($templateid != 1 && $tpldir != './templates/default') {
+		if($tpldir != './templates/default') {
 			return template($file, 1, './templates/default');
 		} else {
 			// 如果默认模板也不存在，返回错误

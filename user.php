@@ -128,7 +128,12 @@ if($mode == 'sync_master') {
 			}
 		} elseif($templateid == 2) {
 			# NOUVEAU模板对所有用户开放
-			$gamedata['innerHTML']['info'] .= '已切换到NOUVEAU界面，刷新页面生效。<br>';
+			//$gamedata['innerHTML']['info'] .= '已切换到NOUVEAU界面，刷新页面生效。<br>';
+			if($udata['groupid'] < 9)
+			{
+				$templateid = 0;
+				$gamedata['innerHTML']['info'] .= 'NOUVEAU界面尚在施工中。<br>';
+			}
 		} else {
 			# 其他值默认为经典界面
 			$templateid = 0;

@@ -53,45 +53,9 @@ $chatinnews = 50;
 //模板编号。默认为1
 define('STYLEID', '1');
 
-// 动态设置模板ID和目录
-$user_templateid = 0; // 默认模板ID
-if(isset($cuser) && $cuser) {
-    // 获取用户的模板设置
-    global $db, $gtablepre;
-    if(isset($db) && $db) {
-        $result = $db->query("SELECT u_templateid FROM {$gtablepre}users WHERE username='$cuser'");
-        if($db->num_rows($result)) {
-            $userdata = $db->fetch_array($result);
-            $user_templateid = intval($userdata['u_templateid']);
-        }
-    }
-}
-
-// 根据模板ID设置模板目录和常量
-switch($user_templateid) {
-    case 1:
-        // LULUXIA模板（未实装）
-        define('TEMPLATEID', '1');
-        define('TPLDIR', './templates/luluxia');
-        // 如果模板目录不存在，fallback到默认模板
-        if(!file_exists(GAME_ROOT.TPLDIR)) {
-            define('TPLDIR_FALLBACK', './templates/default');
-        }
-        break;
-    case 2:
-        // NOUVEAU模板
-        define('TEMPLATEID', '2');
-        define('TPLDIR', './templates/nouveau');
-        // 如果模板目录不存在，fallback到默认模板
-        if(!file_exists(GAME_ROOT.TPLDIR)) {
-            define('TPLDIR_FALLBACK', './templates/default');
-        }
-        break;
-    default:
-        // 默认模板
-        define('TEMPLATEID', '1');
-        define('TPLDIR', './templates/default');
-        break;
-}
+// 模板设置将在用户数据加载后进行
+// 这里先设置默认值，稍后会在common.inc.php中重新设置
+define('TEMPLATEID', 1);
+define('TPLDIR', './templates/default');
 
 ?>

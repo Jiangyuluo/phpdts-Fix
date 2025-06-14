@@ -4,6 +4,10 @@ if (! defined ( 'IN_GAME' )) {
 	exit ( 'Access Denied' );
 }
 
+// Include required function files
+require_once GAME_ROOT . './include/game/fortune.func.php';
+require_once GAME_ROOT . './include/game/dice.func.php';
+
 // Handle dice items
 function item_dice($itmn, &$data) {
 	global $log, $db, $tablepre;

@@ -333,6 +333,20 @@
 
 		# Process 百命猫 Kills
 		if($pd['name'] == '是TSEROF啦！'){
+			// 确保 clbpara 是数组
+			if(!is_array($pd['clbpara'])) {
+				if(is_string($pd['clbpara'])) {
+					$pd['clbpara'] = json_decode($pd['clbpara'], true);
+				}
+				if(!is_array($pd['clbpara'])) {
+					$pd['clbpara'] = array();
+				}
+			}
+
+			// 确保 lifedestroyed 字段存在且为数字
+			if(!isset($pd['clbpara']['lifedestroyed']) || !is_numeric($pd['clbpara']['lifedestroyed'])) {
+				$pd['clbpara']['lifedestroyed'] = 0;
+			}
 			$pd['clbpara']['lifedestroyed'] += 1;
 			//make her disappear from map if all life are destroyed.
 			if($pd['clbpara']['lifedestroyed'] > 111){
