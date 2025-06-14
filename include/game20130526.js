@@ -551,10 +551,7 @@ function AddMixElements(emix_arr) {
 }
 
 function changeVolume(cv){
-	var audioElement = $('gamebgm');
-	if (!audioElement) return;
-
-	var v = audioElement.volume;
+	var v = $('gamebgm').volume;
 	v = v+cv;
 	v = Math.min(1,v); v = Math.max(0,v); 	v = v.toFixed(2);
 	Cookie.setCookie("volume",v, {
@@ -562,189 +559,30 @@ function changeVolume(cv){
 		path: "/",
 	});
 	s = Math.round(v*100);
-
-	// 安全地设置音量，避免在播放状态变化时出错
-	try {
-		audioElement.volume = v;
-		$('nowbgmvolume').innerHTML = v;
-		if ($('volume_num')) {
-			$('volume_num').innerHTML = s+'%';
-		}
-	} catch (error) {
-		console.log('音量设置失败: ' + error.message);
-	}
+	$('gamebgm').volume = v;
+	$('volume_num').innerHTML = s+'%';
 }
 
-// 全局BGM管理器
-window.BGMManager = {
-	isChanging: false,
-	currentPromise: null,
-	pendingChange: null,
-	isPlaying: false,
-	userInteracted: false,
-	initialized: false,
-
-	// 初始化BGM管理器
-	init: function() {
-		if (this.initialized) return;
-		this.initialized = true;
-
-		// 在任何用户交互时尝试启动BGM
-		var self = this;
-		document.addEventListener('click', function() {
-			if (!self.userInteracted) {
-				self.startBGM();
-			}
-		}, { once: true });
-
-		console.log('BGM管理器已初始化');
-	},
-
-	// 启动BGM播放（需要用户交互）
-	startBGM: function() {
-		if (this.userInteracted) return;
-		this.userInteracted = true;
-
-		var audioElement = $('gamebgm');
-		if (audioElement && audioElement.paused) {
-			var self = this;
-			var playPromise = audioElement.play();
-			if (playPromise !== undefined) {
-				playPromise.then(function() {
-					self.isPlaying = true;
-					console.log('BGM开始播放');
-				}).catch(function(error) {
-					console.log('BGM启动失败: ' + error.message);
-				});
-			}
-		}
-	},
-
-	// 安全地切换BGM
-	changeBGM: function(mode) {
-		mode = mode || 1;
-
-		// 防止并发调用
-		if (this.isChanging) {
-			this.pendingChange = mode;
-			console.log('BGM正在切换中，将在完成后执行新的切换请求');
-			return;
-		}
-
-		this.isChanging = true;
-		var self = this;
-
-		try {
-			var bgmlist = JSON.parse($('bgmlist').innerHTML);
-			var nowbgm = Math.round($('nowbgm').innerHTML);
-			nowbgm = nowbgm + mode;
-			if(nowbgm < 0){
-				nowbgm = bgmlist.length - 1;
-			}else{
-				nowbgm = nowbgm % bgmlist.length;
-			}
-
-			var audioElement = $('gamebgm');
-			var sourceElement = $('gbgm');
-
-			if (!audioElement || !sourceElement) {
-				this.isChanging = false;
-				return;
-			}
-
-			// 取消当前的播放Promise
-			if (this.currentPromise) {
-				audioElement.pause();
-				this.currentPromise = null;
-			}
-
-			// 暂停当前播放并重置
-			audioElement.pause();
-			audioElement.currentTime = 0;
-
-			// 更新音频源
-			sourceElement.src = bgmlist[nowbgm].url;
-			sourceElement.type = bgmlist[nowbgm].type;
-			$('nowbgm').innerHTML = nowbgm;
-			Cookie.setCookie("nowbgmid",bgmlist[nowbgm].id, {
-				path: "/",
-			});
-
-			var v = audioElement.volume;
-			if ($('bgmname')) {
-				$('bgmname').innerHTML = bgmlist[nowbgm].name;
-			}
-
-			// 等待一小段时间确保pause()完成
-			setTimeout(function() {
-				// 加载新音频
-				audioElement.load();
-				audioElement.volume = v;
-
-				// 等待load完成后再播放
-				function tryPlay() {
-					if (audioElement.readyState >= 3) { // HAVE_FUTURE_DATA
-						// 使用Promise处理异步播放
-						self.currentPromise = audioElement.play();
-						if (self.currentPromise !== undefined) {
-							self.currentPromise.then(function() {
-								console.log('BGM播放成功: ' + bgmlist[nowbgm].name);
-								self.currentPromise = null;
-								self.isChanging = false;
-								self.isPlaying = true;
-
-								// 处理待处理的切换请求
-								if (self.pendingChange !== null) {
-									var pendingMode = self.pendingChange;
-									self.pendingChange = null;
-									setTimeout(function() {
-										self.changeBGM(pendingMode);
-									}, 100);
-								}
-							}).catch(function(error) {
-								console.log('BGM播放失败: ' + error.message);
-								self.currentPromise = null;
-								self.isChanging = false;
-
-								// 处理待处理的切换请求
-								if (self.pendingChange !== null) {
-									var pendingMode = self.pendingChange;
-									self.pendingChange = null;
-									setTimeout(function() {
-										self.changeBGM(pendingMode);
-									}, 100);
-								}
-							});
-						} else {
-							self.isChanging = false;
-						}
-					} else {
-						// 等待音频加载完成
-						setTimeout(tryPlay, 50);
-					}
-				}
-
-				tryPlay();
-			}, 100);
-
-		} catch (error) {
-			console.log('changeBGM错误: ' + error.message);
-			this.isChanging = false;
-			this.currentPromise = null;
-		}
+function changeBGM(mode=1){
+	var bgmlist = JSON.parse($('bgmlist').innerHTML);
+	var nowbgm = Math.round($('nowbgm').innerHTML);
+	nowbgm = nowbgm + mode;
+	if(nowbgm < 0){
+		nowbgm = bgmlist.length - 1;
+	}else{
+		nowbgm = nowbgm % bgmlist.length;
 	}
-};
-
-// 初始化BGM管理器
-BGMManager.init();
-
-// 兼容性函数 - 调用新的BGM管理器
-function changeBGM(mode) {
-	if (window.BGMManager) {
-		BGMManager.changeBGM(mode);
-	} else {
-		console.log('BGM管理器未初始化');
-	}
+	$('gbgm').src = bgmlist[nowbgm].url;
+	$('gbgm').type = bgmlist[nowbgm].type;
+	$('nowbgm').innerHTML = nowbgm;
+	Cookie.setCookie("nowbgmid",bgmlist[nowbgm].id, {
+		path: "/",
+	});
+	var v = $('gamebgm').volume;
+	$('bgmname').innerHTML = bgmlist[nowbgm].name;
+	$('gamebgm').load();
+	$('gamebgm').volume = v;
+	$('gamebgm').play();
 }
 
 function changePages(mode,cPages)

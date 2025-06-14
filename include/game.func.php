@@ -175,17 +175,9 @@ function init_bgm($force_update=0)
 		}
 	}
 
-	# 防止重复初始化 - 只在真正需要时重载播放器
-	static $bgm_initialized = false;
-	if($bgm_initialized && !$force_update && $command != 'enter')
-	{
-		return '';
-	}
-
 	# 刷新页面或输入强制重载参数时，重载播放器
-	if($command == 'enter' || $force_update || !$bgm_initialized)
+	if($command == 'enter' || $force_update)
 	{
-		$bgm_initialized = true;
 		$booklist = $bgmarr = Array();
 		# 为播放列表中的曲集关联对应BGM名、链接与种类
 		foreach($clbpara['bgmbook'] as $book)
@@ -216,69 +208,17 @@ function init_bgm($force_update=0)
 		# 生成播放器与播放队列 太野蛮了……嘻嘻……
 		if(!empty($bgmlink) && !empty($bgmtype))
 		{
-			$bgm_timestamp = time() . rand(1000, 9999); // 唯一标识符
 $bgmplayer = <<<EOT
-			<audio id="gamebgm" controls="1" preload="metadata" data-bgm-init="$bgm_timestamp">
+			<audio id="gamebgm" autoplay controls=1" onplay="$('gamebgm').volume=$('nowbgmvolume').innerHTML;">
 				<source id="gbgm" src="$bgmlink" type="$bgmtype">
 			</audio>
 			<div id="bgmlist">$json_bgmarr</div>
 			<div id="nowbgm">0</div>
 			<div id="nowbgmvolume">$volume_r</div>
 			<script>
-				// 防止重复初始化BGM播放器
-				(function() {
-					var currentTimestamp = '$bgm_timestamp';
-
-					// 检查是否已经初始化过相同的实例
-					if (window.bgmInitTimestamp === currentTimestamp) {
-						console.log('BGM播放器已存在，跳过重复初始化');
-						return;
-					}
-					window.bgmInitTimestamp = currentTimestamp;
-
-					var audioElement = document.getElementById('gamebgm');
-					if (!audioElement) {
-						console.log('BGM音频元素不存在');
-						return;
-					}
-
-					// 清理之前的事件监听器
-					if (window.bgmEndedHandler) {
-						audioElement.removeEventListener('ended', window.bgmEndedHandler);
-					}
-
-					function initBGM() {
-						audioElement.volume = $volume_r;
-
-						// 创建新的事件处理器
-						window.bgmEndedHandler = function() {
-							if (window.BGMManager && typeof BGMManager.changeBGM === 'function') {
-								BGMManager.changeBGM();
-							} else if (typeof changeBGM === 'function') {
-								changeBGM();
-							}
-						};
-
-						// 监听音频结束事件
-						audioElement.addEventListener('ended', window.bgmEndedHandler, false);
-
-						console.log('BGM播放器已初始化 (ID: ' + currentTimestamp + ')');
-					}
-
-					// 页面加载完成后初始化
-					if (document.readyState === 'loading') {
-						document.addEventListener('DOMContentLoaded', initBGM);
-					} else {
-						initBGM();
-					}
-
-					// 防止页面卸载时的播放中断错误
-					window.addEventListener('beforeunload', function() {
-						if (audioElement) {
-							audioElement.pause();
-						}
-					});
-				})();
+				gamebgm.addEventListener('ended', function () {
+					changeBGM();
+				}, false);
 			</script>
 EOT;
 		}
