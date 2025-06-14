@@ -5,6 +5,45 @@ if(!defined('IN_GAME')) exit('Access Denied');
 include_once GAME_ROOT.'./gamedata/cache/club22cfg.php';
 
 /**
+ * 获取种火的实时数据
+ *
+ * @param int $fireseed_id 种火ID
+ * @return array|null 种火数据，如果种火不存在或已死亡则返回null
+ */
+function getFireseedRealTimeData($fireseed_id) {
+    global $db, $tablepre;
+
+    $result = $db->query("SELECT * FROM {$tablepre}players WHERE pid='$fireseed_id' AND type=92");
+    if($db->num_rows($result) == 0) {
+        return null; // 种火不存在
+    }
+
+    $fireseed_data = $db->fetch_array($result);
+
+    // 检查种火是否死亡或被销毁
+    if($fireseed_data['hp'] <= 0 || $fireseed_data['pls'] == 254) {
+        return null; // 种火已死亡或被销毁
+    }
+
+    // 确保 clbpara 是数组格式
+    if(!is_array($fireseed_data['clbpara'])) {
+        $fireseed_data['clbpara'] = get_clbpara($fireseed_data['clbpara']);
+    }
+
+    return $fireseed_data;
+}
+
+/**
+ * 检查种火是否存活且可用
+ *
+ * @param int $fireseed_id 种火ID
+ * @return bool 种火是否存活且可用
+ */
+function isFireseedAlive($fireseed_id) {
+    return getFireseedRealTimeData($fireseed_id) !== null;
+}
+
+/**
  * 将目标种火复活，并进行收纳种火
  *
  * @param array $npc 目标种火NPC数据
@@ -51,32 +90,12 @@ function FireseedRecruit($npc) {
     // 生成种火ID
     $fireseed_id = $npc['pid'];
 
-    // 记录种火数据
+    // 记录种火数据 - 使用指针式存储，减少数据冗余
     $clbpara['fireseed'][$fireseed_id] = array(
-        'name' => $npc['name'],
-        'icon' => $npc['icon'],
         'level' => 1, // 初始等级
         'mode' => 0,  // 初始模式：跟随
-        'pls' => $pls, // 初始位置
         'horizon' => 0, // 初始位于通常视界而非灵子视界
-        'hp' => $npc['mhp'],
-        'mhp' => $npc['mhp'],
-        'sp' => $npc['msp'],
-        'msp' => $npc['msp'],
-        'att' => $npc['att'],
-        'def' => $npc['def'],
-        'skills' => isset($npc['clbpara']['skill']) && is_array($npc['clbpara']['skill']) ? $npc['clbpara']['skill'] : array(),
         'items' => array(), // 探物模式下收集的物品
-        'wep' => $npc['wep'],
-        'wepk' => $npc['wepk'],
-        'wepe' => $npc['wepe'],
-        'weps' => $npc['weps'],
-        'wepsk' => $npc['wepsk'],
-        'arb' => $npc['arb'],
-        'arbk' => $npc['arbk'],
-        'arbe' => $npc['arbe'],
-        'arbs' => $npc['arbs'],
-        'arbsk' => $npc['arbsk'],
         'recruited_time' => $now
     );
 
@@ -119,6 +138,12 @@ function FireseedDeploy($fireseed_id, $mode, $deploypls = 0) {
     // 检查种火是否存在
     if(!isset($clbpara['fireseed'][$fireseed_id])) {
         $log .= "<span class='red'>指定的种火不存在！</span><br>";
+        return false;
+    }
+
+    // 检查种火是否存活
+    if(!isFireseedAlive($fireseed_id)) {
+        $log .= "<span class='red'>指定的种火已死亡或被销毁，无法部署！</span><br>";
         return false;
     }
 
@@ -173,7 +198,11 @@ function FireseedDeploy($fireseed_id, $mode, $deploypls = 0) {
     $location = $plsinfo[$fspls];
     $pose_name = $poseinfo[$pose];
 
-    $log .= "<span class='lime'>你将种火「{$clbpara['fireseed'][$fireseed_id]['name']}」的状态设置为「{$mode_name}」（{$pose_name}）";
+    // 获取种火名称
+    $fireseed_data = getFireseedRealTimeData($fireseed_id);
+    $fireseed_name = $fireseed_data ? $fireseed_data['name'] : '未知种火';
+
+    $log .= "<span class='lime'>你将种火「{$fireseed_name}」的状态设置为「{$mode_name}」（{$pose_name}）";
     $log .= "，并部署在了「{$location}」";
     $log .= "。</span><br>";
 
@@ -200,15 +229,33 @@ function FireseedSearch($pls) {
         return;
     }
 
-    // 查找所有处于探物模式的种火，不限制地图位置
+    // 查找所有处于探物模式且存活的种火，不限制地图位置
     $search_fireseeds = array();
     foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
-        // 使用 pose 值 3 表示探物姿态
-        if(isset($fs_data['pose']) && $fs_data['pose'] == 3) {
-            $search_fireseeds[$fs_id] = $fs_data;
-        } else if($fs_data['mode'] == 1) {
-            // 兼容旧数据，如果没有 pose 字段，则使用 mode
-            $search_fireseeds[$fs_id] = $fs_data;
+        // 检查种火是否存活
+        if(!isFireseedAlive($fs_id)) {
+            continue; // 跳过死亡或被销毁的种火
+        }
+
+        // 获取种火实时数据
+        $realtime_data = getFireseedRealTimeData($fs_id);
+        if(!$realtime_data) {
+            continue;
+        }
+
+        // 检查是否为探物模式
+        $is_search_mode = false;
+
+        // 优先检查 pose 字段（新数据）
+        if(isset($fs_data['pose'])) {
+            $is_search_mode = ($fs_data['pose'] == 3); // 探物姿态
+        } else {
+            // 兼容旧数据，使用 mode 字段
+            $is_search_mode = ($fs_data['mode'] == 1); // 探物模式
+        }
+
+        if($is_search_mode) {
+            $search_fireseeds[$fs_id] = array_merge($fs_data, array('pls' => $realtime_data['pls']));
         }
     }
 
@@ -267,7 +314,11 @@ function FireseedSearch($pls) {
         // 从地图上移除物品
         $db->query("DELETE FROM {$tablepre}mapitem WHERE iid='{$item_data['iid']}'");
 
-        $log .= "<span class='lime'>你的种火「{$clbpara['fireseed'][$finder_id]['name']}」在「{$plsinfo[$location]}」发现了物品「{$item_data['itm']}」！</span><br>";
+        // 获取种火名称
+        $finder_data = getFireseedRealTimeData($finder_id);
+        $finder_name = $finder_data ? $finder_data['name'] : '未知种火';
+
+        $log .= "<span class='lime'>你的种火「{$finder_name}」在「{$plsinfo[$location]}」发现了物品「{$item_data['itm']}」！</span><br>";
     }
 
     // 如果有任何种火成功探物，更新玩家的 clbpara
@@ -298,15 +349,36 @@ function FireseedDrainNPC($pls) {
         return;
     }
 
-    // 查找所有处于索敌模式的种火，不限制地图位置
+    // 查找所有处于索敌模式且存活的种火，不限制地图位置
     $drain_fireseeds = array();
     foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
-        // 使用 pose 值 2 表示强袭姿态（索敌）
-        if(isset($fs_data['pose']) && $fs_data['pose'] == 2) {
-            $drain_fireseeds[$fs_id] = $fs_data;
-        } else if($fs_data['mode'] == 2) {
-            // 兼容旧数据，如果没有 pose 字段，则使用 mode
-            $drain_fireseeds[$fs_id] = $fs_data;
+        // 检查种火是否存活
+        if(!isFireseedAlive($fs_id)) {
+            continue; // 跳过死亡或被销毁的种火
+        }
+
+        // 获取种火实时数据
+        $realtime_data = getFireseedRealTimeData($fs_id);
+        if(!$realtime_data) {
+            continue;
+        }
+
+        // 检查是否为索敌模式
+        $is_drain_mode = false;
+
+        // 优先检查 pose 字段（新数据）
+        if(isset($fs_data['pose'])) {
+            $is_drain_mode = ($fs_data['pose'] == 2); // 强袭姿态
+        } else {
+            // 兼容旧数据，使用 mode 字段
+            $is_drain_mode = ($fs_data['mode'] == 2); // 索敌模式
+        }
+
+        if($is_drain_mode) {
+            $drain_fireseeds[$fs_id] = array_merge($fs_data, array(
+                'pls' => $realtime_data['pls'],
+                'att' => $realtime_data['att']
+            ));
         }
     }
 
@@ -378,7 +450,11 @@ function FireseedDrainNPC($pls) {
             // 更新NPC生命值
             $db->query("UPDATE {$tablepre}players SET hp='$new_hp' WHERE pid='{$npc['pid']}'");
 
-            $log .= "<span class='lime'>你的种火「{$clbpara['fireseed'][$drainer_id]['name']}」在「{$plsinfo[$location]}」削弱了「{$npc['name']}」，造成了{$drain_amount}点伤害！</span><br>";
+            // 获取种火名称
+            $drainer_data = getFireseedRealTimeData($drainer_id);
+            $drainer_name = $drainer_data ? $drainer_data['name'] : '未知种火';
+
+            $log .= "<span class='lime'>你的种火「{$drainer_name}」在「{$plsinfo[$location]}」削弱了「{$npc['name']}」，造成了{$drain_amount}点伤害！</span><br>";
         }
     }
 }
@@ -391,7 +467,7 @@ function FireseedDrainNPC($pls) {
  * @return bool 是否成功强化
  */
 function FireseedEnhance($fireseed_id, $item_index) {
-    global $log, $fireseed_enhance_multipliers;
+    global $log, $fireseed_enhance_multipliers, $db, $tablepre;
 
     if(!isset($data)) {
         global $pdata;
@@ -402,6 +478,12 @@ function FireseedEnhance($fireseed_id, $item_index) {
     // 检查种火是否存在
     if(!isset($clbpara['fireseed'][$fireseed_id])) {
         $log .= "<span class='red'>指定的种火不存在！</span><br>";
+        return false;
+    }
+
+    // 检查种火是否存活
+    if(!isFireseedAlive($fireseed_id)) {
+        $log .= "<span class='red'>指定的种火已死亡或被销毁，无法强化！</span><br>";
         return false;
     }
 
@@ -427,23 +509,32 @@ function FireseedEnhance($fireseed_id, $item_index) {
     // 获取强化倍率
     $multiplier = $fireseed_enhance_multipliers[$item_name];
 
+    // 获取种火当前数据
+    $fireseed_data = getFireseedRealTimeData($fireseed_id);
+    if(!$fireseed_data) {
+        $log .= "<span class='red'>无法获取种火数据！</span><br>";
+        return false;
+    }
+
     // 更新种火属性
     $old_level = $clbpara['fireseed'][$fireseed_id]['level'];
     $clbpara['fireseed'][$fireseed_id]['level'] = $multiplier;
-    $clbpara['fireseed'][$fireseed_id]['hp'] *= $multiplier / $old_level;
-    $clbpara['fireseed'][$fireseed_id]['mhp'] *= $multiplier / $old_level;
-    $clbpara['fireseed'][$fireseed_id]['sp'] *= $multiplier / $old_level;
-    $clbpara['fireseed'][$fireseed_id]['msp'] *= $multiplier / $old_level;
-    $clbpara['fireseed'][$fireseed_id]['att'] *= $multiplier / $old_level;
-    $clbpara['fireseed'][$fireseed_id]['def'] *= $multiplier / $old_level;
 
-    // 更新武器和防具效果
-    if(!empty($clbpara['fireseed'][$fireseed_id]['wepe'])) {
-        $clbpara['fireseed'][$fireseed_id]['wepe'] *= $multiplier / $old_level;
-    }
-    if(!empty($clbpara['fireseed'][$fireseed_id]['arbe'])) {
-        $clbpara['fireseed'][$fireseed_id]['arbe'] *= $multiplier / $old_level;
-    }
+    // 计算新的属性值
+    $new_hp = ceil($fireseed_data['hp'] * $multiplier / $old_level);
+    $new_mhp = ceil($fireseed_data['mhp'] * $multiplier / $old_level);
+    $new_sp = ceil($fireseed_data['sp'] * $multiplier / $old_level);
+    $new_msp = ceil($fireseed_data['msp'] * $multiplier / $old_level);
+    $new_att = ceil($fireseed_data['att'] * $multiplier / $old_level);
+    $new_def = ceil($fireseed_data['def'] * $multiplier / $old_level);
+    $new_wepe = !empty($fireseed_data['wepe']) ? ceil($fireseed_data['wepe'] * $multiplier / $old_level) : $fireseed_data['wepe'];
+    $new_arbe = !empty($fireseed_data['arbe']) ? ceil($fireseed_data['arbe'] * $multiplier / $old_level) : $fireseed_data['arbe'];
+
+    // 更新数据库中的种火属性
+    $db->query("UPDATE {$tablepre}players SET
+        hp='$new_hp', mhp='$new_mhp', sp='$new_sp', msp='$new_msp',
+        att='$new_att', def='$new_def', wepe='$new_wepe', arbe='$new_arbe'
+        WHERE pid='$fireseed_id'");
 
     // 消耗物品
     $$items_var--;
@@ -452,8 +543,12 @@ function FireseedEnhance($fireseed_id, $item_index) {
         $$iteme_var = $$items_var = 0;
     }
 
-    $log .= "<span class='lime'>你使用「{$item_name}」强化了种火「{$clbpara['fireseed'][$fireseed_id]['name']}」！</span><br>";
+    $log .= "<span class='lime'>你使用「{$item_name}」强化了种火「{$fireseed_data['name']}」！</span><br>";
     $log .= "<span class='yellow'>种火的强化倍率提升到了{$multiplier}倍！</span><br>";
+
+    // 保存玩家的clbpara数据到数据库
+    $encoded_clbpara = json_encode($clbpara, JSON_UNESCAPED_UNICODE);
+    $db->query("UPDATE {$tablepre}players SET clbpara='$encoded_clbpara' WHERE pid='$pid'");
 
     return true;
 }
@@ -478,13 +573,33 @@ function FireseedFollow($target_pls) {
         return;
     }
 
-    // 查找所有处于跟随模式的种火
+    // 查找所有处于跟随模式且存活的种火
     $follow_fireseeds = array();
     foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
-        // 使用 pose 值 1 表示作战姿态（跟随）
-        if((isset($fs_data['pose']) && $fs_data['pose'] == 1) ||
-           ($fs_data['mode'] == 0)) {
-            $follow_fireseeds[$fs_id] = $fs_data;
+        // 检查种火是否存活
+        if(!isFireseedAlive($fs_id)) {
+            continue; // 跳过死亡或被销毁的种火
+        }
+
+        // 获取种火实时数据
+        $realtime_data = getFireseedRealTimeData($fs_id);
+        if(!$realtime_data) {
+            continue;
+        }
+
+        // 检查是否为跟随模式
+        $is_follow_mode = false;
+
+        // 优先检查 pose 字段（新数据）
+        if(isset($fs_data['pose'])) {
+            $is_follow_mode = ($fs_data['pose'] == 1); // 作战姿态
+        } else {
+            // 兼容旧数据，使用 mode 字段
+            $is_follow_mode = ($fs_data['mode'] == 0); // 跟随模式
+        }
+
+        if($is_follow_mode) {
+            $follow_fireseeds[$fs_id] = array_merge($fs_data, array('pls' => $realtime_data['pls']));
         }
     }
 
@@ -568,13 +683,33 @@ function FireseedBuffBonus($base_att = null, $base_def = null) {
     */
 
     foreach($clbpara['fireseed'] as $fs_id => $fs_data) {
+        // 检查种火是否存活
+        if(!isFireseedAlive($fs_id)) {
+            continue; // 跳过死亡或被销毁的种火
+        }
+
+        // 获取种火实时数据
+        $realtime_data = getFireseedRealTimeData($fs_id);
+        if(!$realtime_data) {
+            continue;
+        }
+
         /*
-        $debug_info .= "【种火调试】种火ID: {$fs_id}, 位置: {$fs_data['pls']}, 模式: " . (isset($fs_data['pose']) ? $fs_data['pose'] : $fs_data['mode']) . ", 等级: {$fs_data['level']}<br>";
+        $debug_info .= "【种火调试】种火ID: {$fs_id}, 位置: {$realtime_data['pls']}, 模式: " . (isset($fs_data['pose']) ? $fs_data['pose'] : $fs_data['mode']) . ", 等级: {$fs_data['level']}<br>";
         */
 
-        // 使用 pose 值 1 表示作战姿态（跟随）
-        if((isset($fs_data['pose']) && $fs_data['pose'] == 1 && $fs_data['pls'] == $pls) ||
-           ($fs_data['mode'] == 0 && $fs_data['pls'] == $pls)) {
+        // 检查是否为跟随模式且在同一位置
+        $is_follow_mode = false;
+
+        // 优先检查 pose 字段（新数据）
+        if(isset($fs_data['pose'])) {
+            $is_follow_mode = ($fs_data['pose'] == 1 && $realtime_data['pls'] == $pls); // 作战姿态且同位置
+        } else {
+            // 兼容旧数据，使用 mode 字段
+            $is_follow_mode = ($fs_data['mode'] == 0 && $realtime_data['pls'] == $pls); // 跟随模式且同位置
+        }
+
+        if($is_follow_mode) {
             // 加成 = 数量(1) × 强化层数 × 1%
             $bonus_percent = 1 * $fs_data['level'] * $fireseed_follow_bonus_rate;
             $att_bonus += ceil($base_att * $bonus_percent / 100);

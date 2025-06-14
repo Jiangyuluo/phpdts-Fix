@@ -1507,23 +1507,128 @@
             return;
         }
 
+        // 获取种火实时数据
+        fetchFireseedRealTimeData().then(function(realtimeData) {
+            // 再次清除现有行，确保表格是空的
+            while (statusTable.rows.length > 1) {
+                statusTable.deleteRow(1);
+            }
+
+            // 添加种火数据行
+            for (const fsId in clbpara.fireseed) {
+                // 跳过非对象类型的条目或无效数据
+                if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
+                    !clbpara.fireseed[fsId].level) {
+                    console.log('跳过无效种火数据:', fsId, clbpara.fireseed[fsId]);
+                    continue;
+                }
+
+                const fsData = realtimeData[fsId] || clbpara.fireseed[fsId];
+                const row = statusTable.insertRow();
+
+                // 名称
+                const nameCell = row.insertCell();
+                const nameSpan = document.createElement('span');
+                nameSpan.className = fsData.alive === false ? 'red' : 'yellow';
+                nameSpan.textContent = fsData.name || '未知种火';
+                nameCell.appendChild(nameSpan);
+
+                // 等级
+                const levelCell = row.insertCell();
+                levelCell.textContent = fsData.level;
+
+                // 状态
+                const modeCell = row.insertCell();
+                const modes = ['跟随', '探物', '索敌', '隐藏'];
+                modeCell.textContent = modes[fsData.mode] || '未知';
+
+                // 位置
+                const plsCell = row.insertCell();
+                const plsName = getPlsName(fsData.pls);
+                plsCell.textContent = plsName;
+
+                // 生命
+                const hpCell = row.insertCell();
+                hpCell.textContent = fsData.hp + '/' + fsData.mhp;
+
+                // 体力
+                const spCell = row.insertCell();
+                spCell.textContent = fsData.sp + '/' + fsData.msp;
+
+                // 攻击
+                const attCell = row.insertCell();
+                attCell.textContent = fsData.att;
+
+                // 防御
+                const defCell = row.insertCell();
+                defCell.textContent = fsData.def;
+
+                // ID
+                const idCell = row.insertCell();
+                idCell.textContent = fsId;
+            }
+        }).catch(function(error) {
+            console.error('获取种火实时数据失败:', error);
+            // 如果获取实时数据失败，使用原有逻辑
+            updateFireseedStatusTableFallback();
+        });
+    }
+
+    // 获取种火实时数据
+    function fetchFireseedRealTimeData() {
+        return new Promise(function(resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'fireseed_data.php', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.error) {
+                            reject(new Error(data.error));
+                        } else {
+                            resolve(data);
+                        }
+                    } catch (e) {
+                        reject(new Error('解析响应数据失败'));
+                    }
+                } else {
+                    reject(new Error('请求失败: ' + xhr.statusText));
+                }
+            };
+            xhr.onerror = function() {
+                reject(new Error('网络错误'));
+            };
+            xhr.send();
+        });
+    }
+
+    // 备用的种火状态表格更新函数（使用原有逻辑）
+    function updateFireseedStatusTableFallback() {
+        const statusTable = document.querySelector('#fireseed-tab .fireseed-table');
+        if (!statusTable) return;
+
+        // 确保表格是空的
+        while (statusTable.rows.length > 1) {
+            statusTable.deleteRow(1);
+        }
+
         // 添加种火数据行
         for (const fsId in clbpara.fireseed) {
             // 跳过非对象类型的条目或无效数据
             if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
-                !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
+                !clbpara.fireseed[fsId].level) {
                 console.log('跳过无效种火数据:', fsId, clbpara.fireseed[fsId]);
                 continue;
             }
 
             const fsData = clbpara.fireseed[fsId];
-            const row = statusTable.insertRow();
+            const row = statusTable.insertRow(); // 修复：先创建行
 
             // 名称
             const nameCell = row.insertCell();
             const nameSpan = document.createElement('span');
             nameSpan.className = 'yellow';
-            nameSpan.textContent = fsData.name;
+            nameSpan.textContent = fsData.name || '未知种火';
             nameCell.appendChild(nameSpan);
 
             // 等级
@@ -1537,25 +1642,24 @@
 
             // 位置
             const plsCell = row.insertCell();
-            // 获取位置名称
             const plsName = getPlsName(fsData.pls);
             plsCell.textContent = plsName;
 
             // 生命
             const hpCell = row.insertCell();
-            hpCell.textContent = fsData.hp + '/' + fsData.mhp;
+            hpCell.textContent = (fsData.hp || 0) + '/' + (fsData.mhp || 0);
 
             // 体力
             const spCell = row.insertCell();
-            spCell.textContent = fsData.sp + '/' + fsData.msp;
+            spCell.textContent = (fsData.sp || 0) + '/' + (fsData.msp || 0);
 
             // 攻击
             const attCell = row.insertCell();
-            attCell.textContent = fsData.att;
+            attCell.textContent = fsData.att || 0;
 
             // 防御
             const defCell = row.insertCell();
-            defCell.textContent = fsData.def;
+            defCell.textContent = fsData.def || 0;
 
             // ID
             const idCell = row.insertCell();
@@ -1619,22 +1723,17 @@
                     continue;
                 }
 
-                // 检查必要字段，但更宽松一些
-                if (!fsData.name && !fsData.level) {
-                    console.log('跳过无效种火数据(缺少name和level):', fsId, fsData);
+                // 检查必要字段 - 现在只检查level，因为name不再存储在clbpara中
+                if (!fsData.level) {
+                    console.log('跳过无效种火数据(缺少level):', fsId, fsData);
                     continue;
                 }
 
                 const option = document.createElement('option');
                 option.value = fsId;
 
-                // 构建显示文本，处理可能缺失的字段
-                let displayText = '';
-                if (fsData.name) {
-                    displayText += fsData.name;
-                } else {
-                    displayText += '种火' + fsId;
-                }
+                // 构建显示文本 - 使用种火ID作为标识
+                let displayText = '种火' + fsId;
 
                 if (fsData.level) {
                     displayText += ' (等级: ' + fsData.level;
@@ -1666,9 +1765,9 @@
 
         // 为每个种火创建物品列表
         for (const fsId in clbpara.fireseed) {
-            // 跳过非对象类型的条目或无效数据
+            // 跳过非对象类型的条目或无效数据 - 现在只检查level
             if (!clbpara.fireseed[fsId] || typeof clbpara.fireseed[fsId] !== 'object' ||
-                !clbpara.fireseed[fsId].name || !clbpara.fireseed[fsId].level) {
+                !clbpara.fireseed[fsId].level) {
                 console.log('跳过无效种火数据(物品列表):', fsId, clbpara.fireseed[fsId]);
                 continue;
             }
@@ -1779,7 +1878,7 @@
         let validFireseeds = [];
         for (const fsId in clbpara.fireseed) {
             if (clbpara.fireseed[fsId] && typeof clbpara.fireseed[fsId] === 'object' &&
-                clbpara.fireseed[fsId].name && clbpara.fireseed[fsId].level) {
+                clbpara.fireseed[fsId].level) {
                 validFireseeds.push(fsId);
             }
         }
