@@ -77,6 +77,7 @@ function language($file, $templateid = 0, $tpldir = '') {
 	if(file_exists($languagepack)) {
 		return $languagepack;
 	} elseif($templateid != 1 && $tpldir != './templates/default') {
+		// Fallback到默认模板的语言包
 		return language($file, 1, './templates/default');
 	} else {
 		return FALSE;
@@ -91,9 +92,18 @@ function template($file, $templateid = 0, $tpldir = '') {
 
 	$tplfile = GAME_ROOT.'./'.$tpldir.'/'.$file.'.htm';
 	$objfile = GAME_ROOT.'./gamedata/templates/'.$templateid.'_'.$file.'.tpl.php';
-	if(TEMPLATEID != 1 && $templateid != 1 && !file_exists($tplfile)) {
-		return template($file, 1, './templates/default/');
+
+	// 改进的fallback机制，支持nouveau模板
+	if(!file_exists($tplfile)) {
+		// 如果当前模板文件不存在，尝试fallback到默认模板
+		if($templateid != 1 && $tpldir != './templates/default') {
+			return template($file, 1, './templates/default');
+		} else {
+			// 如果默认模板也不存在，返回错误
+			gexit("Template file '$file.htm' not found in any template directory!");
+		}
 	}
+
 	if($tplrefresh == 1) {
 		if(!file_exists($objfile) || filemtime($tplfile) > filemtime($objfile)) {
 			require_once GAME_ROOT.'./include/template.func.php';

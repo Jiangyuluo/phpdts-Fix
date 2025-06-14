@@ -118,12 +118,20 @@ if($mode == 'sync_master') {
 	# 切换用户界面
 	if(!empty($templateid))
 	{
-		if($templateid != 1) $templateid = 1;
-		# 暂时只允许管理员账户切换至新界面
-		if($udata['groupid'] < 9)
-		{
+		// 支持的模板ID: 0=默认, 1=LULUXIA(未开放), 2=NOUVEAU
+		if($templateid == 1) {
+			# LULUXIA模板暂时只允许管理员账户切换
+			if($udata['groupid'] < 9)
+			{
+				$templateid = 0;
+				$gamedata['innerHTML']['info'] .= '界面切换失败，LULUXIA界面暂未实装。<br>';
+			}
+		} elseif($templateid == 2) {
+			# NOUVEAU模板对所有用户开放
+			$gamedata['innerHTML']['info'] .= '已切换到NOUVEAU界面，刷新页面生效。<br>';
+		} else {
+			# 其他值默认为经典界面
 			$templateid = 0;
-			$gamedata['innerHTML']['info'] .= '界面切换失败，新版界面暂未实装。<br>';
 		}
 	}
 	$db->query("UPDATE {$gtablepre}users SET gender='$gender', icon='$icon',{$passqry}motto='$motto',  killmsg='$killmsg', lastword='$lastword', credits='$credits', credits2='$credits2' ,nick='$nick', u_templateid='$templateid' WHERE username='$cuser'");
