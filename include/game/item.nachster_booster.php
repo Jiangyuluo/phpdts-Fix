@@ -51,6 +51,13 @@ function item_nachster_booster($itmn, &$data) {
             $itme0 = diceroll($clbpara['randver1']);
             $itms0 = diceroll(5);
             $itmsk0 = '';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } elseif ($harukaBoxCheck <= 23) {
             // Get random HB item.
             $log .= "你从里面翻找出了看起来能作为<span class='yellow'>有趣的补给</span>的东西！<br>";
@@ -60,6 +67,13 @@ function item_nachster_booster($itmn, &$data) {
             $itme0 = diceroll($clbpara['randver1']) * diceroll(3);
             $itms0 = diceroll(17);
             $itmsk0 = 'z';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } elseif ($harukaBoxCheck <= 42) {
             // Get random mid effect true damage trap.
             $log .= "你从里面翻找出了看起来能作为<span class='yellow'>精心制作的陷阱</span>的东西！<br>";
@@ -69,6 +83,13 @@ function item_nachster_booster($itmn, &$data) {
             $itme0 = diceroll($clbpara['randver2']);
             $itms0 = diceroll(5);
             $itmsk0 = '';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } elseif ($harukaBoxCheck <= 61) {
             // Get random high effect trap.
             $log .= "你从里面翻找出了看起来能作为<span class='yellow'>非常有趣的陷阱</span>的东西！<br>";
@@ -77,7 +98,14 @@ function item_nachster_booster($itmn, &$data) {
             $itmk0 = 'TN';
             $itme0 = diceroll($clbpara['randver3']);
             $itms0 = diceroll(5);
-            $itmsk0 = '';                
+            $itmsk0 = '';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } elseif ($harukaBoxCheck <= 80) {
             // Get random percent damage trap.
             $log .= "你从里面翻找出了看起来能作为<span class='yellow'>十分强力的陷阱</span>的东西！<br>";
@@ -86,7 +114,11 @@ function item_nachster_booster($itmn, &$data) {
             $itmk0 = 'TN8';
             $itme0 = 1;
             $itms0 = diceroll(2);
-            $itmsk0 = 'x';                
+            $itmsk0 = 'x';
+            // 确保耐久值不会为0
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } elseif ($harukaBoxCheck <= 109) {
             // Get high true damage trap.
             $log .= "你从里面翻找出了看起来能作为<span class='yellow'>精心制作的可怕陷阱</span>的东西！<br>";
@@ -96,6 +128,13 @@ function item_nachster_booster($itmn, &$data) {
             $itme0 = diceroll($clbpara['randver3']);
             $itms0 = diceroll(5);
             $itmsk0 = '';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         } else {
             // Get Chaos Normal Trap.
             $log .= "你从里面翻找出了一些<span class='yellow'>不可名状</span>的东西！<br>它似乎可以当作陷阱使用……<br>";
@@ -105,6 +144,13 @@ function item_nachster_booster($itmn, &$data) {
             $itme0 = diceroll(114514);
             $itms0 = diceroll(69);
             $itmsk0 = '';
+            // 确保效果值和耐久值不会为0
+            if ($itme0 == 0) {
+                $itme0 = 1;
+            }
+            if ($itms0 == 0) {
+                $itms0 = 1;
+            }
         }
 
         // Troll the player if itms0 somehow rolled an 0. YSK: I encountered that 4 times in a row.

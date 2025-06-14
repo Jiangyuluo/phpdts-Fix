@@ -109,6 +109,13 @@ function item_dice($itmn, &$data) {
 			//generate the item's effect and stimina, based on player's Yume values.
 			$itme0 = diceroll($clbpara['randver3'] * 3);
 			$itms0 = diceroll($clbpara['randver2']);
+			// 确保生成的物品效果值和耐久值不会为0
+			if ($itme0 == 0) {
+				$itme0 = 1;
+			}
+			if ($itms0 == 0) {
+				$itms0 = 1;
+			}
 
 			//Generate a random number based on player's 1st Yume Value.
 			$dicebreak = diceroll($clbpara['randver1']);
@@ -149,6 +156,13 @@ function item_dice($itmn, &$data) {
 			//generate the item's effect and stimina, based on player's Yume values.
 			$itme0 = diceroll($clbpara['randver3'] * 3);
 			$itms0 = diceroll($clbpara['randver2']);
+			// 确保生成的物品效果值和耐久值不会为0
+			if ($itme0 == 0) {
+				$itme0 = 1;
+			}
+			if ($itms0 == 0) {
+				$itms0 = 1;
+			}
 
 			//Generate a random number based on player's 1st Yume Value.
 			$dicebreak = diceroll($clbpara['randver1']);
@@ -432,12 +446,20 @@ function item_dice($itmn, &$data) {
 				foreach ($rand_s as $key => &$value) {
 					if ($value != 0) {
 						$value = diceroll($stotal);
+						// 确保耐久值不会变成0
+						if ($value == 0) {
+							$value = 1;
+						}
 					}
 				}
-	
+
 				foreach ($rand_e as $key => &$value) {
 					if ($value != 0) {
 						$value = diceroll($etotal);
+						// 确保效果值不会变成0
+						if ($value == 0) {
+							$value = 1;
+						}
 					}
 				}
 	
