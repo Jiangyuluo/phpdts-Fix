@@ -1,4 +1,4 @@
-修改时间：2024-12-14 14:45
+修改时间：2024-12-14 14:45 (NOUVEAU DAY -115)
 修改文件：include/game/item.dice.php, include/game/itemmain.func.php
 修改原因：修复D3、D6骰子和棱镜八面体使用时页面卡住的问题
 
