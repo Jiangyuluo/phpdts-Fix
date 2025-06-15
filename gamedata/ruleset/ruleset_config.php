@@ -222,41 +222,165 @@ $ruleset_config = Array(
     ),
 );
 
+
+
 // 获取RuleSet配置的函数
 function get_ruleset_config($ruleset_id = null) {
-    global $ruleset_config, $ruleset_enabled;
-    
-    if (!$ruleset_enabled) {
+    // 直接在函数内部定义配置，避免全局变量作用域问题
+    $local_ruleset_enabled = true;
+
+    // 尝试使用全局配置，如果不存在则使用本地配置
+    global $ruleset_config;
+    if (isset($ruleset_config) && is_array($ruleset_config)) {
+        $local_ruleset_config = $ruleset_config;
+    } else {
+        // 如果全局变量不存在，使用本地配置作为fallback
+        $local_ruleset_config = Array(
+            'ACBRA_2009' => Array(
+                'name' => 'ACBRA 2009版',
+                'description' => '重现2009年经典ACBRA版本的游戏体验，包含原版的平衡性设置、道具系统和NPC配置。',
+                'credits_cost' => 100,
+                'admin_free' => true,
+                'avatar_config' => Array(
+                    'use_ruleset_avatars' => true,
+                    'avatar_path' => './gamedata/ruleset/ACBRA_2009/img/',
+                    'male_avatars' => 43,
+                    'female_avatars' => 43,
+                    'npc_avatars' => Array(
+                        1 => 'n_1.gif', 11 => 'n_11.gif', 12 => 'n_12.gif', 13 => 'n_13.gif',
+                        14 => 'n_14.gif', 15 => 'n_15.gif', 16 => 'n_16.gif', 17 => 'n_17.gif',
+                        18 => 'n_18.gif', 81 => 'n_81.gif', 82 => 'n_82.gif', 83 => 'n_83.gif',
+                        84 => 'n_84.gif', 85 => 'n_85.gif', 86 => 'n_86.gif', 87 => 'n_87.gif',
+                        90 => 'n_90.gif',
+                    ),
+                ),
+            ),
+            'ACDTS_2011' => Array(
+                'name' => 'ACDTS 2011版',
+                'description' => '体验2011年ACDTS版本的独特魅力，包含当时的特色系统和平衡调整。',
+                'credits_cost' => 150,
+                'admin_free' => true,
+                'avatar_config' => Array(
+                    'use_ruleset_avatars' => true,
+                    'avatar_path' => './gamedata/ruleset/ACDTS_2011/img/',
+                    'male_avatars' => 21,
+                    'female_avatars' => 21,
+                    'npc_avatars' => Array(
+                        1 => 'n_1.gif', 2 => 'n_2.gif', 3 => 'n_3.gif', 4 => 'n_4.gif',
+                        5 => 'n_5.gif', 6 => 'n_6.gif', 11 => 'n_11.gif', 12 => 'n_12.gif',
+                        13 => 'n_13.gif', 14 => 'n_14.gif', 21 => 'n_21.gif', 22 => 'n_22.gif',
+                        23 => 'n_23.gif', 24 => 'n_24.gif', 31 => 'n_31.gif', 32 => 'n_32.gif',
+                        33 => 'n_33.gif', 41 => 'n_41.gif', 42 => 'n_42.gif', 43 => 'n_43.gif',
+                        51 => 'n_51.gif', 91 => 'n_91.gif', 92 => 'n_92.gif', 93 => 'n_93.gif',
+                        94 => 'n_94.gif',
+                    ),
+                ),
+            ),
+            'ACDTS_298SP4' => Array(
+                'name' => 'ACDTS 298SP4版',
+                'description' => '最后的经典版本298SP4，包含了丰富的内容和完善的系统。',
+                'credits_cost' => 200,
+                'admin_free' => true,
+                'avatar_config' => Array(
+                    'use_ruleset_avatars' => true,
+                    'avatar_path' => './gamedata/ruleset/ACDTS_298SP4/img/',
+                    'male_avatars' => 22,
+                    'female_avatars' => 21,
+                    'npc_avatars' => Array(
+                        1 => 'n_1.gif', 2 => 'n_2.gif', 3 => 'n_3.gif', 4 => 'n_4.gif',
+                        5 => 'n_5.gif', 6 => 'n_6.gif', 7 => 'n_7.gif', 9 => 'n_9.gif',
+                        11 => 'n_11.gif', 12 => 'n_12.gif', 13 => 'n_13.gif', 14 => 'n_14.gif',
+                        21 => 'n_21.gif', 22 => 'n_22.gif', 23 => 'n_23.gif', 24 => 'n_24.gif',
+                        31 => 'n_31.gif', 32 => 'n_32.gif', 33 => 'n_33.gif', 41 => 'n_41.gif',
+                        42 => 'n_42.gif', 43 => 'n_43.gif', 51 => 'n_51.gif', 52 => 'n_52.gif',
+                        61 => 'n_61.gif', 62 => 'n_62.gif', 63 => 'n_63.gif', 64 => 'n_64.gif',
+                        65 => 'n_65.gif', 66 => 'n_66.gif', 81 => 'n_81.gif', 82 => 'n_82.gif',
+                        83 => 'n_83.gif', 91 => 'n_91.gif', 92 => 'n_92.gif', 93 => 'n_93.gif',
+                        94 => 'n_94.gif', 95 => 'n_95.gif', 96 => 'n_96.gif', 98 => 'n_98.gif',
+                    ),
+                ),
+            ),
+        );
+    }
+
+    if (!$local_ruleset_enabled) {
         return false;
     }
-    
+
     if ($ruleset_id === null) {
-        return $ruleset_config;
+        return $local_ruleset_config;
     }
-    
-    return isset($ruleset_config[$ruleset_id]) ? $ruleset_config[$ruleset_id] : false;
+
+    return isset($local_ruleset_config[$ruleset_id]) ? $local_ruleset_config[$ruleset_id] : false;
 }
 
 // 检查用户是否可以创建指定RuleSet房间
 function can_create_ruleset_room($ruleset_id, $user_data) {
-    global $ruleset_config, $ruleset_enabled;
-    
-    if (!$ruleset_enabled || !isset($ruleset_config[$ruleset_id])) {
+    // 使用get_ruleset_config函数获取配置，确保一致性
+    $local_ruleset_enabled = true;
+    $local_ruleset_config = get_ruleset_config();
+
+    // 调试信息：记录函数内部状态
+    $debug_info = array(
+        'function_called' => 'can_create_ruleset_room',
+        'ruleset_id' => $ruleset_id,
+        'user_data_groupid' => isset($user_data['groupid']) ? $user_data['groupid'] : 'undefined',
+        'user_data_credits2' => isset($user_data['credits2']) ? $user_data['credits2'] : 'undefined',
+        'local_ruleset_enabled' => $local_ruleset_enabled,
+        'local_config_exists' => isset($local_ruleset_config[$ruleset_id]) ? 'yes' : 'no',
+        'fix_method' => 'using_local_config'
+    );
+
+    if (!$local_ruleset_enabled || !isset($local_ruleset_config[$ruleset_id])) {
+        $debug_info['early_return'] = 'ruleset_disabled_or_config_missing';
+        $debug_info['enabled_check'] = $local_ruleset_enabled ? 'pass' : 'fail';
+        $debug_info['config_exists_check'] = isset($local_ruleset_config[$ruleset_id]) ? 'pass' : 'fail';
+
+        // 写入调试文件
+        file_put_contents(GAME_ROOT.'./doc/etc/can_create_debug_'.date('Y-m-d_H-i-s').'.txt',
+            "can_create_ruleset_room调试信息:\n" . print_r($debug_info, true));
+
         return false;
     }
-    
-    $config = $ruleset_config[$ruleset_id];
-    
-    // 管理员免费
-    if ($config['admin_free'] && $user_data['groupid'] >= 4) {
+
+    $config = $local_ruleset_config[$ruleset_id];
+    $debug_info['config_admin_free'] = $config['admin_free'];
+    $debug_info['config_credits_cost'] = $config['credits_cost'];
+
+    // 管理员免费 (修改权限要求从>=4改为>=2，允许所有管理员免费创建)
+    if ($config['admin_free'] && $user_data['groupid'] >= 2) {
+        $debug_info['result'] = 'admin_pass';
+        $debug_info['admin_free_check'] = $config['admin_free'] ? 'pass' : 'fail';
+        $debug_info['groupid_check'] = ($user_data['groupid'] >= 2) ? 'pass' : 'fail';
+
+        // 写入调试文件
+        file_put_contents(GAME_ROOT.'./doc/etc/can_create_debug_'.date('Y-m-d_H-i-s').'.txt',
+            "can_create_ruleset_room调试信息:\n" . print_r($debug_info, true));
+
         return true;
     }
-    
+
     // 检查切糕数量
     if ($user_data['credits2'] >= $config['credits_cost']) {
+        $debug_info['result'] = 'credits_pass';
+        $debug_info['credits_check'] = ($user_data['credits2'] >= $config['credits_cost']) ? 'pass' : 'fail';
+
+        // 写入调试文件
+        file_put_contents(GAME_ROOT.'./doc/etc/can_create_debug_'.date('Y-m-d_H-i-s').'.txt',
+            "can_create_ruleset_room调试信息:\n" . print_r($debug_info, true));
+
         return true;
     }
-    
+
+    $debug_info['result'] = 'all_checks_failed';
+    $debug_info['admin_free_check'] = $config['admin_free'] ? 'pass' : 'fail';
+    $debug_info['groupid_check'] = ($user_data['groupid'] >= 2) ? 'pass' : 'fail';
+    $debug_info['credits_check'] = ($user_data['credits2'] >= $config['credits_cost']) ? 'pass' : 'fail';
+
+    // 写入调试文件
+    file_put_contents(GAME_ROOT.'./doc/etc/can_create_debug_'.date('Y-m-d_H-i-s').'.txt',
+        "can_create_ruleset_room调试信息:\n" . print_r($debug_info, true));
+
     return false;
 }
 
@@ -290,14 +414,10 @@ function ruleset_resource_exists($ruleset_id, $filename, $resource_type = 'cache
 
 // 获取RuleSet头像路径
 function get_ruleset_avatar_path($ruleset_id, $avatar_type, $avatar_id = null) {
-    global $ruleset_config;
+    // 直接获取配置，不依赖全局变量
+    $config = get_ruleset_config($ruleset_id);
 
-    if (empty($ruleset_id) || !isset($ruleset_config[$ruleset_id])) {
-        return false;
-    }
-
-    $config = $ruleset_config[$ruleset_id];
-    if (!isset($config['avatar_config']) || !$config['avatar_config']['use_ruleset_avatars']) {
+    if (!$config || !isset($config['avatar_config']) || !$config['avatar_config']['use_ruleset_avatars']) {
         return false;
     }
 
@@ -335,26 +455,15 @@ function get_ruleset_avatar_path($ruleset_id, $avatar_type, $avatar_id = null) {
 
 // 检查RuleSet是否使用自定义头像
 function ruleset_uses_custom_avatars($ruleset_id) {
-    global $ruleset_config;
-
-    if (empty($ruleset_id) || !isset($ruleset_config[$ruleset_id])) {
-        return false;
-    }
-
-    $config = $ruleset_config[$ruleset_id];
-    return isset($config['avatar_config']) && $config['avatar_config']['use_ruleset_avatars'];
+    $config = get_ruleset_config($ruleset_id);
+    return $config && isset($config['avatar_config']) && $config['avatar_config']['use_ruleset_avatars'];
 }
 
 // 获取RuleSet头像数量限制
 function get_ruleset_avatar_limits($ruleset_id) {
-    global $ruleset_config;
+    $config = get_ruleset_config($ruleset_id);
 
-    if (empty($ruleset_id) || !isset($ruleset_config[$ruleset_id])) {
-        return false;
-    }
-
-    $config = $ruleset_config[$ruleset_id];
-    if (!isset($config['avatar_config'])) {
+    if (!$config || !isset($config['avatar_config'])) {
         return false;
     }
 

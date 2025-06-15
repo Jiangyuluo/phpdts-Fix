@@ -38,33 +38,33 @@ function init_icon_states(&$pa,$pd,$ismeet=0)
 	if (!empty($ruleset_id)) {
 		include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';
 
-		# 检查是否存在固定头像
-		if(file_exists('img/'.$pa['icon'])) {
-			$iconImg = $pa['icon'];
+		$iconImg = null;
+
+		# 尝试从RuleSet获取头像
+		if ($pa['type'] > 0) {
+			# NPC头像 - 使用icon字段而不是type字段
+			$ruleset_avatar = get_ruleset_avatar_path($ruleset_id, 'npc', $pa['icon']);
+			if ($ruleset_avatar && file_exists($ruleset_avatar)) {
+				$iconImg = $ruleset_avatar;
+			}
 		} else {
-			$iconImg = null;
-
-			# 尝试从RuleSet获取头像
-			if ($pa['type'] > 0) {
-				# NPC头像
-				$ruleset_avatar = get_ruleset_avatar_path($ruleset_id, 'npc', $pa['type']);
-				if ($ruleset_avatar && file_exists($ruleset_avatar)) {
-					$iconImg = $ruleset_avatar;
-				}
-			} else {
-				# 玩家头像
-				$avatar_type = $pa['gd'] == 'f' ? 'female' : 'male';
-				$ruleset_avatar = get_ruleset_avatar_path($ruleset_id, $avatar_type, $pa['icon']);
-				if ($ruleset_avatar && file_exists($ruleset_avatar)) {
-					$iconImg = $ruleset_avatar;
-				}
+			# 玩家头像
+			$avatar_type = $pa['gd'] == 'f' ? 'female' : 'male';
+			$ruleset_avatar = get_ruleset_avatar_path($ruleset_id, $avatar_type, $pa['icon']);
+			if ($ruleset_avatar && file_exists($ruleset_avatar)) {
+				$iconImg = $ruleset_avatar;
 			}
+		}
 
-			# 如果RuleSet中没有对应头像，使用默认逻辑
-			if (!$iconImg) {
-				$itype = $pa['type'] > 0 ? 'n' : $pa['gd'];
-				$iconImg = 'img/'.$itype.'_'.$pa['icon'].'.gif';
-			}
+		# 如果RuleSet中没有对应头像，检查是否存在固定头像
+		if (!$iconImg && file_exists('img/'.$pa['icon'])) {
+			$iconImg = 'img/'.$pa['icon'];
+		}
+
+		# 如果都没有，使用默认逻辑
+		if (!$iconImg) {
+			$itype = $pa['type'] > 0 ? 'n' : $pa['gd'];
+			$iconImg = 'img/'.$itype.'_'.$pa['icon'].'.gif';
 		}
 	} else {
 		# 默认头像逻辑
@@ -76,12 +76,13 @@ function init_icon_states(&$pa,$pd,$ismeet=0)
 		}
 	}
 
+	# 设置头像路径
+	$pa['iconImg'] = $iconImg;
+
 	# 检查是否存在大头像
 	$iconImgB = str_replace('.','a.',$iconImg);
 	if(file_exists($iconImgB)) {
 		$pa['iconImgB'] = $iconImgB;
-	} else {
-		$pa['iconImg'] = $iconImg;
 	}
 }
 

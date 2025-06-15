@@ -82,7 +82,7 @@ else
             'name' => $config['name'],
             'description' => $config['description'],
             'cost' => $config['credits_cost'],
-            'admin_free' => $config['admin_free'] && $udata['groupid'] >= 4
+            'admin_free' => $config['admin_free'] && $udata['groupid'] >= 2
           );
         }
       }

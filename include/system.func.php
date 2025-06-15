@@ -98,9 +98,21 @@ function rs_game($mode = 0) {
 					//}
 
 
-					$subnum = sizeof($npc['sub']);
-					$sub = $j % $subnum;
-					$npc = array_merge($npc,$npc['sub'][$sub]);
+					// 检查sub数组是否存在且不为空
+					if(isset($npc['sub']) && is_array($npc['sub']) && !empty($npc['sub'])) {
+						$subnum = sizeof($npc['sub']);
+						$sub = $j % $subnum;
+						// 确保sub数组中的元素存在且为数组
+						if(isset($npc['sub'][$sub]) && is_array($npc['sub'][$sub])) {
+							$npc = array_merge($npc,$npc['sub'][$sub]);
+						} else {
+							error_log("Warning: NPC type {$i} sub[{$sub}] is null or not array. Using base NPC data.");
+						}
+					} else {
+						// 如果没有sub数组或sub数组为空，记录警告但继续使用基础NPC数据
+						error_log("Warning: NPC type {$i} has no valid 'sub' array. Using base NPC data.");
+						// 不跳过，继续使用当前的$npc数据
+					}
 					$npc['hp'] = $npc['mhp'];
 					$npc['sp'] = $npc['msp'];
 					$npc['exp'] = round(2*$npc['lvl']*$GLOBALS['baseexp']);

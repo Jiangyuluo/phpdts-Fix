@@ -71,7 +71,7 @@ function itemmixchooser(){
 //}
 function userIconMover(){
 	ugd = $('male').checked ? 'm' : 'f';
-	uinum = $('icon').selectedIndex;
+	uinum = $('icon').value; // 使用value而不是selectedIndex
 
 	// 检查是否在RuleSet房间中
 	if (typeof window.rulesetAvatarPath !== 'undefined' && window.rulesetAvatarPath) {

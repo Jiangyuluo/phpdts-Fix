@@ -8,7 +8,24 @@
             <!-- Avatar and Status -->
             <div class="flex flex-col items-center space-y-4">
                 <div class="relative">
-                    <img src="img/$iconImg"
+                    <!--{eval $profile_avatar_path = 'img/'.$iconImg;}-->
+                    <!--{if !empty($groomid) && $groomid > 0}-->
+                        <!--{eval $result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");}-->
+                        <!--{if $db->num_rows($result)}-->
+                            <!--{eval $room_data = $db->fetch_array($result);}-->
+                            <!--{eval $ruleset_id = $room_data['gruleset'];}-->
+                            <!--{if !empty($ruleset_id)}-->
+                                <!--{eval include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';}-->
+                                <!--{eval $avatar_type = $gd == 'f' ? 'female' : 'male';}-->
+                                <!--{eval $icon_num = intval(str_replace(array('m_', 'f_', '.gif'), '', $iconImg));}-->
+                                <!--{eval $ruleset_avatar_path = get_ruleset_avatar_path($ruleset_id, $avatar_type, $icon_num);}-->
+                                <!--{if $ruleset_avatar_path && file_exists($ruleset_avatar_path)}-->
+                                    <!--{eval $profile_avatar_path = $ruleset_avatar_path;}-->
+                                <!--{/if}-->
+                            <!--{/if}-->
+                        <!--{/if}-->
+                    <!--{/if}-->
+                    <img src="$profile_avatar_path"
                          class="w-32 h-20 object-cover border border-cyber-primary/50 rounded cyber-glow"
                          <!--{if $hp==0}-->style="filter: grayscale(100%) brightness(0.5);"<!--{/if}-->
                          alt="Player Avatar"

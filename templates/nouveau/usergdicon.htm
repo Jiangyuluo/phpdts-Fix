@@ -36,8 +36,24 @@
             </div>
             <div class="flex justify-center">
                 <div id="userIconImg" class="cyber-card p-4 border border-cyber-primary/50">
-                    <img src="img/<!--{if $gender != 'f'}-->m<!--{else}-->f<!--{/if}-->_{$select_icon}.gif" 
-                         alt="$select_icon" 
+                    <!--{eval $user_avatar_path = 'img/'.($gender != 'f' ? 'm' : 'f').'_'.$select_icon.'.gif';}-->
+                    <!--{if !empty($groomid) && $groomid > 0}-->
+                        <!--{eval $result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");}-->
+                        <!--{if $db->num_rows($result)}-->
+                            <!--{eval $room_data = $db->fetch_array($result);}-->
+                            <!--{eval $ruleset_id = $room_data['gruleset'];}-->
+                            <!--{if !empty($ruleset_id)}-->
+                                <!--{eval include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';}-->
+                                <!--{eval $avatar_type = $gender == 'f' ? 'female' : 'male';}-->
+                                <!--{eval $ruleset_avatar_path = get_ruleset_avatar_path($ruleset_id, $avatar_type, $select_icon);}-->
+                                <!--{if $ruleset_avatar_path && file_exists($ruleset_avatar_path)}-->
+                                    <!--{eval $user_avatar_path = $ruleset_avatar_path;}-->
+                                <!--{/if}-->
+                            <!--{/if}-->
+                        <!--{/if}-->
+                    <!--{/if}-->
+                    <img src="$user_avatar_path"
+                         alt="$select_icon"
                          class="w-20 h-12 object-cover cyber-glow">
                 </div>
             </div>
@@ -140,13 +156,21 @@ function userIconMover() {
     const gender = document.querySelector('input[name="gender"]:checked').value;
     const iconSelect = document.getElementById('icon');
     const iconImg = document.getElementById('userIconImg').querySelector('img');
-    
+
     if (iconSelect && iconImg) {
         const iconValue = iconSelect.value;
-        const newSrc = `img/${gender}_${iconValue}.gif`;
+
+        // 检查是否在RuleSet房间中
+        let newSrc;
+        if (typeof window.rulesetAvatarPath !== 'undefined' && window.rulesetAvatarPath) {
+            newSrc = `${window.rulesetAvatarPath}${gender}_${iconValue}.gif`;
+        } else {
+            newSrc = `img/${gender}_${iconValue}.gif`;
+        }
+
         iconImg.src = newSrc;
         iconImg.alt = iconValue;
-        
+
         // Add animation effect
         iconImg.style.opacity = '0';
         setTimeout(() => {

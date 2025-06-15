@@ -59,14 +59,6 @@ require GAME_ROOT.'./include/roommng.func.php';
 require GAME_ROOT.'./include/game/revclubskills.func.php';
 require GAME_ROOT.'./include/game/dice.func.php';
 require GAME_ROOT.'./include/game/titles.func.php';
-require config('resources',$gamecfg);
-require config('gamecfg',$gamecfg);
-require config('combatcfg',$gamecfg);
-require config('clubskills',$gamecfg);
-require config('dialogue',$gamecfg);
-require config('audio',$gamecfg);
-require config('tooltip',$gamecfg);
-require config('titles',$gamecfg);
 
 // $gtablepre 已在数据库连接时设置，这里不再重新赋值
 if(!isset($gtablepre)) {
@@ -139,6 +131,16 @@ if(!empty($groomid))
 }
 
 $tablepre = !empty($groomid) ? $tablepre.'s'.$groomid.'_' : $tablepre;
+
+// 现在$groomid已经设置，可以正确加载RuleSet资源文件
+require config('resources',$gamecfg);
+require config('gamecfg',$gamecfg);
+require config('combatcfg',$gamecfg);
+require config('clubskills',$gamecfg);
+require config('dialogue',$gamecfg);
+require config('audio',$gamecfg);
+require config('tooltip',$gamecfg);
+require config('titles',$gamecfg);
 
 if(CURSCRIPT !== 'chat')
 {
