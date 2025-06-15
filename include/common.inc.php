@@ -40,7 +40,7 @@ require GAME_ROOT.'./include/db_'.$database.'.class.php';
 $db = new dbstuff;
 
 // 检查是否直接使用主数据库 (slave_level = 3)
-if($slave_level == 3 && !empty($master_dbhost) && !empty($master_dbuser) && !empty($master_dbname)) {
+if(isset($slave_level) && $slave_level == 3 && !empty($master_dbhost) && !empty($master_dbuser) && !empty($master_dbname)) {
 	$db->connect($master_dbhost, $master_dbuser, $master_dbpw, $master_dbname, $pconnect);
 	$gtablepre = $master_tablepre;
 } else {
@@ -63,8 +63,6 @@ require GAME_ROOT.'./include/game/titles.func.php';
 if(!isset($gtablepre)) {
 	$gtablepre = $tablepre;
 }
-
-if($need_update_db_structrue) roommng_verify_db_game_structure();
 
 ob_start();
 
@@ -150,6 +148,11 @@ load_ruleset_override_functions();
 
 // 现在加载system.func.php
 require GAME_ROOT.'./include/system.func.php';
+
+// 检查数据库结构更新（在配置文件加载后执行）
+if(isset($need_update_db_structrue) && $need_update_db_structrue) {
+	roommng_verify_db_game_structure();
+}
 
 if(CURSCRIPT !== 'chat')
 {

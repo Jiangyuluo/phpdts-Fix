@@ -237,7 +237,7 @@ function get_user_sync_status($username) {
  */
 function should_auto_sync() {
 	global $slave_level;
-	return ($slave_level == 2);
+	return (isset($slave_level) && $slave_level == 2);
 }
 
 /**
@@ -246,7 +246,7 @@ function should_auto_sync() {
  */
 function should_use_master_db() {
 	global $slave_level;
-	return ($slave_level == 3);
+	return (isset($slave_level) && $slave_level == 3);
 }
 
 /**
@@ -255,7 +255,7 @@ function should_use_master_db() {
  */
 function is_reverse_migration_mode() {
 	global $slave_level;
-	return ($slave_level == -1);
+	return (isset($slave_level) && $slave_level == -1);
 }
 
 /**
