@@ -2,7 +2,7 @@
 /*Game Config*/
 
 //禁区间隔时间,单位 小时
-$areahour = 1;
+$areahour = 60;
 //每次间隔增加的禁区数量
 $areaadd = 3;
 //聊天记录里的禁区提示时间，单位秒
@@ -25,7 +25,7 @@ $antiAFKertime = 20;
 //尸体保护时间，单位秒
 $corpseprotect = 10;
 //是否允许销毁尸体（1：开启）
-$allow_destory_corpse = 1;
+$allow_destory_corpse = 0;
 //销毁尸体会导致rp上升最多多少点
 $rpup_destory_corpse = 233;
 //如果允许销毁尸体 以下哪些种类的尸体不可以被销毁
@@ -158,7 +158,7 @@ $gnpctype = 90;
 //场外支援系统 快递员NPC的子类别
 $gnpcsub = 0;
 //场外支援系统 不能赞助自己 1:启用 0:关闭
-$no_self_sponsored = 0;
+$no_self_sponsored = 1;
 
 //游戏新开局时向场内投入的bot数量
 $rsgame_bots = 4;
