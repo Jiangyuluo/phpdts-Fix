@@ -10,7 +10,6 @@ if(version_compare(PHP_VERSION, '4.3.0', '<')) {
 	exit('PHP version must >= 4.3.0!');
 }
 require GAME_ROOT.'./include/global.func.php';
-require GAME_ROOT.'./include/system.func.php';
 require GAME_ROOT.'./include/user.func.php';
 error_reporting(E_ALL);
 set_error_handler('gameerrorhandler');
@@ -141,6 +140,16 @@ require config('dialogue',$gamecfg);
 require config('audio',$gamecfg);
 require config('tooltip',$gamecfg);
 require config('titles',$gamecfg);
+
+// 初始化RuleSet覆盖系统
+include_once GAME_ROOT.'./include/ruleset_override.func.php';
+init_ruleset_override();
+
+// 加载RuleSet覆盖函数
+load_ruleset_override_functions();
+
+// 现在加载system.func.php
+require GAME_ROOT.'./include/system.func.php';
 
 if(CURSCRIPT !== 'chat')
 {

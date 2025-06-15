@@ -222,7 +222,10 @@ function rs_game($mode = 0) {
 
 				if(($iarea == $an)||($iarea == 99)) {
 					for($j = $inum; $j>0; $j--) {
-						if($imap == 99) {
+						// RuleSet钩子：检查地图物品是否需要随机刷新
+						$force_random = function_exists('ruleset_should_randomize_item') && ruleset_should_randomize_item($imap, $iarea, $an);
+
+						if($imap == 99 || $force_random) {
 							$rmap = rand(1,$plsnum-1);
 							while ($rmap==34){$rmap = rand(1,$plsnum-1);}
 							if(strpos($ikind ,'TO')===0){
@@ -756,30 +759,38 @@ function addnpc($type,$sub,$num,$time = 0,$anpcdata = NULL) {
 			//$npc['wp'] = $npc['wk'] = $npc['wg'] = $npc['wc'] = $npc['wd'] = $npc['wf'] = $npc['skill'];
 			if($npc['gd'] == 'r'){$npc['gd'] = rand(0,1) ? 'm':'f';}
 
-			# 位置信息为数组时，在两地中择一随机刷新
-			if(is_array($npc['pls']))
-			{
-				$npc['pls'] = $npc['pls'][array_rand($npc['pls'])];
-			}
-			elseif($npc['pls'] == 99)
-			{
-				$areaarr = array_slice($arealist,$areanum+1);
-				if(empty($areaarr)){
-					$npc['pls'] = 0;
-				}else{
-					shuffle($areaarr);
-					//特定NPC不会生成在危险区域
-					$npc['pls'] = $areaarr[0];
-					if(in_array($npc['type'],$hidding_typelist))
-					{
-						while(in_array($npc['pls'],$deepzones))
+			# RuleSet钩子：检查NPC位置是否需要随机化
+			if(function_exists('ruleset_should_randomize_npc') && ruleset_should_randomize_npc($npc['pls'])) {
+				// 调用RuleSet的NPC位置随机化函数
+				if(function_exists('ruleset_get_random_npc_location')) {
+					$npc['pls'] = ruleset_get_random_npc_location($plsnum);
+				}
+			} else {
+				# 位置信息为数组时，在两地中择一随机刷新
+				if(is_array($npc['pls']))
+				{
+					$npc['pls'] = $npc['pls'][array_rand($npc['pls'])];
+				}
+				elseif($npc['pls'] == 99)
+				{
+					$areaarr = array_slice($arealist,$areanum+1);
+					if(empty($areaarr)){
+						$npc['pls'] = 0;
+					}else{
+						shuffle($areaarr);
+						//特定NPC不会生成在危险区域
+						$npc['pls'] = $areaarr[0];
+						if(in_array($npc['type'],$hidding_typelist))
 						{
-							shuffle($areaarr);
-							$npc['pls'] = $areaarr[0];
+							while(in_array($npc['pls'],$deepzones))
+							{
+								shuffle($areaarr);
+								$npc['pls'] = $areaarr[0];
+							}
 						}
 					}
+					//$npc['pls'] = rand(1,$plsnum-1);
 				}
-				//$npc['pls'] = rand(1,$plsnum-1);
 			}
 
 			# NPC称号技能初始化

@@ -466,6 +466,13 @@ function itemget(&$data=NULL)
 		$data = &$pdata;
 	}
 	extract($data,EXTR_REFS);
+
+	// RuleSet钩子：物品获得前处理
+	if(function_exists('ruleset_itemget_hook')) {
+		ruleset_itemget_hook($data);
+		extract($data,EXTR_REFS); // 重新提取可能被修改的变量
+	}
+
 	$log .= "获得了物品<span class=\"yellow\">$itm0</span>。<br>";
 
 	# 拾取诅咒物品时，触发霉运

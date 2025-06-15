@@ -395,13 +395,19 @@ function itemmix_proc($mlist, $minfo, $itmstr, &$data=NULL)
 //合成成功时会触发的额外事件
 function itemmix_events(&$data=NULL)
 {
-	global $log,$gamevars;
+	global $log,$gamevars,$nosta;
 	if(!isset($data))
 	{
 		global $pdata;
 		$data = &$pdata;
 	}
 	extract($data,EXTR_REFS);
+
+	// RuleSet钩子：合成物品前处理
+	if(function_exists('ruleset_itemmix_hook')) {
+		ruleset_itemmix_hook($data);
+		extract($data,EXTR_REFS); // 重新提取可能被修改的变量
+	}
 
 	# 合成成功时爆熟+1
 	$wd+=1;

@@ -17,7 +17,7 @@ $ruleset_config = Array(
     'ACBRA_2009' => Array(
         'name' => 'ACBRA 2009版',
         'description' => '重现2009年经典ACBRA版本的游戏体验，包含原版的平衡性设置、道具系统和NPC配置。',
-        'credits_cost' => 100,  // 开启房间需要的切糕数量
+        'credits_cost' => 1,  // 开启房间需要的切糕数量
         'admin_free' => true,   // 管理员是否免费
         'initial_setup' => Array(
             // 初始装备和属性设置
@@ -81,7 +81,7 @@ $ruleset_config = Array(
     'ACDTS_2011' => Array(
         'name' => 'ACDTS 2011版',
         'description' => '体验2011年ACDTS版本的独特魅力，包含当时的特色系统和平衡调整。',
-        'credits_cost' => 150,
+        'credits_cost' => 1,
         'admin_free' => true,
         'initial_setup' => Array(
             'hp_limit' => 400,
@@ -144,7 +144,7 @@ $ruleset_config = Array(
     'ACDTS_298SP4' => Array(
         'name' => 'ACDTS 298SP4版',
         'description' => '最后的经典版本298SP4，包含了丰富的内容和完善的系统。',
-        'credits_cost' => 200,
+        'credits_cost' => 5,
         'admin_free' => true,
         'initial_setup' => Array(
             'hp_limit' => 400,
@@ -220,6 +220,89 @@ $ruleset_config = Array(
             'ending_story' => '298SP4的传奇落下帷幕，感谢你的参与！',
         ),
     ),
+
+    'ACDTS_298SP4_AR' => Array(
+        'name' => 'ACDTS298 ALL RANDOM',
+        'description' => '基于ACDTS_298SP4的全随机版本：全地图物品随机刷新，全NPC随机刷新，物品属性完全随机化。体验前所未有的混沌游戏！',
+        'credits_cost' => 5,
+        'admin_free' => true,
+        'initial_setup' => Array(
+            'hp_limit' => 400,
+            'sp_limit' => 400,
+            'base_exp' => 9,
+            'money' => 20,
+            'initial_items' => Array(),
+            'initial_equipment' => Array(),
+            'clbpara_flags' => Array(
+                'ruleset_version' => 'ACDTS_298SP4_AR',
+                'ruleset_name' => 'ACDTS298 ALL RANDOM',
+                'all_random_mode' => true,  // 标记为全随机模式
+            ),
+        ),
+        'override_modules' => Array(
+            // 使用函数覆盖而不是文件覆盖
+        ),
+        'title_system' => 0,
+        'club_skills' => 0,
+        'avatar_config' => Array(
+            'use_ruleset_avatars' => true,
+            'avatar_path' => './gamedata/ruleset/ACDTS_298SP4_AR/img/',
+            'male_avatars' => 22,    // 男性头像数量 (m_0.gif 到 m_21.gif)
+            'female_avatars' => 21,  // 女性头像数量 (f_0.gif 到 f_20.gif)
+            'npc_avatars' => Array(
+                1 => 'n_1.gif',     // 董事长
+                2 => 'n_2.gif',     // 全息幻象
+                3 => 'n_3.gif',     // 各路党派
+                4 => 'n_4.gif',     // 非作战人员
+                5 => 'n_5.gif',     // 代码聚合体
+                6 => 'n_6.gif',     // 黑幕
+                7 => 'n_7.gif',     // 首席执行官
+                9 => 'n_9.gif',     // 活动盔甲
+                11 => 'n_11.gif',   // 真职人
+                12 => 'n_12.gif',
+                13 => 'n_13.gif',
+                14 => 'n_14.gif',
+                21 => 'n_21.gif',   // 特殊NPC
+                22 => 'n_22.gif',
+                23 => 'n_23.gif',
+                24 => 'n_24.gif',
+                31 => 'n_31.gif',
+                32 => 'n_32.gif',
+                33 => 'n_33.gif',
+                41 => 'n_41.gif',
+                42 => 'n_42.gif',
+                43 => 'n_43.gif',
+                51 => 'n_51.gif',
+                52 => 'n_52.gif',
+                61 => 'n_61.gif',
+                62 => 'n_62.gif',
+                63 => 'n_63.gif',
+                64 => 'n_64.gif',
+                65 => 'n_65.gif',
+                66 => 'n_66.gif',
+                81 => 'n_81.gif',
+                82 => 'n_82.gif',
+                83 => 'n_83.gif',
+                91 => 'n_91.gif',
+                92 => 'n_92.gif',
+                93 => 'n_93.gif',
+                94 => 'n_94.gif',
+                95 => 'n_95.gif',
+                96 => 'n_96.gif',
+                98 => 'n_98.gif',
+            ),
+            'special_avatars' => Array(
+                'pb' => 'PB.gif',
+                'p' => 'p.gif',
+                'p2' => 'p2.gif',
+                'question' => 'question.gif',
+            ),
+        ),
+        'story_config' => Array(
+            'opening_story' => '欢迎来到ACDTS298 ALL RANDOM！在这个混沌的世界里，一切都是随机的——物品、NPC、属性，没有什么是确定的！准备好迎接前所未有的挑战吧！',
+            'ending_story' => '在这个完全随机的世界中，你竟然能够生存到最后！你已经征服了混沌本身！',
+        ),
+    ),
 );
 
 
@@ -284,6 +367,30 @@ function get_ruleset_config($ruleset_id = null) {
                 'avatar_config' => Array(
                     'use_ruleset_avatars' => true,
                     'avatar_path' => './gamedata/ruleset/ACDTS_298SP4/img/',
+                    'male_avatars' => 22,
+                    'female_avatars' => 21,
+                    'npc_avatars' => Array(
+                        1 => 'n_1.gif', 2 => 'n_2.gif', 3 => 'n_3.gif', 4 => 'n_4.gif',
+                        5 => 'n_5.gif', 6 => 'n_6.gif', 7 => 'n_7.gif', 9 => 'n_9.gif',
+                        11 => 'n_11.gif', 12 => 'n_12.gif', 13 => 'n_13.gif', 14 => 'n_14.gif',
+                        21 => 'n_21.gif', 22 => 'n_22.gif', 23 => 'n_23.gif', 24 => 'n_24.gif',
+                        31 => 'n_31.gif', 32 => 'n_32.gif', 33 => 'n_33.gif', 41 => 'n_41.gif',
+                        42 => 'n_42.gif', 43 => 'n_43.gif', 51 => 'n_51.gif', 52 => 'n_52.gif',
+                        61 => 'n_61.gif', 62 => 'n_62.gif', 63 => 'n_63.gif', 64 => 'n_64.gif',
+                        65 => 'n_65.gif', 66 => 'n_66.gif', 81 => 'n_81.gif', 82 => 'n_82.gif',
+                        83 => 'n_83.gif', 91 => 'n_91.gif', 92 => 'n_92.gif', 93 => 'n_93.gif',
+                        94 => 'n_94.gif', 95 => 'n_95.gif', 96 => 'n_96.gif', 98 => 'n_98.gif',
+                    ),
+                ),
+            ),
+            'ACDTS_298SP4_AR' => Array(
+                'name' => 'ACDTS298 ALL RANDOM',
+                'description' => '基于ACDTS_298SP4的全随机版本：全地图物品随机刷新，全NPC随机刷新，物品属性完全随机化。',
+                'credits_cost' => 300,
+                'admin_free' => true,
+                'avatar_config' => Array(
+                    'use_ruleset_avatars' => true,
+                    'avatar_path' => './gamedata/ruleset/ACDTS_298SP4_AR/img/',
                     'male_avatars' => 22,
                     'female_avatars' => 21,
                     'npc_avatars' => Array(
