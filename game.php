@@ -109,6 +109,36 @@ if($hp <= 0){
 		$result = $db->query("SELECT name FROM {$tablepre}players WHERE pid='$bid'");
 		if($db->num_rows($result)) { $kname = $db->result($result,0); }
 	}
+
+	// 检查是否需要显示RuleSet结束剧情
+	if(!empty($groomid) && $groomid > 0 && empty($clbpara['ruleset_ending_shown'])) {
+		$result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");
+		if ($db->num_rows($result)) {
+			$room_data = $db->fetch_array($result);
+			$ruleset_id = $room_data['gruleset'];
+			if (!empty($ruleset_id)) {
+				include_once GAME_ROOT.'./gamedata/ruleset/story_config.php';
+				$story = get_ruleset_story($ruleset_id, 'ending');
+				if ($story) {
+					// 标记结束剧情已显示
+					$clbpara['ruleset_ending_shown'] = true;
+					$db->query("UPDATE {$tablepre}players SET clbpara='".json_encode($clbpara, JSON_UNESCAPED_UNICODE)."' WHERE name='$cuser'");
+
+					// 设置结束剧情显示
+					$opendialog = 'ruleset_ending';
+					$dialogue_id = 'ruleset_ending';
+
+					// 动态添加RuleSet结束剧情到对话系统
+					global $dialogues, $dialogue_log;
+					$dialogues['ruleset_ending'] = array(
+						0 => $story['content']
+					);
+					$dialogue_log['ruleset_ending'] = "<span class='red'>※ 时光重现结束</span><br>{$story['title']}<br><br>";
+				}
+			}
+		}
+	}
+
 	$mode = 'death';
 } elseif($state ==1 || $state == 2 || $state == 3){
 	$mode = 'rest';
@@ -187,7 +217,37 @@ if ($club==0)
 // 通过检查 $_POST['command'] 是否包含 'dialogue_choice' 来判断
 $just_made_choice = isset($_POST['command']) && strpos($_POST['command'], 'dialogue_choice') === 0;
 
-if(!$just_made_choice && (!empty($clbpara['dialogue']) || !empty($clbpara['noskip_dialogue'])))
+// 检查是否有RuleSet开场剧情需要显示
+if(!$just_made_choice && !empty($clbpara['ruleset_opening_story']) && empty($clbpara['ruleset_story_shown']))
+{
+	// 标记剧情已显示，避免重复显示
+	$clbpara['ruleset_story_shown'] = true;
+	$db->query("UPDATE {$tablepre}players SET clbpara='".json_encode($clbpara, JSON_UNESCAPED_UNICODE)."' WHERE name='$cuser'");
+
+	// 显示RuleSet剧情
+	$opendialog = 'ruleset_opening';
+	$dialogue_id = 'ruleset_opening';
+
+	// 动态添加RuleSet剧情到对话系统
+	include_once GAME_ROOT.'./gamedata/ruleset/story_config.php';
+	$result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");
+	if ($db->num_rows($result)) {
+		$room_data = $db->fetch_array($result);
+		$ruleset_id = $room_data['gruleset'];
+		if (!empty($ruleset_id)) {
+			$story = get_ruleset_story($ruleset_id, 'opening');
+			if ($story) {
+				// 将RuleSet剧情内容注入到对话系统
+				global $dialogues, $dialogue_log;
+				$dialogues['ruleset_opening'] = array(
+					0 => $story['content']
+				);
+				$dialogue_log['ruleset_opening'] = "<span class='lime'>※ 时光重现开始！</span><br>欢迎来到{$story['title']}的世界。<br><br>";
+			}
+		}
+	}
+}
+elseif(!$just_made_choice && (!empty($clbpara['dialogue']) || !empty($clbpara['noskip_dialogue'])))
 {
 	$opendialog = $clbpara['noskip_dialogue'];
 	if(!empty($clbpara['dialogue'])) $dialogue_id = $clbpara['dialogue'];

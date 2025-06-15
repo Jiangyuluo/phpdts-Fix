@@ -1476,6 +1476,9 @@ $_ERROR = Array(
 	'room_num_limit' => '房间数量已达上限，无法新建房间。',
 	'room_close_limit' => '你没有权限解散该房间，只有房主或管理员可以解散房间。',
 	'room_close_limit2' => '不能解散正在进行游戏，且游戏内尚有幸存者的房间！',
+	'ruleset_no_permission' => '没有权限创建该时光重现房间',
+	'insufficient_credits' => '切糕余额不足，无法创建时光重现房间',
+	'invalid_ruleset' => '无效的时光重现版本',
 );
 
 ?>

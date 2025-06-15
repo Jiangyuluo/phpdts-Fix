@@ -72,7 +72,13 @@ function itemmixchooser(){
 function userIconMover(){
 	ugd = $('male').checked ? 'm' : 'f';
 	uinum = $('icon').selectedIndex;
-	$('userIconImg').innerHTML = '<img src="img/' + ugd + '_' + uinum + '.gif" alt="' + uinum + '">';
+
+	// 检查是否在RuleSet房间中
+	if (typeof window.rulesetAvatarPath !== 'undefined' && window.rulesetAvatarPath) {
+		$('userIconImg').innerHTML = '<img src="' + window.rulesetAvatarPath + ugd + '_' + uinum + '.gif" alt="' + uinum + '">';
+	} else {
+		$('userIconImg').innerHTML = '<img src="img/' + ugd + '_' + uinum + '.gif" alt="' + uinum + '">';
+	}
 }
 function dniconMover(){
 	dngd = $('male').checked ? 'm' : 'f';

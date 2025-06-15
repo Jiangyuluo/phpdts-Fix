@@ -21,6 +21,13 @@ function roommng_verify_db_game_structure()
 		$db->query("ALTER TABLE {$gtablepre}game ADD groomid tinyint(3) unsigned NOT NULL DEFAULT '0' AFTER gamestate");
 		echo "向game表中添加了字段groomid<br>";
 	}
+
+	$result = $db->query("DESCRIBE {$gtablepre}game gruleset");
+	if(!$db->num_rows($result))
+	{
+		$db->query("ALTER TABLE {$gtablepre}game ADD gruleset varchar(50) NOT NULL DEFAULT '' AFTER groomid");
+		echo "向game表中添加了字段gruleset<br>";
+	}
 	$result = $db->query("DESCRIBE {$gtablepre}game groomnums");
 	if(!$db->num_rows($result))
 	{
@@ -64,7 +71,7 @@ function roommng_verify_db_game_structure()
 }
 
 # 创建一个新房间
-function roommng_create_new_room(&$udata)
+function roommng_create_new_room(&$udata, $ruleset_id = '')
 {
 	global $db,$gtablepre,$now;
 	global $startmin,$max_rooms,$ip_max_rooms,$rerror;
@@ -73,6 +80,30 @@ function roommng_create_new_room(&$udata)
 	{
 		$rerror = 'alreay_in_room';
 		return;
+	}
+
+	# 检查RuleSet权限和费用
+	if(!empty($ruleset_id))
+	{
+		include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';
+		if(!can_create_ruleset_room($ruleset_id, $udata))
+		{
+			$rerror = 'ruleset_no_permission';
+			return;
+		}
+
+		# 扣除切糕费用（管理员除外）
+		$config = get_ruleset_config($ruleset_id);
+		if($config && !($config['admin_free'] && $udata['groupid'] >= 4))
+		{
+			if($udata['credits2'] < $config['credits_cost'])
+			{
+				$rerror = 'insufficient_credits';
+				return;
+			}
+			$new_credits = $udata['credits2'] - $config['credits_cost'];
+			$db->query("UPDATE {$gtablepre}users SET credits2='$new_credits' WHERE username='{$udata['username']}'");
+		}
 	}
 
 	# 根据IP判断是否可新建房间
@@ -91,14 +122,14 @@ function roommng_create_new_room(&$udata)
 		$rerror = 'room_num_limit';
 		return;
 	}
-	
+
 	if($now_room_nums)
 	{
 		$room_ids = range(1,$max_rooms);
 		while($now_room_ids[] = $db->fetch_array($result)['groomid']){};
 		$new_room_id = array_shift(array_diff($room_ids,$now_room_ids));
 	}
-	else 
+	else
 	{
 		$new_room_id = 1;
 	}
@@ -109,7 +140,8 @@ function roommng_create_new_room(&$udata)
 
 	# 新建并初始化房间状态
 	$starttime = $now + $startmin*5;
-	$db->query("INSERT INTO {$gtablepre}game (gamenum,groomid,groomownid,gamestate,starttime) VALUES ('$new_gamenum','$new_room_id','{$udata['username']}','0','$starttime')");
+	$ruleset_sql = !empty($ruleset_id) ? ",'$ruleset_id'" : ",''";
+	$db->query("INSERT INTO {$gtablepre}game (gamenum,groomid,groomownid,gamestate,starttime,gruleset) VALUES ('$new_gamenum','$new_room_id','{$udata['username']}','0','$starttime'$ruleset_sql)");
 
 	# 加入房间
 	roommng_join_room($new_room_id,$udata);

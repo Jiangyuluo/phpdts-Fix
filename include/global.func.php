@@ -142,6 +142,32 @@ function clearcookies() {
 }
 
 function config($file = '', $cfg = 1) {
+	global $groomid, $db, $gtablepre;
+
+	// 检查当前房间是否使用RuleSet
+	$ruleset_id = '';
+	if (!empty($groomid) && $groomid > 0) {
+		$result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");
+		if ($db->num_rows($result)) {
+			$room_data = $db->fetch_array($result);
+			$ruleset_id = $room_data['gruleset'];
+		}
+	}
+
+	// 如果房间使用RuleSet，优先加载RuleSet资源文件
+	if (!empty($ruleset_id)) {
+		$ruleset_file = GAME_ROOT."./gamedata/ruleset/{$ruleset_id}/cache/{$file}_{$cfg}.php";
+		if (file_exists($ruleset_file)) {
+			return $ruleset_file;
+		}
+		// 如果RuleSet文件不存在，fallback到默认文件
+		$ruleset_file = GAME_ROOT."./gamedata/ruleset/{$ruleset_id}/cache/{$file}_1.php";
+		if (file_exists($ruleset_file)) {
+			return $ruleset_file;
+		}
+	}
+
+	// 默认加载逻辑
 	$cfgfile = file_exists(GAME_ROOT."./gamedata/cache/{$file}_{$cfg}.php") ? GAME_ROOT."./gamedata/cache/{$file}_{$cfg}.php" : GAME_ROOT."./gamedata/cache/{$file}_1.php";
 	return $cfgfile;
 }

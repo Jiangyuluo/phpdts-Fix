@@ -197,6 +197,64 @@ if($mode == 'enter') {
 	$clbpara['valid_bgmbook'] = $regular_bgm;
 	$clbpara['bgmbook'] = $clbpara['valid_bgmbook'];
 
+	# 检查当前房间是否使用RuleSet
+	$ruleset_id = '';
+	if (!empty($groomid) && $groomid > 0) {
+		$result = $db->query("SELECT gruleset FROM {$gtablepre}game WHERE groomid = {$groomid}");
+		if ($db->num_rows($result)) {
+			$room_data = $db->fetch_array($result);
+			$ruleset_id = $room_data['gruleset'];
+		}
+	}
+
+	# 应用RuleSet初始化设置
+	if (!empty($ruleset_id)) {
+		include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';
+		$ruleset_config = get_ruleset_config($ruleset_id);
+		if ($ruleset_config && !empty($ruleset_config['initial_setup'])) {
+			$setup = $ruleset_config['initial_setup'];
+
+			# 应用初始属性设置
+			if (isset($setup['hp_limit'])) $mhp = $hp = $setup['hp_limit'];
+			if (isset($setup['sp_limit'])) $msp = $sp = $setup['sp_limit'];
+			if (isset($setup['base_exp'])) $exp = $areanum * $setup['base_exp'];
+			if (isset($setup['money'])) $money = $setup['money'];
+
+			# 应用初始装备
+			if (!empty($setup['initial_items'])) {
+				foreach ($setup['initial_items'] as $slot => $item_data) {
+					if (isset($item_data['name'])) $itm[$slot] = $item_data['name'];
+					if (isset($item_data['type'])) $itmk[$slot] = $item_data['type'];
+					if (isset($item_data['effect'])) $itme[$slot] = $item_data['effect'];
+					if (isset($item_data['durability'])) $itms[$slot] = $item_data['durability'];
+					if (isset($item_data['special'])) $itmsk[$slot] = $item_data['special'];
+				}
+			}
+
+			if (!empty($setup['initial_equipment'])) {
+				foreach ($setup['initial_equipment'] as $equip_slot => $equip_data) {
+					if (isset($equip_data['name'])) $$equip_slot = $equip_data['name'];
+					if (isset($equip_data['type'])) ${$equip_slot.'k'} = $equip_data['type'];
+					if (isset($equip_data['effect'])) ${$equip_slot.'e'} = $equip_data['effect'];
+					if (isset($equip_data['durability'])) ${$equip_slot.'s'} = $equip_data['durability'];
+					if (isset($equip_data['special'])) ${$equip_slot.'sk'} = $equip_data['special'];
+				}
+			}
+
+			# 应用clbpara标记
+			if (!empty($setup['clbpara_flags'])) {
+				foreach ($setup['clbpara_flags'] as $key => $value) {
+					$clbpara[$key] = $value;
+				}
+			}
+
+			# 设置开场剧情
+			if (!empty($ruleset_config['story_config']['opening_story'])) {
+				$clbpara['ruleset_opening_story'] = $ruleset_config['story_config']['opening_story'];
+			}
+		}
+	}
+
 	# 显示开场剧情模态框
 	$clbpara['noskip_dialogue'] = 'opening';
 

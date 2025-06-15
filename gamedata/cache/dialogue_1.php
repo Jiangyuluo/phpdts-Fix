@@ -71,6 +71,14 @@ $dialogues = Array
 		1 => '这是带选择的测试对话第二页',
 		2 => '请选择下面的选项：',
 	),
+
+	// RuleSet开场剧情
+	'opening' => Array
+	(
+		0 => '欢迎来到游戏世界！',
+		1 => '在这里，你将体验到精彩的大逃杀玩法。',
+		2 => '准备好开始你的冒险了吗？',
+	),
 );
 
 # 单组对白中哪一页对话会显示头像：
@@ -94,6 +102,7 @@ $dialogue_log = Array
 	'choiceTestingDialog_choice_1' => "<span class='yellow'>你选择了选项B！</span><br>这是选项B的结果。<br><br>",
 	'choiceTestingDialog_choice_2' => "<span class='yellow'>你选择了选项C！</span><br>这是选项C的结果。<br><br>",
 	'club22entry' => "<span class='yellow'>你获得了收纳种火的力量！</span><br>作为开始，去寻找种火的残骸吧……<br><br>",
+	'opening' => "<span class='lime'>※ 游戏开始！</span><br>愿你在这个世界中找到属于自己的道路。<br><br>",
 );
 
 # 单组对白结束时提供选择肢：
