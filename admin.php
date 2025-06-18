@@ -22,11 +22,6 @@ $admin_cmd_list = Array(
 	'roommng' => 5,
 	'antiAFKmng' => 4,
 	'templates_clean' => 4,
-	'resourcemng' => 6,
-	'mapitemsmng' => 7,
-	'shopitemsmng' => 7,
-	'startitemsmng' => 6,
-	'startnpcsmng' => 8,
 );
 
 if(!$cuser||!$cpass) { gexit($_ERROR['no_login'],__file__,__line__); }
