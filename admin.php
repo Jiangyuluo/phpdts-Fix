@@ -22,6 +22,7 @@ $admin_cmd_list = Array(
 	'roommng' => 5,
 	'antiAFKmng' => 4,
 	'templates_clean' => 4,
+	'resourcemng' => 6,
 	'mapitemsmng' => 7,
 	'shopitemsmng' => 7,
 	'startitemsmng' => 6,
@@ -38,27 +39,6 @@ elseif(($udata['groupid'] <= 1)&&($cuser!==$gamefounder)) { gexit($_ERROR['no_ad
 if($cuser===$gamefounder){$mygroup=10;}
 else{$mygroup = $udata['groupid'];}
 
-// 获取可用的RuleSet列表（用于admin_menu模板）
-function getRulesetList() {
-	$rulesets = array();
-	$rulesets['default'] = '默认资源 (gamedata/cache)';
-
-	$ruleset_dir = GAME_ROOT.'./gamedata/ruleset/';
-	if(is_dir($ruleset_dir)) {
-		$dirs = scandir($ruleset_dir);
-		foreach($dirs as $dir) {
-			if($dir != '.' && $dir != '..' && is_dir($ruleset_dir.$dir)) {
-				if(file_exists($ruleset_dir.$dir.'/cache/')) {
-					$rulesets[$dir] = 'RuleSet: '.$dir;
-				}
-			}
-		}
-	}
-	return $rulesets;
-}
-
-$available_rulesets = getRulesetList();
-
 $showdata = $cmd_info = false;
 if($mode == 'admin_menu' && in_array($command, array_keys($admin_cmd_list))) {//进入子菜单的指令
 	if($mygroup >= $admin_cmd_list[$command]){
@@ -67,7 +47,7 @@ if($mode == 'admin_menu' && in_array($command, array_keys($admin_cmd_list))) {//
 	}else{
 		$cmd_info = $_ERROR['no_power'];
 	}
-
+	
 } elseif(in_array($mode, array_keys($admin_cmd_list))) {//子菜单内指令
 	if($mygroup >= $admin_cmd_list[$mode]){
 		include_once GAME_ROOT."./include/admin/{$mode}.php";
