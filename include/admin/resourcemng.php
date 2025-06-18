@@ -3,24 +3,8 @@ if(!defined('IN_ADMIN')) {
 	exit('Access Denied');
 }
 
-// 获取可用的RuleSet列表
-function getRulesetList() {
-	$rulesets = array();
-	$rulesets['default'] = '默认资源 (gamedata/cache)';
-	
-	$ruleset_dir = GAME_ROOT.'./gamedata/ruleset/';
-	if(is_dir($ruleset_dir)) {
-		$dirs = scandir($ruleset_dir);
-		foreach($dirs as $dir) {
-			if($dir != '.' && $dir != '..' && is_dir($ruleset_dir.$dir)) {
-				if(file_exists($ruleset_dir.$dir.'/cache/')) {
-					$rulesets[$dir] = 'RuleSet: '.$dir;
-				}
-			}
-		}
-	}
-	return $rulesets;
-}
+// 引入公共函数
+require_once GAME_ROOT.'./include/admin/resourcemng_common.php';
 
 // 获取当前选择的RuleSet路径
 function getCurrentRulesetPath($ruleset = 'default') {
@@ -39,6 +23,8 @@ function checkResourceFile($ruleset, $filename) {
 
 $cmd_info = '';
 $current_ruleset = isset($ruleset) ? $ruleset : 'default';
+
+// 获取可用的RuleSet列表（使用admin.php中定义的函数）
 $available_rulesets = getRulesetList();
 
 // 检查各资源文件状态

@@ -109,33 +109,61 @@
 						<th width="30">$lang['groups']</th>
 					</tr>
 					<tr height="45px">
-						<td><input type="submit" style="width:100;height:40;" value="$lang['resourcemng']" onclick="$('command').value='resourcemng'" <!--{if $mygroup < $admin_cmd_list['resourcemng']}-->disabled="true"<!--{/if}-->></td>
-						<td>$lang['resourcemng_comment']</td>
-						<td>$admin_cmd_list['resourcemng']</td>
+						<td>
+							<select name="ruleset" id="ruleset" style="width:100px;">
+								<!--{loop $available_rulesets $key $name}-->
+								<option value="$key">$name</option>
+								<!--{/loop}-->
+							</select>
+						</td>
+						<td>选择要管理的资源模式</td>
+						<td>-</td>
 					</tr>
 					<tr height="45px">
-						<td><input type="submit" style="width:100;height:40;" value="$lang['mapitemsmng']" onclick="$('command').value='mapitemsmng'" <!--{if $mygroup < $admin_cmd_list['mapitemsmng']}-->disabled="true"<!--{/if}-->></td>
+						<td><input type="submit" style="width:100;height:40;" value="$lang['mapitemsmng']" onclick="submitResourceCommand('mapitemsmng')" <!--{if $mygroup < 7}-->disabled="true"<!--{/if}-->></td>
 						<td>$lang['mapitemsmng_comment']</td>
-						<td>$admin_cmd_list['mapitemsmng']</td>
+						<td>7</td>
 					</tr>
 					<tr height="45px">
-						<td><input type="submit" style="width:100;height:40;" value="$lang['shopitemsmng']" onclick="$('command').value='shopitemsmng'" <!--{if $mygroup < $admin_cmd_list['shopitemsmng']}-->disabled="true"<!--{/if}-->></td>
+						<td><input type="submit" style="width:100;height:40;" value="$lang['shopitemsmng']" onclick="submitResourceCommand('shopitemsmng')" <!--{if $mygroup < 7}-->disabled="true"<!--{/if}-->></td>
 						<td>$lang['shopitemsmng_comment']</td>
-						<td>$admin_cmd_list['shopitemsmng']</td>
+						<td>7</td>
 					</tr>
 					<tr height="45px">
-						<td><input type="submit" style="width:100;height:40;" value="$lang['startitemsmng']" onclick="$('command').value='startitemsmng'" <!--{if $mygroup < $admin_cmd_list['startitemsmng']}-->disabled="true"<!--{/if}-->></td>
+						<td><input type="submit" style="width:100;height:40;" value="$lang['startitemsmng']" onclick="submitResourceCommand('startitemsmng')" <!--{if $mygroup < 6}-->disabled="true"<!--{/if}-->></td>
 						<td>$lang['startitemsmng_comment']</td>
-						<td>$admin_cmd_list['startitemsmng']</td>
+						<td>6</td>
 					</tr>
 					<tr height="45px">
-						<td><input type="submit" style="width:100;height:40;" value="$lang['startnpcsmng']" onclick="$('command').value='startnpcsmng'" <!--{if $mygroup < $admin_cmd_list['startnpcsmng']}-->disabled="true"<!--{/if}-->></td>
+						<td><input type="submit" style="width:100;height:40;" value="$lang['startnpcsmng']" onclick="submitResourceCommand('startnpcsmng')" <!--{if $mygroup < 8}-->disabled="true"<!--{/if}-->></td>
 						<td>$lang['startnpcsmng_comment']</td>
-						<td>$admin_cmd_list['startnpcsmng']</td>
+						<td>8</td>
 					</tr>
 				</table>
 			</td>
 		</tr>
 	</table>
 
-</form> 
+</form>
+
+<script type="text/javascript">
+function submitResourceCommand(cmd) {
+	var rulesetSelect = document.getElementById('ruleset');
+	var selectedRuleset = rulesetSelect.value;
+
+	// 创建隐藏的表单元素来传递ruleset参数
+	var rulesetInput = document.createElement('input');
+	rulesetInput.type = 'hidden';
+	rulesetInput.name = 'ruleset';
+	rulesetInput.value = selectedRuleset;
+
+	// 设置命令
+	document.getElementById('command').value = cmd;
+
+	// 添加ruleset参数到表单
+	document.forms['admin'].appendChild(rulesetInput);
+
+	// 提交表单
+	document.forms['admin'].submit();
+}
+</script>
