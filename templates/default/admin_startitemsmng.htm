@@ -13,7 +13,48 @@
 <div style="color: red; margin: 10px 0;">$cmd_info</div>
 <!--{/if}-->
 
-<!--{if $command == 'list' || !$command}-->
+<!--{if $command == 'edit_form'}-->
+<div class="subtitle">编辑$current_type_name</div>
+<form method="post" action="admin.php">
+	<input type="hidden" name="mode" value="startitemsmng">
+	<input type="hidden" name="command" value="save_edit">
+	<input type="hidden" name="ruleset" value="$current_ruleset">
+	<input type="hidden" name="file_type" value="$file_type">
+	<input type="hidden" name="edit_line" value="$edit_item['line_num']">
+	
+	<table class="admin">
+		<tr><td>名称：</td><td><input type="text" name="name" value="$edit_item['name']" size="30"></td></tr>
+		<tr><td>类别：</td><td><input type="text" name="type" value="$edit_item['type']" size="10"></td></tr>
+		<tr><td>效果：</td><td><input type="text" name="effect" value="$edit_item['effect']" size="10"></td></tr>
+		<tr><td>耐久：</td><td><input type="text" name="durability" value="$edit_item['durability']" size="10"></td></tr>
+		<tr><td>子类别：</td><td><input type="text" name="subtype" value="$edit_item['subtype']" size="10"></td></tr>
+		<tr><td colspan="2">
+			<input type="submit" value="保存修改">
+			<input type="button" value="取消" onclick="history.back();">
+		</td></tr>
+	</table>
+</form>
+<!--{elseif $command == 'add_form'}-->
+<div class="subtitle">添加新$current_type_name</div>
+<form method="post" action="admin.php">
+	<input type="hidden" name="mode" value="startitemsmng">
+	<input type="hidden" name="command" value="save_add">
+	<input type="hidden" name="ruleset" value="$current_ruleset">
+	<input type="hidden" name="file_type" value="$file_type">
+	
+	<table class="admin">
+		<tr><td>名称：</td><td><input type="text" name="name" value="" size="30"></td></tr>
+		<tr><td>类别：</td><td><input type="text" name="type" value="" size="10"></td></tr>
+		<tr><td>效果：</td><td><input type="text" name="effect" value="1" size="10"></td></tr>
+		<tr><td>耐久：</td><td><input type="text" name="durability" value="1" size="10"></td></tr>
+		<tr><td>子类别：</td><td><input type="text" name="subtype" value="" size="10"></td></tr>
+		<tr><td colspan="2">
+			<input type="submit" value="添加$current_type_name">
+			<input type="button" value="取消" onclick="history.back();">
+		</td></tr>
+	</table>
+</form>
+<!--{else}-->
 
 <div style="margin: 10px 0;">
 	<form method="post" action="admin.php" style="display: inline;">
@@ -21,8 +62,8 @@
 		<input type="hidden" name="ruleset" value="$current_ruleset">
 		<label>文件类型：</label>
 		<select name="file_type" onchange="this.form.submit();">
-			<option value="items"<!--{if $file_type == 'items'}--> selected<!--{/if}-->>物品 (stitem_1.php)</option>
-			<option value="weapons"<!--{if $file_type == 'weapons'}--> selected<!--{/if}-->>武器 (stwep_1.php)</option>
+			<option value="items" <!--{if $file_type == 'items'}-->selected<!--{/if}-->>物品 (stitem_1.php)</option>
+			<option value="weapons" <!--{if $file_type == 'weapons'}-->selected<!--{/if}-->>武器 (stwep_1.php)</option>
 		</select>
 	</form>
 </div>
@@ -99,7 +140,7 @@
 				<input type="hidden" name="edit_line" value="$item['line_num']">
 				<input type="submit" value="编辑" style="width: 40px; font-size: 11px;">
 			</form>
-			<form method="post" action="admin.php" style="display: inline;" onsubmit="return confirm('确定要删除这个项目吗？');">
+			<form method="post" action="admin.php" style="display: inline;" onsubmit="return confirm('确定要删除$current_type_name $item[name] 吗？');">
 				<input type="hidden" name="mode" value="startitemsmng">
 				<input type="hidden" name="command" value="delete">
 				<input type="hidden" name="ruleset" value="$current_ruleset">
@@ -122,11 +163,11 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="up">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="上一页"<!--{if $start <= 0}--> disabled<!--{/if}-->>
+		<input type="submit" value="上一页" <!--{if $start <= 0}-->disabled<!--{/if}-->>
 	</form>
 	
 	<span style="margin: 0 10px;">
-		第 <!--{eval echo $start + 1;}--> 到 <!--{eval echo min($start + $showlimit, $total_items);}--> 项，共 $total_items 项
+		第 <!--{echo $start + 1}--> 到 <!--{echo min($start + $showlimit, $total_items)--> 项，共 $total_items 项
 	</span>
 	
 	<form method="post" action="admin.php" style="display: inline;">
@@ -136,7 +177,7 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="down">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="下一页"<!--{if $start + $showlimit >= $total_items}--> disabled<!--{/if}-->>
+		<input type="submit" value="下一页" <!--{if $start + $showlimit >= $total_items}-->disabled<!--{/if}-->>
 	</form>
 </div>
 <!--{/if}-->
@@ -150,6 +191,8 @@
 		<input type="submit" value="添加新$current_type_name" style="padding: 5px 15px;">
 	</form>
 </div>
+
+<!--{/if}-->
 
 <!--{/if}-->
 

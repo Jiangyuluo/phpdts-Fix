@@ -13,7 +13,53 @@
 <div style="color: red; margin: 10px 0;">$cmd_info</div>
 <!--{/if}-->
 
-<!--{if $command == 'list' || !$command}-->
+<!--{if $command == 'edit_form'}-->
+<div class="subtitle">编辑NPC (ID: $edit_id)</div>
+<div style="margin: 10px 0; padding: 10px; background-color: #f0f0f0;">
+	<strong>注意：</strong>NPC数据结构复杂，建议使用现有的NPC管理功能进行详细编辑。<br>
+	这里仅显示基本信息，完整编辑请使用"当前游戏管理"中的"NPC数据管理"功能。
+</div>
+
+<table class="admin">
+	<tr><td colspan="2" class="tdtitle">基本信息</td></tr>
+	<tr><td>NPC ID：</td><td>$edit_id</td></tr>
+	<tr><td>模式：</td><td>$edit_npc['mode']</td></tr>
+	<tr><td>数量：</td><td>$edit_npc['num']</td></tr>
+	<tr><td>社团：</td><td>$edit_npc['club']</td></tr>
+	<tr><td>位置：</td><td>$edit_npc['pls']</td></tr>
+	<tr><td>最大HP：</td><td>$edit_npc['mhp']</td></tr>
+	<tr><td>最大SP：</td><td>$edit_npc['msp']</td></tr>
+	<tr><td>攻击力：</td><td>$edit_npc['att']</td></tr>
+	<tr><td>防御力：</td><td>$edit_npc['def']</td></tr>
+	<tr><td>等级：</td><td>$edit_npc['lvl']</td></tr>
+	<tr><td>金钱：</td><td>$edit_npc['money']</td></tr>
+</table>
+
+<!--{if isset($edit_npc['sub']) && is_array($edit_npc['sub'])}-->
+<table class="admin" style="margin-top: 20px;">
+	<tr><td colspan="4" class="tdtitle">子NPC列表</td></tr>
+	<tr>
+		<th>序号</th>
+		<th>名称</th>
+		<th>头像</th>
+		<th>武器</th>
+	</tr>
+	<!--{loop $edit_npc['sub'] $index $sub_npc}-->
+	<tr>
+		<td>$index</td>
+		<td><!--{if isset($sub_npc['name'])}-->$sub_npc['name']<!--{else}-->未设置<!--{/if}--></td>
+		<td><!--{if isset($sub_npc['icon'])}-->$sub_npc['icon']<!--{else}-->-<!--{/if}--></td>
+		<td><!--{if isset($sub_npc['wep'])}-->$sub_npc['wep']<!--{else}-->-<!--{/if}--></td>
+	</tr>
+	<!--{/loop}-->
+</table>
+<!--{/if}-->
+
+<div style="margin: 20px 0;">
+	<input type="button" value="返回列表" onclick="history.back();">
+</div>
+
+<!--{else}-->
 
 <form method="post" name="search_form" action="admin.php">
 	<input type="hidden" name="mode" value="startnpcsmng">
@@ -112,11 +158,11 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="up">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="上一页"<!--{if $start <= 0}--> disabled<!--{/if}-->>
+		<input type="submit" value="上一页" <!--{if $start <= 0}-->disabled<!--{/if}-->>
 	</form>
 	
 	<span style="margin: 0 10px;">
-		第 <!--{eval echo $start + 1;}--> 到 <!--{eval echo min($start + $showlimit, $total_npcs);}--> 项，共 $total_npcs 项
+		第 <!--{echo $start + 1}--> 到 <!--{echo min($start + $showlimit, $total_npcs)--> 项，共 $total_npcs 项
 	</span>
 	
 	<form method="post" action="admin.php" style="display: inline;">
@@ -125,9 +171,13 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="down">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="下一页"<!--{if $start + $showlimit >= $total_npcs}--> disabled<!--{/if}-->>
+		<input type="submit" value="下一页" <!--{if $start + $showlimit >= $total_npcs}-->disabled<!--{/if}-->>
 	</form>
 </div>
+<!--{/if}-->
+
+<!--{/if}-->
+
 <!--{/if}-->
 
 <div style="margin: 20px 0;">

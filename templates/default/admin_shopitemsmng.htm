@@ -73,11 +73,7 @@
 	</tr>
 	<!--{else}-->
 	<!--{loop $page_items $item}-->
-	<!--{if $item['is_separator']}-->
-	<tr style="background-color: #f0f0f0; font-weight: bold;">
-	<!--{else}-->
-	<tr>
-	<!--{/if}-->
+	<tr <!--{if $item['is_separator']}-->style="background-color: #f0f0f0; font-weight: bold;"<!--{/if}-->>
 		<td>$item['line_num']</td>
 		<!--{if $item['is_separator']}-->
 		<td colspan="6" style="text-align: center;">
@@ -128,11 +124,11 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="up">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="上一页"<!--{if $start <= 0}--> disabled<!--{/if}-->>
+		<input type="submit" value="上一页" <!--{if $start <= 0}-->disabled<!--{/if}-->>
 	</form>
 	
 	<span style="margin: 0 10px;">
-		第 <!--{eval echo $start + 1;}--> 到 <!--{eval echo min($start + $showlimit, $total_items);}--> 项，共 $total_items 项
+		第 <!--{echo $start + 1}--> 到 <!--{echo min($start + $showlimit, $total_items)--> 项，共 $total_items 项
 	</span>
 	
 	<form method="post" action="admin.php" style="display: inline;">
@@ -141,7 +137,7 @@
 		<input type="hidden" name="search_term" value="$search_term">
 		<input type="hidden" name="pagemode" value="down">
 		<input type="hidden" name="start" value="$start">
-		<input type="submit" value="下一页"<!--{if $start + $showlimit >= $total_items}--> disabled<!--{/if}-->>
+		<input type="submit" value="下一页" <!--{if $start + $showlimit >= $total_items}-->disabled<!--{/if}-->>
 	</form>
 </div>
 <!--{/if}-->
@@ -161,6 +157,8 @@
 		<input type="submit" value="添加新分类" style="padding: 5px 15px;">
 	</form>
 </div>
+
+<!--{/if}-->
 
 <div style="margin: 20px 0;">
 	<h3>字段说明</h3>

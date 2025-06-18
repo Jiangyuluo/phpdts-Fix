@@ -4,7 +4,7 @@ if(!defined('IN_ADMIN')) {
 }
 
 // 引入资源管理公共函数
-require_once GAME_ROOT.'./include/admin/resourcemng_common.php';
+require_once GAME_ROOT.'./include/admin/resourcemng.php';
 
 if(!isset($command)){$command = 'list';}
 if(!isset($start)){$start = 0;}
@@ -15,8 +15,6 @@ if(!isset($ruleset)){$ruleset = 'default';}
 $cmd_info = '';
 $start = getstart($start,$pagemode);
 $current_ruleset = $ruleset;
-
-// 获取可用的RuleSet列表（使用admin.php中定义的函数）
 $available_rulesets = getRulesetList();
 
 // 获取资源文件路径
