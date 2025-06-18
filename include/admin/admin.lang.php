@@ -270,6 +270,17 @@ $lang = array
 	'antiAFKmng_comment' => '手动清除一定时间内未行动的玩家',
 	'sttimemng' => '开始时间管理',
 	'sttimemng_comment' => '设定下局游戏的开始时间',
+
+	'resourcemng' => '游戏资源管理',
+	'resourcemng_comment' => '管理游戏各模式的资源文件',
+	'mapitemsmng' => '地图物品管理',
+	'mapitemsmng_comment' => '管理地图物品刷新配置<br>对应mapitem_1.php',
+	'shopitemsmng' => '商店物品管理',
+	'shopitemsmng_comment' => '管理商店物品销售配置<br>对应shopitem_1.php',
+	'startitemsmng' => '开局物品管理',
+	'startitemsmng_comment' => '管理玩家开局物品配置<br>对应stitem_1.php和stwep_1.php',
+	'startnpcsmng' => '开局NPC管理',
+	'startnpcsmng_comment' => '管理开局NPC配置<br>对应npc_1.php',
 	
 	'on' => '开启',
 	'off' => '关闭',

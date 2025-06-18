@@ -1,0 +1,81 @@
+<div class="subtitle">游戏资源管理</div>
+
+<form method="post" name="resourcemng" action="admin.php">
+	<input type="hidden" name="mode" value="resourcemng">
+	
+	<div style="margin: 10px 0;">
+		<label for="ruleset">选择资源模式：</label>
+		<select name="ruleset" id="ruleset" onchange="this.form.submit();">
+			<!--{loop $available_rulesets $key $name}-->
+			<option value="$key" <!--{if $current_ruleset == $key}-->selected<!--{/if}-->>$name</option>
+			<!--{/loop}-->
+		</select>
+	</div>
+</form>
+
+<div style="margin: 20px 0;">
+	<strong>当前资源路径：</strong>
+	<!--{if $current_ruleset == 'default'}-->
+	gamedata/cache/
+	<!--{else}-->
+	gamedata/ruleset/$current_ruleset/cache/
+	<!--{/if}-->
+</div>
+
+<table class="admin" style="width: 100%;">
+	<tr>
+		<td colspan="5" class="tdtitle">资源文件状态</td>
+	</tr>
+	<tr>
+		<th width="200">资源文件</th>
+		<th width="150">文件名</th>
+		<th width="80">状态</th>
+		<th width="80">所需权限</th>
+		<th width="120">操作</th>
+	</tr>
+	<!--{loop $resource_status $filename $info}-->
+	<tr>
+		<td>$info['name']</td>
+		<td>$filename</td>
+		<td>
+			<!--{if $info['exists']}-->
+			<span style="color: green;">存在</span>
+			<!--{else}-->
+			<span style="color: red;">不存在</span>
+			<!--{/if}-->
+		</td>
+		<td>$info['permission']</td>
+		<td>
+			<!--{if $mygroup >= $info['permission'] && $info['exists']}-->
+			<form method="post" action="admin.php" style="display: inline;">
+				<input type="hidden" name="mode" value="admin_menu">
+				<input type="hidden" name="command" value="$info['manage_cmd']">
+				<input type="hidden" name="ruleset" value="$current_ruleset">
+				<input type="submit" value="管理" style="width: 60px;">
+			</form>
+			<!--{elseif $mygroup < $info['permission']}-->
+			<span style="color: gray;">权限不足</span>
+			<!--{else}-->
+			<span style="color: red;">文件不存在</span>
+			<!--{/if}-->
+		</td>
+	</tr>
+	<!--{/loop}-->
+</table>
+
+<div style="margin: 20px 0;">
+	<h3>使用说明</h3>
+	<ul>
+		<li><strong>地图物品管理</strong>：管理各地图区域的物品刷新配置，包括刷新时间、位置、数量等</li>
+		<li><strong>商店物品管理</strong>：管理商店中销售的物品，包括价格、上架时间、库存等</li>
+		<li><strong>开局物品管理</strong>：管理玩家开局时获得的物品和武器</li>
+		<li><strong>开局NPC管理</strong>：管理游戏开始时出现的NPC配置</li>
+	</ul>
+	
+	<h3>RuleSet说明</h3>
+	<ul>
+		<li><strong>默认资源</strong>：使用 gamedata/cache/ 目录下的资源文件，适用于所有房间</li>
+		<li><strong>RuleSet资源</strong>：使用特定RuleSet的资源文件，仅适用于对应的RuleSet房间</li>
+		<li>修改RuleSet资源不会影响默认资源和其他RuleSet</li>
+	</ul>
+</div>
