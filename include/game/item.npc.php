@@ -7,20 +7,20 @@ if (! defined('IN_GAME')) {
 /**
  * 处理NPC相关物品
  * 这些物品会影响NPC的生成、移动等
- * 
+ *
  * @param int $itmn 物品在物品栏中的位置
  * @param array &$data 玩家数据
  */
 function item_npc($itmn, &$data) {
     global $log, $now, $db, $tablepre, $hack, $gamevars;
     extract($data, EXTR_REFS);
-    
+
     $itm = & ${'itm' . $itmn};
     $itmk = & ${'itmk' . $itmn};
     $itme = & ${'itme' . $itmn};
     $itms = & ${'itms' . $itmn};
     $itmsk = & ${'itmsk' . $itmn};
-    
+
     if ($itm == '杏仁豆腐的ID卡') {
         include_once GAME_ROOT . './include/system.func.php';
         $duelstate = duel($now, $itm);
@@ -60,7 +60,7 @@ function item_npc($itmn, &$data) {
     } elseif ($itm == '破灭之诗') {
         $rp = 0;
         $clbpara['dialogue'] = 'thiphase';
-        $clbpara['console'] = 1;  
+        $clbpara['console'] = 1;
         $clbpara['achvars']['thiphase'] += 1;
         include_once GAME_ROOT . './include/system.func.php';
         $log .= '在你唱出那单一的旋律的霎那，<br>整个虚拟世界起了翻天覆地的变化……<br>';
@@ -82,7 +82,7 @@ function item_npc($itmn, &$data) {
         $log .= '你已经呼唤了一个未知的存在，现在寻找并击败她，<br>并且搜寻她的游戏解除钥匙吧！<br>';
         addnews($now, 'dfphase', $name, $nick);
         addnpc(12, 0, 1);
-        
+
         $itm = $itmk = $itmsk = '';
         $itme = $itms = 0;
     } elseif ($itm == '✦钥匙碎片') {
@@ -97,7 +97,7 @@ function item_npc($itmn, &$data) {
         addnpc(2, 5, 2);
         addnpc(2, 6, 2);
         addnpc(2, 7, 2);
-        addnews($now, 'key0', $name, $nick);                        
+        addnews($now, 'key0', $name, $nick);
         $itms--;
         if ($itms <= 0) destory_single_item($data, $itmn, 1);
     } elseif ($itm == '✦NPC钥匙·一阶段') {
@@ -114,7 +114,7 @@ function item_npc($itmn, &$data) {
         addnpc(13, 0, 1);
         addnpc(13, 1, 1);
         addnpc(13, 2, 1);
-        addnews($now, 'key1', $name, $nick);                        
+        addnews($now, 'key1', $name, $nick);
         $itms--;
         if ($itms <= 0) {
             $log .= "<span class=\"red\">$itm</span>用光了。<br>";
@@ -134,7 +134,7 @@ function item_npc($itmn, &$data) {
         addnpc(6, 0, 1);
         //假蓝凝
         addnpc(9, 0, 1);
-        addnews($now, 'key2', $name, $nick);                        
+        addnews($now, 'key2', $name, $nick);
         $itms--;
         if ($itms <= 0) {
             $log .= "<span class=\"red\">$itm</span>用光了。<br>";
@@ -150,7 +150,7 @@ function item_npc($itmn, &$data) {
         addnpc(92, 2, 10);
         addnpc(92, 3, 10);
         addnpc(92, 4, 10);
-        addnews($now, 'key3', $name, $nick);                        
+        addnews($now, 'key3', $name, $nick);
         $itms--;
         if ($itms <= 0) {
             $log .= "<span class=\"red\">$itm</span>用光了。<br>";
@@ -158,7 +158,7 @@ function item_npc($itmn, &$data) {
             $itme = $itms = 0;
         }
     } elseif ($itm == '✦【自律AI呼唤器】') {
-        //Call in 30 type 93 NPCs, 6 each. 
+        //Call in 30 type 93 NPCs, 6 each.
         //get player's 1st Yume value - different value results in different NPC.
         //There are 5 sets - K, C, G, P, D.
         include_once GAME_ROOT . './include/system.func.php';
@@ -206,5 +206,20 @@ function item_npc($itmn, &$data) {
             $itm = $itmk = $itmsk = '';
             $itme = $itms = 0;
         }
+        } elseif ($itm == '【我想要领略真正的红杀之力】') {
+            // 召唤红暮与蓝凝（从旧版逻辑迁移，恢复原有功能）
+            include_once GAME_ROOT . './include/system.func.php';
+            $log .= '你拿起了这个球状物体，重重地向天空抛去！<br>地图上空出现了红杀组织的龙虎徽标！<br>';
+            addnpc(19, 0, 1);
+            addnpc(19, 1, 1);
+            // 发布新闻：需要将当前位置传入c参数以显示【地点】
+            addnews($now, 'keyuu', $name, '', $pls, $nick);
+            // 系统广播
+            $db->query("INSERT INTO {$tablepre}chat (type,`time`,send,recv,msg) VALUES ('2','$now','【红暮】','','切，真是少见的要求，那么我会在【无月之影】等着你们的挑战！')");
+            $db->query("INSERT INTO {$tablepre}chat (type,`time`,send,recv,msg) VALUES ('2','$now','【蓝凝】','','英雄就该姗姗来迟，我会和姐姐一起迎接你们！')");
+            // 销毁物品
+            $itm = $itmk = $itmsk = '';
+            $itme = $itms = 0;
+
     }
 }
