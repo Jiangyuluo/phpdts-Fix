@@ -167,10 +167,17 @@ function item_tool($itmn, &$data) {
         } else {
             $log .= "你的武器已经安装了消音器。<br>";
         }
-    } elseif ($itm == '■DeathNote■') {
-        global $mode;
-        $mode = 'deathnote';
-        $log .= '你翻开了■DeathNote■<br>';
+    } elseif ($itm == '■DeathNote■' || $itm == '四面亲手制作的■DeathNote■') {
+        // 打开死亡笔记二级菜单
+        // 说明：item.main.php 末尾会在 $cmd 为空时强制设置 $mode='command'
+        // 因此这里必须设置 $cmd（而不是仅设置 $mode），以便二级菜单正确显示
+        global $cmd;
+        // 旧模板使用隐藏字段 name="item" 承载道具格位，这里与之对齐
+        $item = $itmn;
+        include template('deathnote');
+        $cmd = ob_get_contents();
+        ob_clean();
+        // 不设置 $mode，交由框架根据 $cmd 渲染表单
         return;
     } elseif ($itm == '游戏解除钥匙') {
         $state = 6;
