@@ -617,10 +617,12 @@ namespace revattr
 		if((!empty($pa['clbpara']['skill']) && in_array('npc_mecstasy', $pa['clbpara']['skill']) && !empty($pa['clbpara']['skillpara']['npc_mecstasy']['active'])) ||
 		   (!empty($pd['clbpara']['skill']) && in_array('npc_mecstasy', $pd['clbpara']['skill']) && !empty($pd['clbpara']['skillpara']['npc_mecstasy']['active'])))
 		{
+			# 判定技能触发者名称（玩家或NPC）
+			$mec_owner_nm = (!empty($pa['clbpara']['skill']) && in_array('npc_mecstasy', $pa['clbpara']['skill']) && !empty($pa['clbpara']['skillpara']['npc_mecstasy']['active'])) ? $pa['nm'] : $pd['nm'];
 			# 检查是否对种火玩家无效
 			if((!empty($pd['clbpara']['skill']) && (in_array('fireseed3', $pd['clbpara']['skill']) || in_array('fireseed4', $pd['clbpara']['skill']))) || $pd['def'] > 10000)
 			{
-				$log .= "<span class='red'>{$pa['nm']}展开了Ecstasy Mode结界！但{$pd['nm']}早已不受这种东西的影响了！</span><br>";
+				$log .= "<span class='red'>{$mec_owner_nm}展开了Ecstasy Mode结界！但{$pd['nm']}早已不受这种东西的影响了！</span><br>";
 				return 0;
 			}
 
@@ -628,7 +630,7 @@ namespace revattr
 			if(!empty($pd['clbpara']['skill']) && in_array('npc_perfectspy', $pd['clbpara']['skill']) && $pd['hp'] > 200 && $pd['hp'] - $pa['wepe'] < 200)
 			{
 				# 先记录「来潮」效果的文案
-				$log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+				$log .= "<span class='red'>{$mec_owner_nm}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
 
 				# 然后计算「勇谍」效果保护后的伤害
 				$damage = $pd['hp'] - 200;
@@ -637,7 +639,7 @@ namespace revattr
 			}
 
 			$damage = $pa['wepe'];
-			$log .= "<span class='red'>「{$pa['nm']}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
+			$log .= "<span class='red'>{$mec_owner_nm}展开了Ecstasy Mode结界！武器直接造成了等同于其效果值的真实伤害！</span><br>";
 			return $damage;
 		}
 

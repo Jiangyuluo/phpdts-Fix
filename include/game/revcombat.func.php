@@ -411,7 +411,7 @@ namespace revcombat
 			{
 				$damage = $fix_dmg;
 				$pa['final_damage'] = $damage;
-				if($damage == 0)  $log .= "<span class=\"yellow\">造成的总伤害：<span class=\"red\">$damage</span>。</span><br>";
+				$log .= "<span class=\"yellow\">造成的总伤害：<span class=\"red\">{$damage}</span>。</span><br>";
 			}
 			//如无，则正常计算伤害
 			else
