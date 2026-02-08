@@ -8,8 +8,10 @@
       "connect_timeout_sec": 10,
       "read_timeout_sec": 30,
       "restart_delay_sec": 2,
+      "disable_env_proxy": true,
+      "insecure_skip_tls_verify": false,
       "headers": {
-        "User-Agent": "bothost/0.1"
+        "User-Agent": "bothost/0.2"
       },
       "query": {}
     }

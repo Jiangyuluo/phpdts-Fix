@@ -9,6 +9,7 @@ import signal
 import socket
 import threading
 import time
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -27,6 +28,7 @@ class WorkerState:
     bot_id: Optional[int] = None
     restarts: int = 0
     errors: int = 0
+    last_error: str = ""
 
 
 @dataclass
@@ -39,6 +41,8 @@ class TargetConfig:
     restart_delay_sec: int = 2
     headers: Dict[str, str] = field(default_factory=dict)
     query: Dict[str, str] = field(default_factory=dict)
+    disable_env_proxy: bool = True
+    insecure_skip_tls_verify: bool = False
 
 
 class TargetRuntime:
@@ -94,6 +98,10 @@ class BotHost:
             self._set_state(target, worker_id, status="connecting")
             try:
                 self._stream_worker(target, worker_id)
+            except urllib.error.HTTPError as exc:
+                self._record_http_error(target, worker_id, exc)
+            except urllib.error.URLError as exc:
+                self._record_error(target, worker_id, f"URLError: {exc.reason}")
             except Exception as exc:  # noqa: BLE001
                 self._record_error(target, worker_id, f"{type(exc).__name__}: {exc}")
 
@@ -111,7 +119,18 @@ class BotHost:
             full_url += "?" + urllib.parse.urlencode(cfg.query)
 
         request = urllib.request.Request(full_url, headers=cfg.headers, method="GET")
-        with urllib.request.urlopen(request, timeout=cfg.connect_timeout_sec) as response:
+        handlers: List[Any] = []
+        if cfg.disable_env_proxy:
+            handlers.append(urllib.request.ProxyHandler({}))
+        if cfg.insecure_skip_tls_verify:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            handlers.append(urllib.request.HTTPSHandler(context=ctx))
+
+        opener = urllib.request.build_opener(*handlers) if handlers else urllib.request.build_opener()
+
+        with opener.open(request, timeout=cfg.connect_timeout_sec) as response:
             self._set_state(target, worker_id, status="connected")
             # response.fp 是底层文件对象，可设置读超时，防止永远阻塞。
             if hasattr(response, "fp") and hasattr(response.fp, "raw"):
@@ -159,6 +178,10 @@ class BotHost:
                 state.status = "running"
             if "等待中" in line:
                 state.status = "waiting_lock"
+            low = line.lower()
+            if "fatal error" in low or "warning:" in low or "uncaught error" in low:
+                state.last_error = line
+                state.status = "remote_php_error"
 
     def _set_state(self, target: TargetRuntime, worker_id: int, status: str) -> None:
         with target.lock:
@@ -170,8 +193,20 @@ class BotHost:
             state = target.states[worker_id]
             state.errors += 1
             state.last_line = err
+            state.last_error = err
             state.last_seen_ts = time.time()
             state.status = "error"
+
+    def _record_http_error(self, target: TargetRuntime, worker_id: int, err: urllib.error.HTTPError) -> None:
+        body = ""
+        try:
+            body = err.read(300).decode("utf-8", errors="ignore").strip()
+        except Exception:  # noqa: BLE001
+            body = ""
+        detail = f"HTTPError {err.code}: {err.reason}"
+        if body:
+            detail += f" | body={body}"
+        self._record_error(target, worker_id, detail)
 
     def _increment_restart(self, target: TargetRuntime, worker_id: int) -> None:
         with target.lock:
@@ -195,6 +230,10 @@ class BotHost:
                         f"bot={st.bot_id}, restart={st.restarts}, err={st.errors}, age={age}s"
                     )
                 print(f"- {target.config.name}: {', '.join(rows)}")
+                for worker_id in sorted(target.states):
+                    st = target.states[worker_id]
+                    if st.last_error:
+                        print(f"  - w{worker_id} last_error: {st.last_error}")
 
 
 def load_config(path: str) -> Dict[str, Any]:
@@ -215,6 +254,8 @@ def parse_targets(config: Dict[str, Any]) -> List[TargetConfig]:
                 restart_delay_sec=int(raw.get("restart_delay_sec", 2)),
                 headers=dict(raw.get("headers", {})),
                 query=dict(raw.get("query", {})),
+                disable_env_proxy=bool(raw.get("disable_env_proxy", True)),
+                insecure_skip_tls_verify=bool(raw.get("insecure_skip_tls_verify", False)),
             )
         )
     return targets

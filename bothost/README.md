@@ -39,6 +39,8 @@ python bothost/main.py -c bothost/config.json
   - `connect_timeout_sec`：连接超时。
   - `read_timeout_sec`：读取超时，超时会断开并重连。
   - `restart_delay_sec`：重连等待秒数。
+  - `disable_env_proxy`：是否禁用环境变量中的 HTTP/HTTPS 代理（默认 true，建议保持）。
+  - `insecure_skip_tls_verify`：是否跳过 TLS 证书校验（默认 false，仅测试环境临时使用）。
   - `headers`：额外请求头。
   - `query`：附加查询参数。
 
@@ -47,3 +49,12 @@ python bothost/main.py -c bothost/config.json
 1. `revbotservice.php` 是长生命周期脚本，受目标 PHP 运行时参数影响（如 `max_execution_time`）。
 2. 若目标前置代理（Nginx/CDN）对长连接有限制，需要放宽超时。
 3. bothost 仅负责远程托管与状态监测；BOT 行为逻辑仍由 PHPDTS 原生 `revbot` 代码执行。
+
+
+## 故障诊断
+
+- 状态中 `err` 持续增长时，查看汇总下方 `last_error`，可直接看到最近一次 HTTP/网络错误详情。
+- 若出现类似 `Tunnel connection failed: 403 Forbidden`，通常是环境代理劫持导致，请确认 `disable_env_proxy=true`。
+- 若出现证书错误，可先确认站点证书链；仅在临时测试中可设 `insecure_skip_tls_verify=true`。
+
+- 若 `last_error` 中包含 `include(...common.inc.php): failed to open stream` 等报错，通常是目标站 `bot/revbotservice.php` 在 Web 环境下工作目录不正确；本仓库已修复为基于脚本目录计算 GAME_ROOT。
