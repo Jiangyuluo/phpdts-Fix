@@ -1,8 +1,15 @@
 <?php
+
 define('CURSCRIPT', 'revbotservice');
-include './include/common.inc.php';
-include GAME_ROOT . './include/game.func.php';
-include GAME_ROOT . './bot/revbot.func.php';
+
+$gameRoot = dirname(__DIR__).DIRECTORY_SEPARATOR;
+if(is_dir($gameRoot)) {
+	chdir($gameRoot);
+}
+
+require_once $gameRoot.'include/common.inc.php';
+require_once GAME_ROOT.'./include/game.func.php';
+require_once GAME_ROOT.'./bot/revbot.func.php';
 
 # 注意：因为进程锁的存在，运行bot脚本时必须确保游戏处于未开始状态
 # 否则请先中止游戏，并手动清空lock目录下所有文件，然后确保游戏正处于未开始状态下运行脚本
@@ -11,6 +18,9 @@ include GAME_ROOT . './bot/revbot.func.php';
 bot_prepare_flag:
 $id = 0;
 $dir = GAME_ROOT.'./bot/lock/';
+if(!is_dir($dir)) {
+	mkdir($dir, 0777, true);
+}
 $scdir = scandir($dir);
 # 为进程创建对应编号的进程锁
 $process_id = $scdir ? count($scdir)+1 : 1;
@@ -67,7 +77,7 @@ while($id)
 		{
 			$flag = bot_acts($id);
 			if ($flag == 0) {
-				unset($gamevars['botid'][array_search($botid, $gamevars['botid'])]);
+				unset($gamevars['botid'][array_search($id, $gamevars['botid'])]);
 				save_gameinfo();
 				save_combatinfo();
 				if (empty($gamevars['botid'])) break;
