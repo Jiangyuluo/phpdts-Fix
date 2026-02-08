@@ -42,7 +42,7 @@ python bothost/main.py -c bothost/config.json
   - `disable_env_proxy`：是否禁用环境变量中的 HTTP/HTTPS 代理（默认 true，建议保持）。
   - `insecure_skip_tls_verify`：是否跳过 TLS 证书校验（默认 false，仅测试环境临时使用）。
   - `headers`：额外请求头。
-  - `query`：附加查询参数。
+  - `query`：附加查询参数。可加入 `respawn_chance`（0-100）控制 BOT 死亡后的随机补位概率。
 
 ## 注意事项
 
@@ -58,3 +58,5 @@ python bothost/main.py -c bothost/config.json
 - 若出现证书错误，可先确认站点证书链；仅在临时测试中可设 `insecure_skip_tls_verify=true`。
 
 - 若 `last_error` 中包含 `include(...common.inc.php): failed to open stream` 等报错，通常是目标站 `bot/revbotservice.php` 在 Web 环境下工作目录不正确；本仓库已修复为基于脚本目录计算 GAME_ROOT。
+
+- 当目标端输出“已死亡；已加入重生队列 / 不加入重生队列”时，bothost 会将该 worker 标记为 `bot_dead_queued` / `bot_dead_retired`，并等待连接退出后自动重连。

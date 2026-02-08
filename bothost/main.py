@@ -178,6 +178,15 @@ class BotHost:
                 state.status = "running"
             if "等待中" in line:
                 state.status = "waiting_lock"
+            if "已死亡；已加入重生队列" in line:
+                state.status = "bot_dead_queued"
+                state.bot_id = None
+            if "已死亡；不加入重生队列" in line:
+                state.status = "bot_dead_retired"
+                state.bot_id = None
+            if "不在活动队列，进程退出" in line:
+                state.status = "bot_retired"
+                state.bot_id = None
             low = line.lower()
             if "fatal error" in low or "warning:" in low or "uncaught error" in low:
                 state.last_error = line

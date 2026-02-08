@@ -11,9 +11,11 @@
       "disable_env_proxy": true,
       "insecure_skip_tls_verify": false,
       "headers": {
-        "User-Agent": "bothost/0.2"
+        "User-Agent": "bothost/0.3"
       },
-      "query": {}
+      "query": {
+        "respawn_chance": "35"
+      }
     }
   ]
 }
