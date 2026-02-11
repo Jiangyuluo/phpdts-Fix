@@ -5,11 +5,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import signal
 import socket
+import ssl
 import threading
 import time
-import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -39,6 +40,8 @@ class TargetConfig:
     connect_timeout_sec: int = 10
     read_timeout_sec: int = 30
     restart_delay_sec: int = 2
+    loop_interval_sec: float = 2.0
+    mode: str = "oneshot"  # oneshot / stream
     headers: Dict[str, str] = field(default_factory=dict)
     query: Dict[str, str] = field(default_factory=dict)
     disable_env_proxy: bool = True
@@ -74,11 +77,7 @@ class BotHost:
                 target.threads.append(t)
                 t.start()
 
-        self.report_thread = threading.Thread(
-            target=self._report_loop,
-            name="reporter",
-            daemon=True,
-        )
+        self.report_thread = threading.Thread(target=self._report_loop, name="reporter", daemon=True)
         self.report_thread.start()
 
         while not self.stop_event.is_set():
@@ -94,9 +93,18 @@ class BotHost:
 
     def _worker_loop(self, target: TargetRuntime, worker_id: int) -> None:
         cfg = target.config
+        jitter = random.uniform(0, max(0.2, cfg.loop_interval_sec * 0.2))
+        self.stop_event.wait(jitter)
+
         while not self.stop_event.is_set():
             self._set_state(target, worker_id, status="connecting")
             try:
+                if cfg.mode == "oneshot":
+                    self._oneshot_worker(target, worker_id)
+                    self._set_state(target, worker_id, status="idle")
+                    if self.stop_event.wait(cfg.loop_interval_sec):
+                        break
+                    continue
                 self._stream_worker(target, worker_id)
             except urllib.error.HTTPError as exc:
                 self._record_http_error(target, worker_id, exc)
@@ -112,13 +120,7 @@ class BotHost:
 
         self._set_state(target, worker_id, status="stopped")
 
-    def _stream_worker(self, target: TargetRuntime, worker_id: int) -> None:
-        cfg = target.config
-        full_url = cfg.revbotservice_url
-        if cfg.query:
-            full_url += "?" + urllib.parse.urlencode(cfg.query)
-
-        request = urllib.request.Request(full_url, headers=cfg.headers, method="GET")
+    def _build_opener(self, cfg: TargetConfig) -> urllib.request.OpenerDirector:
         handlers: List[Any] = []
         if cfg.disable_env_proxy:
             handlers.append(urllib.request.ProxyHandler({}))
@@ -127,12 +129,41 @@ class BotHost:
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
             handlers.append(urllib.request.HTTPSHandler(context=ctx))
+        return urllib.request.build_opener(*handlers) if handlers else urllib.request.build_opener()
 
-        opener = urllib.request.build_opener(*handlers) if handlers else urllib.request.build_opener()
+    def _build_url(self, cfg: TargetConfig) -> str:
+        q = dict(cfg.query)
+        if cfg.mode == "oneshot":
+            q.setdefault("oneshot", "1")
+        full_url = cfg.revbotservice_url
+        if q:
+            full_url += "?" + urllib.parse.urlencode(q)
+        return full_url
+
+    def _oneshot_worker(self, target: TargetRuntime, worker_id: int) -> None:
+        cfg = target.config
+        request = urllib.request.Request(self._build_url(cfg), headers=cfg.headers, method="GET")
+        opener = self._build_opener(cfg)
+        with opener.open(request, timeout=cfg.connect_timeout_sec) as response:
+            self._set_state(target, worker_id, status="connected")
+            raw = response.read().decode("utf-8", errors="ignore")
+        any_line = False
+        for line in raw.splitlines():
+            text = line.strip()
+            if not text:
+                continue
+            any_line = True
+            self._consume_line(target, worker_id, text)
+        if not any_line:
+            self._set_state(target, worker_id, status="empty_response")
+
+    def _stream_worker(self, target: TargetRuntime, worker_id: int) -> None:
+        cfg = target.config
+        request = urllib.request.Request(self._build_url(cfg), headers=cfg.headers, method="GET")
+        opener = self._build_opener(cfg)
 
         with opener.open(request, timeout=cfg.connect_timeout_sec) as response:
             self._set_state(target, worker_id, status="connected")
-            # response.fp 是底层文件对象，可设置读超时，防止永远阻塞。
             if hasattr(response, "fp") and hasattr(response.fp, "raw"):
                 raw = response.fp.raw
                 if hasattr(raw, "_sock") and raw._sock:
@@ -150,10 +181,8 @@ class BotHost:
                     break
 
                 text = line.decode("utf-8", errors="ignore").strip()
-                if not text:
-                    continue
-
-                self._consume_line(target, worker_id, text)
+                if text:
+                    self._consume_line(target, worker_id, text)
 
     def _consume_line(self, target: TargetRuntime, worker_id: int, line: str) -> None:
         now = time.time()
@@ -261,6 +290,8 @@ def parse_targets(config: Dict[str, Any]) -> List[TargetConfig]:
                 connect_timeout_sec=int(raw.get("connect_timeout_sec", 10)),
                 read_timeout_sec=int(raw.get("read_timeout_sec", 30)),
                 restart_delay_sec=int(raw.get("restart_delay_sec", 2)),
+                loop_interval_sec=float(raw.get("loop_interval_sec", 2.0)),
+                mode=str(raw.get("mode", "oneshot")).strip().lower() or "oneshot",
                 headers=dict(raw.get("headers", {})),
                 query=dict(raw.get("query", {})),
                 disable_env_proxy=bool(raw.get("disable_env_proxy", True)),

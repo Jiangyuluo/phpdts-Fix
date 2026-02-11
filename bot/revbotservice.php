@@ -15,8 +15,68 @@ $bot_respawn_chance = isset($_GET['respawn_chance']) ? (int)$_GET['respawn_chanc
 if($bot_respawn_chance < 0) $bot_respawn_chance = 0;
 if($bot_respawn_chance > 100) $bot_respawn_chance = 100;
 
+$oneshot = isset($_GET['oneshot']) ? (int)$_GET['oneshot'] : 0;
+$oneshot = $oneshot ? 1 : 0;
+
 # 注意：因为进程锁的存在，运行bot脚本时必须确保游戏处于未开始状态
 # 否则请先中止游戏，并手动清空lock目录下所有文件，然后确保游戏正处于未开始状态下运行脚本
+
+# 单次执行模式：执行一次初始化或一次行动后立即退出，避免长连接占用游戏锁
+if($oneshot)
+{
+	load_gameinfo();
+	echo "oneshot=1
+";
+	echo "当前游戏状态:{$gamestate}
+";
+	if($gamestate <= 10) {
+		echo "游戏未开始，跳过。
+";
+		exit();
+	}
+
+	if (!empty($gamevars['botplayer']))
+	{
+		$ids = bot_player_valid(1);
+		$id = $ids[0];
+		$gamevars['botid'][] = $id;
+		$gamevars['botplayer'] --;
+		save_gameinfo();
+		echo "BOT初始化完成，id：" . ($id) . "
+剩余待初始化bot数量：{$gamevars['botplayer']}
+";
+		exit();
+	}
+
+	if (!empty($gamevars['botid']))
+	{
+		$id = $gamevars['botid'][array_rand($gamevars['botid'])];
+		$flag = bot_acts($id);
+		if ($flag == 0) {
+			$index = array_search($id, $gamevars['botid']);
+			if($index !== false) unset($gamevars['botid'][$index]);
+			$roll = mt_rand(1,100);
+			if($bot_respawn_chance > 0 && $roll <= $bot_respawn_chance) {
+				$gamevars['botplayer'] = isset($gamevars['botplayer']) ? (int)$gamevars['botplayer'] + 1 : 1;
+				echo "BOT：{$id} 已死亡；已加入重生队列。roll={$roll}, chance={$bot_respawn_chance}
+";
+			} else {
+				echo "BOT：{$id} 已死亡；不加入重生队列。roll={$roll}, chance={$bot_respawn_chance}
+";
+			}
+			save_gameinfo();
+			save_combatinfo();
+			exit();
+		}
+		echo "BOT：{$id} 行动完成
+";
+		exit();
+	}
+
+	echo "当前无可行动BOT。
+";
+	exit();
+}
 
 # 进程初始化
 bot_prepare_flag:
