@@ -10,6 +10,15 @@ if(!isset($keyword)) $keyword = '';
 if(!isset($ruleset)) $ruleset = '__default__';
 if(!isset($action)) $action = 'list';
 
+if(isset($edit_id)) {
+	$action = 'edit';
+	$record_id = intval($edit_id);
+}
+if(isset($delete_id)) {
+	$action = 'delete';
+	$record_id = intval($delete_id);
+}
+
 $start = getstart($start,$pagemode);
 $keyword = trim($keyword);
 $res_type = in_array($res_type, array('mapitem','shopitem','stitem','stwep','npc')) ? $res_type : 'mapitem';
@@ -129,6 +138,9 @@ foreach($records as $i => $row) {
 	}
 	if($ok) {
 		$row['_idx'] = $i;
+		if($res_type === 'npc') {
+			$row['_sub_count'] = (isset($row['sub']) && is_array($row['sub'])) ? count($row['sub']) : 0;
+		}
 		$filtered[] = $row;
 	}
 }
