@@ -129,6 +129,11 @@ if($action === 'edit' && isset($record_id)) {
 	if(isset($records[$id])) $edit_record = $records[$id];
 }
 
+$edit_record_json = '';
+if($res_type === 'npc' && !empty($edit_record)) {
+	$edit_record_json = json_encode($edit_record, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+}
+
 $filtered = array();
 foreach($records as $i => $row) {
 	$ok = true;
