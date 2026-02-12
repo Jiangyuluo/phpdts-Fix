@@ -265,7 +265,13 @@ function resourcemng_collect_row($res_type, $input, $default){
 	$size = count(resourcemng_columns($res_type));
 	for($i=0;$i<$size;$i++) {
 		$val = isset($input['col_'.$i]) ? trim($input['col_'.$i]) : '';
-		$row[$i] = str_replace(array("\n","\r",','), array('','','，'), $val);
+		$val = str_replace(array("\n","\r"), array('',''), $val);
+		// 最后一列是 itmpara（JSON），必须保留半角逗号
+		if($i === $size - 1) {
+			$row[$i] = $val;
+		} else {
+			$row[$i] = str_replace(',', '，', $val);
+		}
 	}
 	return $row;
 }
@@ -279,6 +285,18 @@ function resourcemng_validate_row($res_type, $row, &$err){
 	if(empty($row) || trim($row[0]) === '') {
 		$err = '首字段不能为空';
 		return false;
+	}
+	// CSV 资源的最后一列为 itmpara，若填写则应为合法 JSON
+	$last = count($row) - 1;
+	if($last >= 0) {
+		$itmpara = trim($row[$last]);
+		if($itmpara !== '' && $itmpara !== 'null') {
+			json_decode($itmpara, true);
+			if(json_last_error() !== JSON_ERROR_NONE) {
+				$err = 'itmpara 不是合法JSON：'.json_last_error_msg();
+				return false;
+			}
+		}
 	}
 	return true;
 }
