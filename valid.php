@@ -117,7 +117,8 @@ if($mode == 'enter') {
 	$arhe = $arae = $arfe = $arte = 0;
 	$arhs = $aras = $arfs = $arts = 0;
 	
-	for ($i=0; $i<=6; $i++){$itm[$i] = $itmk[$i] = $itmsk[$i] = ''; $itme[$i] = $itms[$i] = 0;}
+	for ($i=0; $i<=6; $i++){$itm[$i] = $itmk[$i] = $itmsk[$i] = $itmpara[$i] = ''; $itme[$i] = $itms[$i] = 0;}
+	$weppara = '';
 	$itm[1] = '面包'; $itmk[1] = 'HH'; $itme[1] = 120; $itms[1] = 15;
 	$itm[2] = '矿泉水'; $itmk[2] = 'HS'; $itme[2] = 140; $itms[2] = 15;
 	//$itm[6] = '银白盒子'; $itmk[6] = 'p'; $itme[6] = 1; $itms[6] = 1; $itmsk[6] = 'ps';
@@ -139,7 +140,9 @@ if($mode == 'enter') {
 	$weplist = openfile(config('stwep',$gamecfg));
 	do { 
 		$index = rand(1,count($weplist)-1); 
-		list($wep,$wepk,$wepe,$weps,$wepsk) = explode(",",$weplist[$index]);
+		$wline = rtrim($weplist[$index]);
+		$wline = preg_replace('/,\s*$/', '', $wline);
+		list($wep,$wepk,$wepe,$weps,$wepsk,$weppara) = array_pad(explode(",", $wline, 6), 6, '');
 	} while(!$wepk);
 
 	$stitemlist = openfile(config('stitem',$gamecfg));
@@ -149,7 +152,9 @@ if($mode == 'enter') {
 	} while(!$itmk[3]);*/
 	do { 
 		$index = rand(1,count($stitemlist)-1); 
-		list($itm[4],$itmk[4],$itme[4],$itms[4],$itmsk[4]) = explode(",",$stitemlist[$index]);
+		$iline = rtrim($stitemlist[$index]);
+		$iline = preg_replace('/,\s*$/', '', $iline);
+		list($itm[4],$itmk[4],$itme[4],$itms[4],$itmsk[4],$itmpara[4]) = array_pad(explode(",", $iline, 6), 6, '');
 	} while(!$itmk[4] || ($itmk[3] == $itmk[4]));
 
 	if ($name == 'Amarillo_NMC') {
@@ -185,6 +190,7 @@ if($mode == 'enter') {
 		{
 			${'itm'.$i} = $value; ${'itmk'.$i} = $itmk[$i]; ${'itme'.$i} = $itme[$i]; ${'itms'.$i} = $itms[$i];
 			if(isset($itmsk[$i])) ${'itmsk'.$i} = $itmsk[$i];
+			if(isset($itmpara[$i])) ${'itmpara'.$i} = $itmpara[$i];
 		}
 	}
 

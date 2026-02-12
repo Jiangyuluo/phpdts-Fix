@@ -196,7 +196,11 @@ function resourcemng_read_data($res_type, $file){
 	foreach($lines as $line) {
 		$trim = trim($line);
 		if($trim === '') continue;
-		if(strpos($trim, '<?') === 0) { $in_guard = true; $header .= $line."\n"; continue; }
+		if(strpos($trim, '<?') === 0) {
+			$header .= $line."\n";
+			$in_guard = (strpos($trim, '?>') === false);
+			continue;
+		}
 		if($in_guard) {
 			$header .= $line."\n";
 			if(strpos($trim, '?>') !== false) $in_guard = false;
@@ -206,8 +210,15 @@ function resourcemng_read_data($res_type, $file){
 		$data_lines[] = $line;
 	}
 	$records = array();
+	$expected = count(resourcemng_columns($res_type));
 	foreach($data_lines as $line) {
-		$records[] = array_map('trim', explode(',', $line));
+		$line = trim($line);
+		// 配置行统一以逗号结尾，先去掉末尾分隔符，保留中间 JSON/文本中的逗号
+		$line = preg_replace('/,\s*$/', '', $line);
+		$row = explode(',', $line, $expected);
+		$row = array_map('trim', $row);
+		if(count($row) < $expected) $row = array_pad($row, $expected, '');
+		$records[] = $row;
 	}
 	$columns = resourcemng_columns($res_type);
 	return array('header' => $header, 'records' => $records, 'columns' => $columns, 'type' => 'csv');
