@@ -112,3 +112,8 @@ img/NPCAvatar_Temp.psd
 /doc/etc/archive
 /test
 diff_copy.bat
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

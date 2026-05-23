@@ -40,7 +40,7 @@
 	$pconnect = true;				// persistent database connection, 0=off, 1=on
 						// 数据库持久连?false=关闭, true=打开
 
-	$gamefounder = 'Amarillo_NMC';			// super administrator's UID
+	$gamefounder = '慕容琦';			// super administrator's UID
 						// 游戏创始?UID, 可以支持多个创始人，之间使用 ??分隔?
 						// 如果不设置游戏创始人，则管理员之间可以相互编辑，具体权力差别请见游戏使用文档
 
@@ -55,7 +55,7 @@
 // [EN] !ATTENTION! Do NOT modify following after your board was settle down
 // [CH] 游戏投入使用后不能修改的变量
 
-	$tablepre = 'acbra3_';   			// 表名前缀, 同一数据库安装多个游戏请修改此处
+	$tablepre = 'bra_';   			// 表名前缀, 同一数据库安装多个游戏请修改此处
 						// table prefix, modify this when you are installingmore than 1 Discuz! in the same database.
 
 	$authkey = 'bra';		//game encrypt key ,the same of plus key

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>phpdts Manager</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ====== TOP BAR ====== -->
+<header class="topbar">
+  <div class="topbar-left">
+    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span class="logo-text">phpdts</span>
+    <span class="logo-sub">Manager</span>
+  </div>
+  <div class="topbar-center">
+    <nav class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="database">Database</button>
+      <button class="tab-btn" data-tab="sql">SQL Console</button>
+      <button class="tab-btn" data-tab="files">Files</button>
+    </nav>
+  </div>
+  <div class="topbar-right">
+    <span class="clock" id="clock">--</span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- ====== TAB: DASHBOARD ====== -->
+<section class="tab-panel active" id="panel-dashboard">
+
+  <div class="quick-row">
+    <button class="game-btn start" id="btnGameStart" onclick="gameControl('start')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start Game
+    </button>
+    <button class="game-btn stop" id="btnGameStop" onclick="gameControl('stop')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      Stop Game
+    </button>
+  </div>
+
+  <div class="section-title">Service Control</div>
+  <div class="card-row">
+
+    <div class="card" id="cardPhp">
+      <div class="card-header">
+        <div class="card-icon php-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+        <div class="card-title-group">
+          <span class="card-title">PHP Server</span>
+          <span class="card-sub">Built-in dev server</span>
+        </div>
+        <span class="status-badge" id="phpStatus">--</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span>Version</span><span id="phpVersion">--</span></div>
+        <div class="info-row"><span>Port</span><span>8080</span></div>
+        <div class="info-row"><span>PID</span><span id="phpPid">--</span></div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-start" id="btnPhpStart" onclick="control('php','start')">Start</button>
+        <button class="btn btn-stop" id="btnPhpStop" onclick="control('php','stop')">Stop</button>
+      </div>
+    </div>
+
+    <div class="card" id="cardMysql">
+      <div class="card-header">
+        <div class="card-icon mysql-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v3c0 1.66 3.58 3 8 3s8-1.34 8-3v-3"/></svg>
+        </div>
+        <div class="card-title-group">
+          <span class="card-title">MySQL 8.0</span>
+          <span class="card-sub">Database server</span>
+        </div>
+        <span class="status-badge" id="mysqlStatus">--</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row"><span>Version</span><span id="mysqlVersion">--</span></div>
+        <div class="info-row"><span>Port</span><span>3306</span></div>
+        <div class="info-row"><span>PID</span><span id="mysqlPid">--</span></div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-start" id="btnMysqlStart" onclick="control('mysql','start')">Start</button>
+        <button class="btn btn-stop" id="btnMysqlStop" onclick="control('mysql','stop')">Stop</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">Game Info</div>
+  <div class="card-row cols-3">
+    <div class="card">
+      <div class="card-header"><div class="card-title-group"><span class="card-title">Configuration</span></div></div>
+      <div class="card-body">
+        <div class="info-row"><span>Title</span><span id="cfgTitle">--</span></div>
+        <div class="info-row"><span>Founder</span><span id="cfgFounder">--</span></div>
+        <div class="info-row"><span>DB Driver</span><span id="cfgDriver">--</span></div>
+        <div class="info-row"><span>Charset</span><span id="cfgCharset">--</span></div>
+        <div class="info-row"><span>DB Name</span><span id="cfgDbname">--</span></div>
+        <div class="info-row"><span>DB Host</span><span id="cfgDbhost">--</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title-group"><span class="card-title">Project Stats</span></div></div>
+      <div class="card-body">
+        <div class="info-row"><span>Files</span><span id="statFiles">--</span></div>
+        <div class="info-row"><span>Total Size</span><span id="statSize">--</span></div>
+        <div class="info-row"><span>Server Time</span><span id="statTime">--</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title-group"><span class="card-title">Quick Access</span></div></div>
+      <div class="card-body">
+        <a class="quick-link" href="#" id="linkGame" target="_blank">Play Game</a>
+        <a class="quick-link" href="#" id="linkRegister" target="_blank">Register</a>
+        <a class="quick-link" href="#" id="linkAdmin" target="_blank">Admin Panel</a>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ====== TAB: DATABASE ====== -->
+<section class="tab-panel" id="panel-database">
+
+  <div class="db-tree-panel">
+    <div class="db-tree-header">
+      <span>Database Explorer</span>
+      <button class="btn-sm" onclick="initDbTree()" title="Refresh">↻</button>
+    </div>
+    <div class="db-tree" id="dbTree">
+      <div class="db-tree-loading">Loading...</div>
+    </div>
+  </div>
+
+  <div class="db-editor-panel">
+    <div class="db-toolbar">
+      <span class="db-current-table" id="dbCurrentTable">Select a table from the tree</span>
+      <div class="db-actions">
+        <button class="btn-sm" id="btnNewRow" onclick="newRow()" disabled>+ New Row</button>
+        <button class="btn-sm" id="btnRefreshTable" onclick="refreshTable()" disabled>Refresh</button>
+      </div>
+    </div>
+
+    <div class="db-schema" id="dbSchema" style="display:none;">
+      <span class="db-schema-title">DDL</span>
+      <pre id="dbCreateSql"></pre>
+    </div>
+
+    <div class="db-edit-hint">Double-click a cell to edit inline. Edits are saved row by row.</div>
+
+    <div class="db-data-wrap">
+      <div class="db-data-scroll" id="dbDataScroll">
+        <table class="db-data-table editable" id="dbDataTable"><tbody><tr><td class="db-empty-msg">Select a table to browse</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="db-pager" id="dbPager" style="display:none;"></div>
+  </div>
+
+</section>
+
+<!-- ====== TAB: SQL CONSOLE ====== -->
+<section class="tab-panel" id="panel-sql">
+  <div class="card">
+    <div class="sql-editor-wrap">
+      <div class="sql-editor-hint">Write your SELECT query below and press Ctrl+Enter to execute</div>
+      <textarea class="sql-editor" id="sqlEditor" placeholder="SELECT * FROM bra_users LIMIT 10;" spellcheck="false"></textarea>
+      <div class="sql-actions">
+        <button class="btn" id="btnSqlExec" onclick="execSql()">Execute</button>
+        <button class="btn" onclick="document.getElementById('sqlEditor').value=''">Clear</button>
+      </div>
+    </div>
+  </div>
+  <div class="card sql-result-card" id="sqlResultCard" style="display:none;">
+    <div class="sql-result-header">
+      <span id="sqlResultInfo">Result</span>
+    </div>
+    <div class="db-data-scroll sql-result-scroll">
+      <table class="db-data-table" id="sqlResultTable"><tbody></tbody></table>
+    </div>
+    <div class="sql-error" id="sqlError" style="display:none;"></div>
+  </div>
+</section>
+
+<!-- ====== TAB: FILES ====== -->
+<section class="tab-panel" id="panel-files">
+  <div class="card file-browser-card">
+    <div class="file-nav" id="fileNav">
+      <button class="file-nav-btn" onclick="browseDir('')">/ (root)</button>
+    </div>
+    <div class="file-toolbar">
+      <span class="file-path" id="currentPath">/</span>
+      <span class="file-count" id="fileCount"></span>
+    </div>
+    <div class="file-list" id="fileList">
+      <div class="file-empty">Loading...</div>
+    </div>
+    <div class="file-preview" id="filePreview" style="display:none;">
+      <div class="file-preview-header">
+        <span id="previewName"></span>
+        <button class="btn-close-preview" onclick="closePreview()">&times;</button>
+      </div>
+      <pre class="file-preview-content" id="previewContent"></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
