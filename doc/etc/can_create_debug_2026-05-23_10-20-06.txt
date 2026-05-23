@@ -1,0 +1,15 @@
+can_create_ruleset_room调试信息:
+Array
+(
+    [function_called] => can_create_ruleset_room
+    [ruleset_id] => ACDTS_298SP4_AR
+    [user_data_groupid] => 1
+    [user_data_credits2] => 15
+    [local_ruleset_enabled] => 1
+    [local_config_exists] => yes
+    [fix_method] => using_local_config
+    [config_admin_free] => 1
+    [config_credits_cost] => 5
+    [result] => credits_pass
+    [credits_check] => pass
+)

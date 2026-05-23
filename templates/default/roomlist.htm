@@ -1,0 +1,152 @@
+<dialog id="roomlist" style="max-width: 90%;max-height: 80%; text-align: left;">
+<span class="yellow b"><div id="roomerror" style="padding-bottom: 5px;"></div></span>
+<form method="post" name="roomact" onsubmit="return false;" >
+<input type="hidden" name="roomact" id="roomact" value="">
+
+<!--{eval $now_rooms = !empty($roomlist) ? count($roomlist) : 0;}-->
+	<span class="evergreen">当前房间列表（{$now_rooms}/{$max_rooms}）
+<!--{if $now_rooms < $max_rooms && !$groomid && (!empty($cuser) && !empty($cpass))}-->
+	<input type="button" value="创建普通房间" onclick="$('roomact').value='create';postCmd('roomact','index.php');" >
+	<!--{eval include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';}-->
+	<!--{if get_ruleset_config()}-->
+		<input type="button" value="创建时光重现房间" onclick="showRulesetDialog();" >
+	<!--{/if}-->
+<!--{/if}-->
+	<br>
+	<div style="height:5px;">&nbsp;</div>
+		<table CellSpacing=0 CellPadding=0 class="infotable">
+			<tr>
+				<td class="b1" width="60px">编号</td>
+				<td class="b1" width="100px">游戏模式</td>
+				<td class="b1" width="60px">状态</td>
+				<td class="b1" width="120px">创建者/房主</td>
+				<td class="b1" width="60px">人数</td>
+				<!--<td class="b1" width="120px">运行时间</td>-->
+				<td class="b1" width="80px">操作</td>
+			</tr>
+		<!--{if !empty($now_rooms)}-->
+			<!--{loop $roomlist $rkey $rinfo}-->
+			<tr>
+				<td class="b3" width="60px" height="30px">
+					$rkey
+				</td>
+				<td class="b3" width="100px">
+					<!--{if !empty($rinfo['gruleset'])}-->
+						<!--{eval include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';}-->
+						<!--{eval $ruleset_config = get_ruleset_config($rinfo['gruleset']);}-->
+						<!--{if $ruleset_config}-->
+							<span class="yellow" title="$ruleset_config[description]">$ruleset_config[name]</span>
+						<!--{else}-->
+							<span class="red">$rinfo[gruleset]</span>
+						<!--{/if}-->
+					<!--{else}-->
+						<span class="evergreen">标准模式</span>
+					<!--{/if}-->
+				</td>
+				<td class="b3" width="60px">
+					$gstate[$rinfo['gamestate']]
+				</td>
+				<td class="b3" width="120px">
+					$rinfo['groomownid']
+				</td>
+				<td class="b3" width="60px">
+					$rinfo['groomnums']
+				</td>
+				<!--<td class="b3" width="120px">运行时间</td>-->
+				<td class="b3" width="80px">
+				<!--{if !empty($cuser) && !empty($cpass)}-->
+					<!--{if !empty($groomid)}-->
+						<!--{if $groomid == $rkey}-->
+							<span tooltip2="退出房间后，如房间内没有其他玩家，则房间会解散；房主退出房间会将房主权限转移给房间内其他玩家；">
+								<input type="button" value="退出" onclick="$('roomact').value='exit';postCmd('roomact','index.php');" >
+							</span>
+							<!--{if !empty($rinfo['groomownid']) && $rinfo['groomownid'] == $cuser}-->
+								<span tooltip2="不能解散正在进行游戏且尚有其他玩家存活的房间">
+									<input type="button" value="解散" onclick="$('roomact').value='close';postCmd('roomact','index.php');" >
+								</span>
+							<!--{/if}-->
+						<!--{else}-->
+							<span class="grey">-</span>
+						<!--{/if}-->
+					<!--{else}-->
+						<input type="button" value="加入" onclick="$('roomact').value='join{$rkey}';postCmd('roomact','index.php');" >
+					<!--{/if}-->
+				<!--{else}-->
+					<span class="grey">-</span>
+				<!--{/if}-->
+				</td>
+			</tr>
+			<!--{/loop}-->
+		<!--{/if}-->
+		</table>
+</form>
+<img class="dialog-background" src="img/profile.gif" onclick="closeDialog($('roomlist'))">
+</dialog>
+
+<!-- RuleSet选择对话框 -->
+<dialog id="rulesetDialog" style="max-width: 600px; max-height: 70%; text-align: left;">
+	<div style="padding: 20px;">
+		<h3 class="yellow">选择时光重现版本</h3>
+		<p class="evergreen">时光重现系统允许你体验游戏的经典旧版本。每个版本都有独特的玩法和特色。</p>
+
+		<!--{eval include_once GAME_ROOT.'./gamedata/ruleset/ruleset_config.php';}-->
+		<!--{eval $available_rulesets = get_ruleset_config();}-->
+		<!--{if $available_rulesets}-->
+			<div style="margin: 15px 0;">
+				<!--{loop $available_rulesets $ruleset_id $config}-->
+					<!--{eval $can_create = can_create_ruleset_room($ruleset_id, $udata);}-->
+					<div style="border: 1px solid #666; margin: 10px 0; padding: 15px; background: rgba(0,0,0,0.3);">
+						<h4 class="<!--{if $can_create}-->lime<!--{else}-->grey<!--{/if}-->">$config[name]</h4>
+						<p class="evergreen2">$config[description]</p>
+						<div style="margin-top: 10px;">
+							<span class="yellow">费用：</span>
+							<!--{if $config[admin_free] && $udata[groupid] >= 2}-->
+								<span class="lime">管理员免费</span>
+							<!--{else}-->
+								<span class="<!--{if $udata[credits2] >= $config[credits_cost]}-->lime<!--{else}-->red<!--{/if}-->">$config[credits_cost] 切糕</span>
+								<!--{if $udata[credits2] < $config[credits_cost]}-->
+									<span class="red">（余额不足：$udata[credits2]）</span>
+								<!--{/if}-->
+							<!--{/if}-->
+						</div>
+						<div style="margin-top: 10px;">
+							<!--{if $can_create}-->
+								<input type="button" value="创建 $config[name] 房间"
+									onclick="createRulesetRoom('$ruleset_id');"
+									class="button">
+							<!--{else}-->
+								<input type="button" value="无法创建" disabled class="button">
+							<!--{/if}-->
+						</div>
+					</div>
+				<!--{/loop}-->
+			</div>
+		<!--{else}-->
+			<p class="red">时光重现系统当前不可用。</p>
+		<!--{/if}-->
+
+		<div style="text-align: center; margin-top: 20px;">
+			<input type="button" value="取消" onclick="closeDialog($('rulesetDialog'));" class="button">
+		</div>
+	</div>
+</dialog>
+
+<script type="text/javascript">
+function showRulesetDialog() {
+	closeDialog($('roomlist'));
+	showModalDialog($('rulesetDialog'));
+}
+
+function createRulesetRoom(rulesetId) {
+	$('roomact').value = 'create_ruleset';
+	// 创建隐藏的input来传递ruleset参数
+	var rulesetInput = document.createElement('input');
+	rulesetInput.type = 'hidden';
+	rulesetInput.name = 'ruleset';
+	rulesetInput.value = rulesetId;
+	document.forms['roomact'].appendChild(rulesetInput);
+
+	closeDialog($('rulesetDialog'));
+	postCmd('roomact', 'index.php');
+}
+</script>
